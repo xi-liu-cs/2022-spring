@@ -1,0 +1,99 @@
+choose to include T_n' 
+(the task with the lastest starting time
+or not)
+
+l(i) := the interval with the latest
+starting time that comes before
+T_i' and does not intersect it
+
+asp(n) = 1 + asp(l(n))
+
+recursion
+asp(n) = max(1 + asp(l(n)), asp(n - 1))
+base case: asp(1) = 1
+asp(0) = 0?
+
+how to compute l(1), ..., l(n)? linear
+
+asp(n)
+(1)	sort intervals 
+	memo[n] = [1]	//base case //m[0] = 0, m[1] = 1
+(2)	for i = 2 to n
+		memo[i] = max(1 + memo[l(i)]),
+				 memo[i - 1])
+	return memo[n]
+
+
+
+tc
+(1) Theta(n lg n)
+(2) n - 1 iterations	Theta(n)
+    each iteration O(1)
+Theta(n lg n) +  Theta(n) =  Theta(n lg n)
+
+
+
+
+
+dp, recursive then memoize
+go through 2 options to decide whether
+to take T_n' or not
+
+greedy, direct
+directly decide which interval 
+should be taken as the first interval 
+
+decide what optimal first interval is:
+(i) the one with longest length
+| | |		
+|   |
+output = 1
+correct = 2
+
+(ii) the one with shortest length
+|  |  |
+  | |
+output = 1
+correct = 2
+
+(iii) the one intersecting least 
+number of intervals (no)
+
+  | |   | |
+  | |   | |
+  | |   | |
+|  |  |  |  |
+     | |    /* least num of intervals */
+output = 3
+correct = 4
+
+(iv) the one with the minimum starting time
+  | | |		
+|   |
+output = 1
+correct = 2
+
+(v) the one with the minimum finishing time (yes)
+
+
+
+
+
+
+
+greedy
+(1) sort tasks based on finishing time
+(2) pick interval with earliest finishing time
+among all the remaining intervals and discard all
+the intervals it intersects
+(3) repeat part (2) until no interval is left
+
+
+asp() 
+sort n tasks based on finishing time
+cur_end = -infty
+for i = 1 to n	// for loop is executed on the sorted n tasks
+	if s_i > cur_end	// s_i = starting time of current underlying task i
+		select i-th interval
+		cur_end = f_i
+      print select interval

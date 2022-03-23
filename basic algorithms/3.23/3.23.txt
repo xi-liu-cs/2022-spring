@@ -1,0 +1,53 @@
+proof correctness: greedy
+lemma
+at each iteration, taking the interval
+with min finishing point among 
+the remaining intervals (that do not
+intersect the previously chosen interval)
+gives an optimal non-overlapping subset of intervals
+
+
+geometry
+find convex hull
+definition
+convexity: a set in the plane is 
+called convex if for any 2 points
+in the set, the whole line segment
+connecting these 2 points also fully
+lies in the set
+
+convex hull: convex hull of n given
+points in the plane is the smallest convex
+set containing all the n points
+
+
+fact
+any 3 consecutive points on the boundary
+of the convex hull in the counter-clockwise
+order must form a counter-clockwise direction
+
+
+problem 
+
+input: n given points in the plane
+(x_1, y_1), ..., (x_n, y_n)
+
+output: find the convex hull of n given
+points: output the points on the boundary
+of the convex hull in the counter-clockwise order
+
+
+
+graham's scan
+(1) find the initial point on the convex hull:
+extreme corner points
+the point with min x-coordinate among 
+all the given points (leftmost point)
+if there is a tie
+choose the bottom point among
+the leftmost point
+
+(2) sort out the rest of the points
+with respect to the angle they form
+with the vertical line emanated
+downward from p_0
