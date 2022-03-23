@@ -1,0 +1,23 @@
+collective
+- blocking
+- called by all processes in communicator
+
+mpi scatter, gather
+
+send recv type can diff, type casting
+
+derived datatype: struct
+
+array_of_blocklengths[]
+
+displacement of each data type 
+from first element in struct
+
+time
+real
+user 
+system
+
+clock() num cycles 
+find longest
+allreduce(max)

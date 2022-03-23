@@ -1,0 +1,32 @@
+how many 7 digit numbers that do not have 1 anywhere as a digit?
+8 * 9^6
+0 cannot be the first digit,
+otherwise it is not a 7-digit number?
+
+(5/6)^n <= 0.05
+n >= log_{5/6}(0.05)
+
+p_{X, Y}(a_i, b_j) = P(X = a_i, Y = b_j)	
+
+F_{X, Y}(a, b)
+volume finite
+some kind of tent, sum of volume is 1
+
+marginal distribution funct
+f_X(a) = int_{-inf}^{inf} f_{X, Y}(a, y) dy
+f_Y(a) = int_{-inf}^{inf} f_{X, Y}(x, b) dx
+
+f_{X, Y}(x, y)
+= 
+{
+	kxy, 0 <= x <= 1, 0 <= y <= 1
+	0, otherwise
+}
+
+what is k?
+1 = int_{-inf}^{inf} int_{-inf}^{inf} f_{X, Y}(x, y) dx dy
+= int_{0}^{1} int_{0}^{1} kxy dx dy
+k = 4
+
+
+
