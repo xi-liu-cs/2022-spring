@@ -1,0 +1,78 @@
+formula is clear steps to
+punch into a calculator
+
+marginal density funct
+discrete rand var:
+
+marginal pmf obtained by 
+summing over rows or over columns
+
+equivalent for continuous rand var
+marginal probability density funct
+
+f_X(a) = int_{-inf}^{inf} f_{X, Y}(a, y) dy
+f_Y(b) =  int_{-inf}^{inf} f_{X, Y}(x, b) dx
+
+marginal distri funct
+F_{x}(u) = int_{-inf}^{u} f_X (a) du
+= int_{-inf}^{u} (int_{-inf}^{inf} f_{X, Y}(a, y) dy) du
+
+F_{y}(v) = int_{-inf}^{v} f_Y (b) db
+=  int_{-inf}^{v} (int_{-inf}^{inf} f_{X, Y}(x, b) dx) db
+
+from joint distri to joint prob density funct
+
+know F_X(a), calculate f_x(a)
+f_X(a) = d/da[F_X(a)]
+
+know F_{X, Y}(a), calculate f_{x, y}(a)
+f_{X, Y}(a, b) 
+= partial / partial a 
+  partial / partial b
+  [F_{X, Y}(a, b)]	 
+
+expected val
+disc rand var
+X in {a_1, a_2, ..., a_n}
+Y in {b_1, b_2, ..., b_n}
+
+E[g(X, Y)] 
+= sum_{a_i} sum_{b_j} g(a_i, b_j) p_{X, Y}(a_i, b_j)
+//  p_{X, Y}(a_i, b_j) is joint pmf
+
+continuous rand var
+
+E[g(X, Y)] 
+= int_{-inf}^{inf} int_{-inf}^{inf} g(x, y) f_{X, Y}(x, y) dx dy
+// f_{X, Y}(x, y) is joint pdf
+
+
+X: value of x-coordinate point
+Y: value of y-coordinate point
+uniform distri funct
+f_{X, Y} =
+{
+	1 	if x in [0, 1], y in [0, 1]
+	0	else
+}
+
+volume of unit cube = 1
+f_{X, Y}(x, y) is height, so it is 1
+int f_{X, Y}(x, y) dA = 1
+
+
+E[aX + bY + c] = aE[X] + bE[Y] + c
+
+E[X^2] = int_{-inf}^{inf} x^2 f_X(x) dx
+int_{-inf}^{inf} int_{-inf}^{inf} x^2 f_{X, Y}(x, y) dy dx
+
+covariance
+var(x + y) = e[((x + y) - e[x + y])^2]
+= e[(x + y)^2 - 2e[x + y](x + y) + (e[x + y])^2] 
+= e[x^2 + 2xy + y^2 - 2e[x]x - 2e[x]y 
+- 2e[y]x - 2e[y]y + + e[x]^2 + e[x]e[y] + (e[y])^2]
+= ...
+= var(x) + var(y) + 2e[(x - e[x])(y - e[y])]
+
+cov(x, y) = e[(x - e[x])(y - e[y])
+
