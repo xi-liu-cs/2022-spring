@@ -1,0 +1,55 @@
+ostep 425
+p1		p2
+lock(m1)	lock(m2)
+lock(m2)      lock(m1)
+
+p1 grabs lock m1
+p2 grabs m2, 
+p2 tries to m1
+deadlock
+each thread is waiting for the
+other and neither can run
+
+intro para 164
+small messages buffered by mpi_send
+larger messages, block
+
+
+p1	p2
+send  send
+recv  recv
+
+p1	p2
+send  recv
+recv  send
+
+segmentation fault
+only 1 process terminate
+until collective call or synchronization point
+
+[list a]
+[list b]
+smallest x elements
+
+from the geometry of algo
+assign processes to branches of trees
+2nd process might immediately find solution 
+depth first binary search
+
+comm_split
+subgroups are mutually exclusive
+processes with same color put in same subgroup
+ranks have to start with 0
+- original comm stay same
+- internally know proc in newcomm is same with proc in orginal 
+
+comm_free
+is collective among each newcomm
+
+
+ps command in linux
+unique id
+
+
+domain-specific 
+streamit

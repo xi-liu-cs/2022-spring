@@ -1,0 +1,26 @@
+mongodb community consume a lot of memory
+
+emacs cmdline based editor
+ctrl x, ctrl s to save
+
+native client language of mongodb
+is javascript
+
+mongodb 
+nosql movement do not use sql
+
+database shard
+spread a program to multiple computers
+
+mongodb is fast for large data set
+
+document do not need to have
+fixed schema
+
+your_database_name is netid
+
+where equivalent
+find()
+pass in a js object  
+
+wrap operators in objects
