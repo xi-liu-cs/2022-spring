@@ -1,0 +1,260 @@
+HW4 Solutions
+CS202, fall 2021
+
+1. Synchronization: warmup
+
+int i = 0;
+scond_t cond;
+smutex_t mutex;
+
+void foo(void *)
+{
+  smutex_lock(&mutex);
+  printf("I am foo!!!\n");
+  i = 1;
+  scond_signal(&cond, &mutex);
+  smutex_unlock(&mutex);
+}
+
+void boo(void *)
+{
+  smutex_lock(&mutex);
+  while (!i) {
+    scond_wait(&cond, &mutex);
+  }
+  printf("I am boo!!!!\n");
+  smutex_unlock(&mutex);
+}
+
+
+int main(int argc, char**argv) 
+{
+  smutex_init(&mutex);
+
+  scond_init(&cond);
+
+  thread* t1 = create_thread(foo);
+  thread* t2 = create_thread(boo);
+
+  join_thread(t1);
+  join_thread(t2);
+
+  smutex_destroy(&mutex);
+
+  scond_destroy(&cond);
+
+  exit(0);
+}
+
+2. More practice with synchronization
+
+class Table {
+  public:
+    void matchSmokerUseTable();
+    void paperSmokerUseTable();
+    void tobaccoSmokerUseTable();
+    void agentUseTable();
+
+    Table();
+    int getPaper();
+    int getTobacco();
+    int getMatch();
+    ~Table();
+
+  private:
+    scond_t tableEmptyCond; // contract: when table is empty, signal this
+    scond_t tableFullCond; // when table is full, signal this
+    smutex_t tableMutex;
+
+    int paper, tobacco, match; // shared state, encapsulated
+    // table is small, so can at most have two items at once
+    bool tableIsFull();
+    bool tableIsEmpty();
+};
+
+Table::
+Table() {
+  paper = 0;
+  tobacco = 0;
+  match = 0;
+  scond_init(&tableFullCond);
+  scond_init(&tableEmptyCond);
+  smutex_init(&tableMutex);
+}
+
+Table::
+~Table() {
+  scond_destroy(&tableEmptyCond);
+  scond_destroy(&tableFullCond);
+  smutex_destroy(&tableMutex);
+}
+
+// warm up example
+int
+Table::getPaper() {
+  smutex_lock(&tableMutex);
+  int r = paper;
+  smutex_unlock(&tableMutex);
+  return r;
+}
+// get tobacco and get match is similar
+
+
+// private method, why we don't need mutex here?
+bool 
+Table::tableIsFull() {
+  return paper + tobacco + match >= 2;
+}
+
+bool
+Table::tableIsEmpty() {
+  return !tableIsFull();
+}
+
+void 
+Table::agentUseTable() {
+  smutex_lock(&tableMutex);
+
+  while (tableIsFull()) {
+    scond_wait(&tableEmptyCond, &tableMutex);
+  }
+
+  chooseIngredients(&paper, &tobacco, &match);
+
+  // why broadcast instead of signal?
+  scond_broadcast(&tableFullCond, &tableMutex);
+  smutex_unlock(&tableMutex);
+}
+
+void 
+Table::paperSmokerUseTable() {
+  smutex_lock(&tableMutex);
+
+  while(tableIsEmpty() || (match < 1 || tobacco < 1)) {
+    scond_wait(&tableFullCond, &tableMutex);
+  }
+  match--;
+  tobacco--;
+
+  scond_signal(&tableEmptyCond, &tableMutex);
+  smutex_unlock(&tableMutex);
+}
+
+3. Sleeping barber
+
+Waitiing Room Solution:
+
+	Type		Name		Initial Value (if applicable)
+        -------------------------------------------------------------
+	mutex		lock	
+	cond		cond
+	int		nfull		0
+	int 		ticketAvail	0
+	int		ticketTurn	-1
+
+
+int WaitingRoom::enter() {
+    lock.acquire();
+    int ret;
+    if (nfull == NCHAIRS){
+	    ret = WR_FULL;
+    } else {
+	    ret = MY_TURN;
+	    myTicket = ticketAvail++;
+	    nfull++;
+	    while (myTicket > ticketTurn) {
+		    cond.wait(&lock);
+	    }
+	    nfull--;
+    }
+    lock.release();
+    return ret;
+}
+
+int WaitingRoom::callNextCustomer() {
+    lock.acquire();
+    ticketTurn++;
+    if (nfull == 0) {
+	    ret = EMPTY;
+    } else {
+	    ret = BUSY;
+	    cond.broadcast();
+    }
+    lock.release();
+    return ret;
+}
+
+
+
+
+Barber Chair Solution:
+	Type		Name		Initial Value (if applicable)
+        -------------------------------------------------------------
+	mutex		lock	
+	cond		custUp
+	cond		barberGetUp
+	cond		sitDown
+        cond      	seatFree
+	cond 		cutDone
+	int		state		EMPTY
+	int   		custWalkedIn      0
+
+void BarberChair::wakeBarber() {
+    lock.acquire();
+    custWalkedIn = 1;
+    barberGetUp.signal(&lock);
+    lock.release()
+}
+ 
+void BarberChair::sitInChair() {
+    lock.acquire()
+    while (state != EMPTY) {
+    	seatFree.wait(&lock);
+    }
+    state = LONG_HAIR_CUSTOMER_IN_CHAIR;
+    sitDown.signal(&lock);
+    while (state != SHORT_HAIR_CUSTOMER_IN_CHAIR) {
+    	cutDone.wait(&lock);
+    }
+    state = EMPTY;
+    custUp.signal(&lock);
+    lock.release();
+}
+
+
+void BarberChair::napInChair() {
+    lock.acquire();
+
+    if(custWalkedIn == 0) {   // Cust could arrive before I sit down
+	state = BARBER_IN_CHAIR;
+    }
+
+    while(custWalkedIn == 0) {
+    	barberGetUp.wait(&lock);
+    }
+    custWalkedIn = 0;
+    if (state == BARBER_IN_CHAIR) { // Cust could have beaten us
+    	state = EMPTY
+    	seatFree.signal(&lock);
+    }
+    lock.release();
+}
+
+             
+void BarberChair::cutHair() {
+    lock.acquire();
+    while(state != LONG_HAIR_CUSTOMER_IN_CHAIR) {
+    	sitDown.wait(&lock);
+    }
+    state = SHORT_HAIR_CUSTOMER_IN_CHAIR;
+    cutDone.signal(&lock);
+    lock.release();
+}
+
+void BarberChair::tellCustomerDone() {
+    lock.acquire();
+    while(state != EMPTY){  // NOTE: No other cust can arrive until I call call_next_cust()
+    	custUp.wait(&lock);
+    }
+    lock.release();
+}

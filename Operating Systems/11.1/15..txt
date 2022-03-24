@@ -1,0 +1,27 @@
+操作系统中颠簸(thrashing)解决办法
+
+
+What is thrashing?
+Processes require more memory than system has
+
+definition of working set (short version): the pages a
+process has touched over some trailing window of time
+
+void *mmap(void *addr, size_t length, int prot, int flags,
+int fd, off_t offset)
+mmap creates a new mapping in the virtual address
+space of the calling process
+addr = starting address for the new mapping
+length = length of mapping
+
+https://www.tutorialspoint.com/unix_system_calls/mmap.htm
+
+mmap() function asks to map length bytes 
+starting at offset offset from the file (or other object)
+specified by the file descriptor fd into memory,
+preferably at address start
+
+<<proc, vpn> entry>
+if call a mmap, 
+dont want all of the files show up in mem
+

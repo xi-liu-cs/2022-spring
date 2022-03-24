@@ -1,0 +1,12 @@
+1
+put locks 锁 around critical sections 临界区
+ensure any critical section executes as if
+it were a single atomic instruction
+
+use lock, add code around critical section
+
+lock_t mutex
+...
+lock(&mutex);
+b = b + 1;
+unlock(&mutex);

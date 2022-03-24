@@ -1,0 +1,490 @@
+Class 15
+CS 202
+1 November 2021
+
+On the board
+------------
+
+1. Last time
+2. Page replacement policies, contd.
+3. Thrashing
+4. mmap()
+5. Where does the OS live?
+6. WeensyOS
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    - page faults: uses costs, page replacement policies
+
+    - page replacement:
+
+        - optimal (fewest misses/evictions) is known as OPT or MIN 
+
+	- LRU is usually a good approximation to optimal (if the future
+	is predicted by the past)
+
+	- Implementing LRU in hardware or at OS/hardware interface is a
+	pain
+
+	- So implement CLOCK or NTH CHANCE ... decent approximations to
+	LRU, which is in turn good approximation to OPT *assuming that
+	past is a good predictor of the future* (this assumption does
+	not always hold!)
+
+2. Page replacement policies, contd.
+ 
+    Miscellaneous implementation points
+
+	Note that many machines, x86 included, maintain 4 bits per page
+	table entry:
+
+	    --*use*: Set when page referenced; cleared by an algorithm
+	    like CLOCK (the bit is called "Accessed" on x86)
+
+	    --*modified*: Set when page modified; cleared when page
+	    written to disk (the bit is called "Dirty" on x86)
+
+	    --*present*: It's set only if page is in memory [asterisk:
+	    note that it's an "only if" not an "if". There are cases
+	    when the page in physical memory but the bit is clear.]
+
+	    --*read-only*: program can read page, but not modify it. Set
+	    if page is truly read-only? [no. similar case to above, but
+	    slightly confusing because the bit is called "writable". if
+	    a page's bits are such that it appears to be read-only, that
+	    page may or may not be truly "read only". meanwhile, if a
+	    page is truly read-only, it better have its bits set to be
+	    read-only.]
+
+	Do we actually need Use and Modified bits in the page tables
+	set by the hardware?
+
+	    --[again, x86 calls these the Accessed and Dirty bits]
+
+	    --answer: no.
+
+	    --how could we simulate them?
+
+	    --for the Modified [x86: Dirty] bit, just mark all pages
+	    read-only. Then if a write happens, the OS gets a page fault
+	    and can set the bit itself. Then the OS should mark the page
+	    writable so that this page fault doesn't happen again
+
+	    --for the Use [x86: Accessed] bit, just mark all pages as
+	    not present (even if they are present). Then if a reference
+	    happens, the OS gets a page fault, and can set the bit,
+	    after which point the OS should mark the page present (i.e.,
+	    set the PRESENT bit).
+
+
+    Fairness
+
+	--if OS needs to swap a page out, does it consider all pages in one
+	pool or only those of the process that caused the page fault? 
+
+	--what is the trade-off between local and global policies?
+
+	    --global: more flexible but less fair
+
+	    --local: less flexible but fairer
+
+
+3. Thrashing
+
+    [The points below apply to any caching system, but for the sake of
+    concreteness, let's assume that we're talking about page replacement
+    in particular.]
+
+    What is thrashing?
+
+    Processes require more memory than system has
+
+    Specifically, each time a page is brought in, another page, whose
+    contents will soon be referenced, is thrown out
+
+	Example:
+
+	    --one program touches 50 pages (each equally likely); only 
+	      have 40 physical page frames 
+	    
+	    --If we have enough physical pages, 100ns/ref 
+     
+	    --If we have too few physical pages, assume every 5th
+	    reference leads to a page fault 
+     
+	    --4refs x 100ns  and 1 page fault x 10ms for disk I/O 
+
+	    --this gets us
+		5 refs per (10ms + 400ns) ~ 2ms/ref = 20,000x slowdown!!! 
+     
+
+	--What we wanted: virtual memory the size of disk with access
+	time the speed of physical memory 
+
+	--What we have here: memory with access time roughly of disk
+	(2 ms/mem_ref compare to 10 ms/disk_access)
+
+	As stated earlier, this concept is much larger than OSes: need
+	to pay attention to the slow case if it's really slow and common
+	enough to matter.
+
+
+    Reasons/cases:
+
+	--process doesn't reuse memory (or has no temporal locality)
+
+	--process reuses memory but the memory that is absorbing
+	most of the accesses doesn't fit.
+
+	--individually, all processes fit, but too much for the system
+
+    what do we do?
+
+	--well, in the first two reasons above, there's nothing you can
+	do, other than restructuring your computation or buying memory
+	(e.g., expensive hardware that keeps entire customer database in
+	RAM)
+
+	--in the third case, can and must shed load. how?
+    
+    two approaches:
+	a. working set
+	b. page fault frequency
+
+    a. working set
+
+	--only run a set of processes s.t. the union of their
+	working sets fit in memory
+
+	--definition of working set (short version): the pages a
+	process has touched over some trailing window of time
+
+    b. page fault frequency
+
+	--track the metric (# page faults/instructions executed)
+
+	--if that thing rises above a threshold, and there is not enough
+	memory on the system, swap out the process
+
+
+4. mmap
+
+    Plays a role in lab5. Also, cool way to bring some ideas together.
+
+    --recall some syscalls: 
+	fd = open(pathname, mode)
+	write(fd, buf, sz)
+	read(fd, buf, sz)
+
+    --we've seen fds before, but what's an fd?
+	--indexes into a table maintained by the kernel on behalf of the process
+
+    --syscall:
+	void* mmap(void* addr, size_t len, int prot, int flags,
+		   int fd, off_t offset);
+
+
+        --means, roughly, "map the specified open file (fd) into a
+        region of my virtual memory (close to addr, or at a kernel-selected
+        place if addr is 0), and return a pointer to it"
+
+        [see handout]
+
+        NOTE: the "disk image" here is the file we've mmap()'ed, not the
+        process's usual backing store. The idea is that mmap() lets the
+        programmer "inject" pages from a regular file on disk into the
+        process's backing store (which would otherwise be part of a swap
+        file).
+
+    --after this, loads and stores to addr[x] are
+    equivalent to reading and writing to the file at offset+x.
+
+    --why is this cool?
+
+        - example: mmap enables copying a file to stdout without
+        transferring data to user space
+
+            see handout
+
+            NOTE: the process never itself dereferences a pointer to
+            memory containing file data.
+
+            NOTE: this saves a memory-to-memory copy versus the "naive"
+            solution of read()ing into a buffer in user space, and then
+            write()ing. (the read() goes right from buffer cache to
+            terminal buffer, instead of buffer cache --> user space -->
+            terminal buffer)
+
+            [Also, a well-tuned buffer cache manages which file pages
+            are kept in RAM, rather than leaving the app developer to
+            have to explicitly try to manage that (and potentially have
+            the OS page replacement algorithm underneath make
+            conflicting decisions).]
+
+        - other examples:
+
+            - reading big files. map the whole thing, rely on the paging
+            mechanism to bring the needed pieces into memory as necessary
+
+            - shared data structures, when flag is MAP_SHARED 
+
+            - file-based data structures:
+                - load data from file, update it, write it back
+                - this is implemented entirely with loads/stores
+
+            Question: how does the OS ensure that it's only writing back
+            modified pages?
+
+
+    --how's mmap implemented?! (answer: through virtual memory,
+    with the VA being addr [or whatever the kernel selects] and
+    the PA being what? answer: the physical address storing the
+    given page in the kernel's buffer cache).
+
+    --have to deal with eviction from buffer cache, so kernel will need
+    a data structure that maps from:
+        Phys page --> {list of (proc,va) pairs}
+      
+    note that the kernel needs this data structure anyway: when a
+    page is evicted from RAM, the kernel needs to be able to invalidate
+    the given virtual address in the page table(s) of the process(es)
+    that have the page mapped.
+
+5. Where does the OS live? 
+
+    [see handout for picture]
+
+    In its own address space?
+
+    -- Can't do this on most hardware (e.g., syscall instruction won’t
+    switch address spaces)
+
+    -- Also would make it harder to parse syscall arguments passed as
+    pointers
+
+    So on real systems, kernel is actually in the same address space as
+    all processes *
+
+        * not precisely true post-Meltdown, but close enough (in that
+        some of the kernel is mapped into all user processes). for those
+        who are interested, see notes from Aurojit Panda below
+
+    -- Use protection bits to prohibit user code from reading/writing kernel
+
+    -- Typically all kernel text, most data at same VA in *every*
+    address space (every process has virtual addresses that map to the
+    physical memory that stores the kernel's instructions and data)
+
+    -- In Linux, the kernel is mapped at the top of the address space,
+    along with per-process data structures.
+
+    -- Physical memory also mapped up top, which gives the kernel a
+    convenient way to access physical memory.
+
+        NOTE: that means that physical memory that is in use is mapped
+        in at least two places (once into a process's virtual address
+        space and once into this upper region of the virtual space).
+
+
+    [note: in lab4, it doesn't work like this. in lab4, the kernel has
+    its own separate page table]
+
+
+    notes from Panda about kernel-being-mapped-into-each-process:
+
+    [AP: This answer is complicated (https://www.usenix.org/system/files/login/articles/login_winter18_03_gruss.pdf), but see below for attempt to explain.
+
+    * In the post-meltdown KAISER/KPTI/KVA/XNU Double Map (all names for
+    similar mitigations) each process has two (logical) page tables:
+
+        - One, the user mode page table, for use when the process is
+        executing usermode code, unmaps most (but not all) of the kernel,
+        this includes some of the kernel stack, and a few other things. The
+        aim of all mitigations has been to minimize the number of kernel
+        pages in the user mode page table, but different tradeoffs are
+        selected for how much this is minimized.
+
+        - The second, the kernel mode page table, has exactly the same
+        layout as what [is mentioned above], i.e., the kernel is in all address
+        spaces.
+
+    On entry to kernel, the OS tries as rapidly as possible to switch from
+    user mode page table to kernel mode one.
+
+    It switches back before return. Having a kernel mode page table per
+    process is in part to minimize how much one needs to change in the
+    kernel, so maybe one can argue that this is not the "best" possible
+    solution, but it is pretty good.]
+
+
+6. WeensyOS
+
+    [draw picture of the software stack: two instances of virtualization]
+
+    advice: start now!!!
+
+    processes, files with p-*
+
+    kernel code, files with k-*
+
+    processes just allocate memory. system call: sys_page_alloc().
+    analogous to brk() or mmap() in POSIX systems.
+
+        look at process.h for where the system call happens
+
+        see exception_return() for where the return back into user space
+        happens
+
+        %rax is what the application return value is.
+
+    - figures (the animated gifs) are from 32-bit version of the lab. so
+    you'll see some differences.
+
+    - you'll use the virtual_memory_map() function
+        pay attention to the "allocator" argument
+        (and make sure your allocator initializes the new page table)
+
+    - how many page tables are allocated for 3MB? what's the structure?
+
+        - 3MB virtual address space, but the L4 page table that handles
+         [2MB, 3MB) is allocated only on demand.
+
+            - thus, make sure when calling virtual_memory_map that you're
+            passing in a non-NULL allocator when you're supposed to.
+
+    - process control block (PCB): this is the "struct proc" in kernel.h
+
+    - recall:
+        register %rax is the system call return value
+        register %rdi contains the system call argument
+
+    - remember: bugs in earlier parts may show up only later
+
+    - pageinfo array:
+    
+        typedef struct physical_pageinfo {
+            int8_t owner;
+            int8_t refcount;
+        } physical_pageinfo;
+
+        static physical_pageinfo pageinfo[PAGENUMBER(MEMSIZE_PHYSICAL)];
+
+        one physical_pageinfo struct per _physical_ page.
+
+    - x86_64_pagetable....array of 512 entries (each 8 bytes)
+
+    ----
+
+    [what's below here are detailed notes from a prior recitation on
+    lab4.]
+
+
+    - Kernel virtual address
+      Kernel is setup to use an identity mapping
+      [0, MEM_PHYSICAL) -> [0, MEM_PHYSICAL)
+
+    - Physical pages' meta data is recorded in physical_pageinfo array,
+        whose elements contains refcount, owner
+        owner can be kernel, reserved, free, or pid
+
+    - Process control block:
+      * Process registers, process state
+      * Process page table - a pointer (kernel virtual address, which is
+      the identical physical address) to an L1 page table
+                           L1 page table's first entry points to a page
+                           table, and so on...
+      Our job mainly consists of manipulating the page tables, and pageinfo array
+
+    - High level evolution of the lab:
+      We have five programs: kernel + 4 processes
+      Ex1. five processes share the same page table. 
+          virtual addresses are all PTE_U | PTE_P | PTE_W
+          Job: mark some of the addresses as (PTE_P | PTE_W), i.e. not user accessible
+
+      Ex2. Each program uses its own page table.
+          kernel already has a page table
+          The job is to allocate and populate a page table for each process.
+          The process break-down as helper functions:
+            1. allocate a new page for process pid, and zero it (important)
+                [use memset to zero-out]
+            2. populate the new page table. can memcpy kernel's, but
+            easier to copy the kernel's mappings individually.
+                  In order to achieve the screenshot, after memcpying, we have to
+                  mark [prog_addr_start, virtual_addr_size) as not-present.
+
+      Ex3. Physical page allocation
+        Motivation:
+          Before this, during sys_page_alloc, when process asks for a specific virtual page,
+          the identity mapping is employed to find the physical page.
+          But it is too restrictive and with virtual memory, the process does not really 
+          care which physical page it gets
+        If we have implemented the function 1 mentioned in Ex2 (allocate
+            a free page), then we are mostly good to go and just use that function.
+        We also need to connect virtual-physical by setting the corresponding page table
+            entry. Use virtual_memory_map
+
+      Ex4. Overlapping virtual addresses
+        Motivation:
+          Every process has its own page table & accessible virtual addresses (PTE_P portions),
+          we don't need to restrict processes to use different parts of the virtual memory.
+          They can overlap, as long as the physical pages backing them are not overlapped.
+
+        Easy to do: in process_setup, we use (MEMSIZE_VIRTUAL - PAGESIZE) instead of the  
+          arithmetic to compute the process's stack page.
+
+      Ex5. Fork
+        High level goal:
+          Produce a mostly identical process (minus the register rax).
+        What does it mean to be an identical process?? 
+              1 same binary
+              2 same process registers
+              3 AND same memory state / contents
+          3 basically covers 1 because the binary is loaded in memory too.
+          2 is easy to achieve (copy the registers; can do this with a
+            single line of C code)
+          The goal here is mainly to achieve 3.
+        Fork creates a copy: the memory state has to be a copy!
+        Question: 
+            What does it mean to make a copy of memory?
+              - They are backed by physical pages, so we alloc new physical pages
+                and copy the content to new pages (memcpy)
+              - Then connect virtual to physical by setting the page table
+            The address space is potentially 256 TB large, do we copy 256 TB? 
+            How do we know which parts to copy?
+              - Iterate over the virtual address space; find pages that is (PTE_P | PTE_U | PTE_W)
+            Given a page table entry, how do you check if it is user RW-able?
+                Fill in the blanks...
+                    pte_val _ (PTE_P | PTE_W | PTE_U) == ___
+            How do you find its corresponding physical page?
+                PTE_ADDR
+
+    - Useful functions to implement for said manipulations:
+      * find a PO_FREE physical page and assign it to a process (Useful for ex2, 3, 4, 5)
+      * allocate empty page dir + page table for a process (Ex2, 4)
+      * make a copy of existing page table and assign it to a process (Ex2, 5)
+      * implement your own helper functions as you see fit
+    Tip: Zero the allocated page before using it!! (memset)
+
+    - Some useful functions/macros:
+       PTE_ADDR : PTE_ENTRY -> Physical address
+       PAGENUMBER : a phyiscal address -> corresponding index into page info array 
+       PAGEADDR : PAGENUMBER^{-1}
+       virtual_memory_lookup(pagetable, va)
+
+----
+
+midterm stats:
+
+    median: 74
+    avg:    72
+    standard dev: 18.2
+    high: 98
+
+---------------------------------------------------------------------------
+
+
+
+[Acknowledgments: David Mazieres, Mike Dahlin]
+

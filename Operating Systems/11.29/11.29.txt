@@ -1,0 +1,29 @@
+lack of transparency
+if no check for close
+
+crime
+stack smashing = buffer overflow
+cannot attack a server
+if there is a bug
+
+take std in put to std out
+ls
+
+
+server only have 96 bytes
+char buf[96]
+but copy more than 96 bytes
+
+serve()
+
+call:
+push return address on stack
+ 
+nx bit
+no execute bit in page table
+
+mark stack not executable
+
+"mem safe lang" can have problem
+at run time
+not a panacea

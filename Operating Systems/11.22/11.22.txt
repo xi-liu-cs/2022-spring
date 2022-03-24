@@ -1,0 +1,18 @@
+faster to write sequentially
+response to crash recovery
+crash = power loss
+
+crash atomicity
+
+ad hoc (when necessary or needed)
+
+metadata:
+inode, indirect blocks...
+
+fsck
+
+all blocks
+only written once
+except uberblock
+
+dont expect only go to lecture is enough

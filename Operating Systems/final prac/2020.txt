@@ -1,0 +1,33 @@
+1. 
+64
+
+2. 
+int read(int fd, void * /or char */ arg2, size_t arg3)
+arg2 points to the memory area /that holds the data/ to be read
+arg3 is how many bytes to read
+
+3.
+same value
+threads share memory (share same page tables)
+
+4.
+false
+code correct under single cpu (sequential consistency)
+may be incorrect (b/c of more possible interleavings)
+under a diff mem model
+
+5.
+
+
+
+
+
+
+ask:
+4
+handout 6
+
+8
+
+10
+11

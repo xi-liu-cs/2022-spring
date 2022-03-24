@@ -1,0 +1,10 @@
+direct memory access 直接存储器访问
+DMA绕过CPU, 在内存和外设之间开辟了一条"隧道",
+直接控制内存与外设之间的操作, 并完全由硬件控制
+allows certain hardware subsystems
+to access main system memory
+(random-access memory)
+independently of the central processing unit (CPU)
+
+gif, Graphics Interchange Format 图像互换格式
+is a image format

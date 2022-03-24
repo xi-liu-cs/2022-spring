@@ -1,0 +1,933 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<p><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-beta1/katex.min.css" integrity="sha384-VEnyslhHLHiYPca9KFkBB3CMeslnM9CzwjxsEbZTeA21JBm7tdLwKoZmCt3cZTYD" crossorigin="anonymous"> 
+</p>
+<div class="container">
+  <title>CS202: Lab 5: File system</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <style type=text/css>
+  @import url("https://use.typekit.net/jlb5olz.css");
+  
+  /* heavily borrowed from Harvard's cs61, which calls it cs161.css */
+  
+  ol > li > ol {
+  	list-style-type: lower-alpha;
+  }
+  ol.upper-alpha {
+  	list-style-type: upper-alpha;
+  }
+  p + ol, p + ul {
+  	margin-bottom: 1rem;
+  }
+  p:last-child {
+  	margin-bottom: 0.5rem;
+  }
+  
+  /* cs202 additions */
+  .required, .challenge, .question {
+    padding: .5em .5em .5em .5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #f0f0ff;
+  }
+  
+  .highlight {
+      border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+      background: #fffff0;
+      padding-left: 0.25rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-right: 1rem;
+  }
+  
+  .honors {
+    padding: .5em .5em .5em .5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fffff0;
+  }
+  
+  
+  .callout {
+      border-left: 0.25rem solid #5bc0de;
+      background: #5bc0de;
+      padding-left: 0.25rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-right: 1rem;
+  }
+  
+  div.required .header {
+      font-weight: bold;
+  }
+  div.honors .header {
+      font-weight: bold;
+  }
+  
+  div.callout .header {
+      font-weight: bold;
+  }
+  
+  
+  div.challenge .header {
+      font-style: italic;
+  }
+  
+  
+  div.challenge {
+      background-color: #ffe0e0;
+  }
+  
+  
+  
+  div.highlight .header {
+      font-weight: bold;
+  }
+  
+  pre {
+      background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4
+  }
+  
+  #topnavbar ul {
+   width: 100%;
+   float: left;
+  
+   margin: 0;
+   padding: 0;
+  
+   text-align: center;
+   white-space: nowrap;
+   color: #000;
+   font-family: Arial, Helvetica, sans-serif;
+   background-color: white;
+   border-top: solid 2px maroon;
+   border-bottom: solid 2px maroon;
+   clear: right;
+   margin-top: .5em;
+   margin-bottom: .5em;
+  }
+  
+  #topnavbar ul li {
+   display: inline;
+   padding-left: 0;
+   padding-right: 0;
+  }
+  
+  #topnavbar ul li a {
+   padding: 3px 10px;
+   text-decoration: none;
+   color: #000;
+   background-color: white;
+   float: left;
+   border-right: 1px solid black;
+  }
+  
+  #topnavbar ul li a:hover {
+   background-color: maroon;
+   color: white;
+  }
+  
+  #topnavbar div { 
+   clear: both;
+  }
+  
+  div#news {
+    width: 30%;
+    float: right;
+    margin-left: 2em;
+    padding-left: 1em;
+    background-color: #fffff0;
+    margin-bottom: 0.5em;
+    border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+  /*  border: 1px solid maroon;*/
+  }
+  
+  dl.idealist dt { 
+    font-weight: bold;
+  }
+  
+  dl.idealist dt { 
+    margin-top: 0.5em;
+  }
+  
+  
+  dl.newslist { 
+   margin: 0;
+   padding: 0;
+  }
+  
+  dl.newslist dt { 
+   padding-left: 0;
+   color: #000055;
+   font-weight: bold;
+   margin-bottom: 0.2em;
+  }
+  
+  dl.newslist dd {
+    padding-bottom: 1em;
+    margin-bottom: 0;
+    margin-left: 1em;
+    padding-left: 0;
+    margin-right: 1em;
+  }
+  
+  div#news p { 
+  margin-top: 0; 
+  padding-top: 0;
+  }
+  
+  #announcements p { 
+    color: maroon;
+  }
+  
+  #announcements h1 { 
+    color: #ffffff;
+    text-align: center;
+    font-size: 110%;
+    text-decoration: underline;
+  }
+  
+  /* The alternating announcement colors */
+  #announcements p.one { color: #ff0000; }
+  #announcements p.two { color: #00ff00; }
+  #announcements p.three { color: #3333ff; }
+  
+  .announce_date { font-weight: bold; }
+  table.people {
+    margin-left: 10px;
+    padding: 2px;
+    border-collapse: collapse;
+    border: none;
+  }
+  
+  table.people th { 
+    font-weight: bold;
+    text-align: left;
+    border: 0;
+  /*  border-bottom: solid 2px; */
+  }
+  
+  table.people td { 
+    padding-right: 1em;
+  /*
+    border: none;
+    border-bottom: 1px solid #888;
+    padding-right: 1em;
+    padding-left: 1em;
+  */
+  }
+  
+  table.books {
+    margin-left: 2%;
+  /*  margin-bottom: 8px; */
+  }
+  
+  table.books tr,td {
+    vertical-align: top;
+  }
+  
+  table.assignments { 
+  /*  width: 98%; */
+    margin-left: 1%;
+    margin-right: 1%;
+    border-collapse: collapse;
+  }
+  
+  table.assignments th { 
+  /*  background: #E0FFFF;*/
+    color: black;
+    border: none;
+    text-align: left;
+    width: 29%;
+  }
+  
+  table.assignments tr,td { 
+  /*  padding: 50px;
+    border-width: 50px;
+    border-style: solid;
+    border-color: black;
+    border-spacing: 0px;*/
+    border: none;
+  }
+  
+  table.schedule {
+    width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+    border-collapse:  collapse;
+  }
+  
+  table.schedule th { 
+  /*  background: maroon;*/
+    color: black;
+    border-width: 0px;
+    text-align: left;
+  }
+  
+  table.Schedule tr { 
+    padding: 3px;  
+    border-width: 1px; 
+    border-spacing: 0px; 
+    border-style: solid;  
+    border-color: black;
+  }
+  
+  table.Schedule th,td { 
+    padding: 5px;  
+    border-width: 1px; 
+    border-spacing: 0px; 
+    border: none;  
+    border-color: black;
+  }
+  /* Presentation:  No underlines on links in schedule unless you're
+   * moving the mouse over it. */
+  
+  table.schedule tr.lecture { background: white; border-bottom: 1px solid #736F6E; }
+  table.schedule tr.alt { background: #E0FFFF; }
+  /*table.schedule tr.lecture.alt { background: white; }*/
+  /*table.schedule tr.noclass { background: #d3d3d3; }
+  table.schedule tr.makeupclass { background: #FAAFBE; }*/
+  table.schedule tr.noclass { color: #736F6E; }
+  table.schedule tr.makeupclass { color: #FF0000; border-bottom: 1px solid #736F6E;}
+  table.schedule td.readings { color: black; }
+  table.schedule td.altreadings { color: black; }
+  table.schedule tr.due { color: #FF0000; }
+  table.schedule td.due { color: #FF0000; }
+  table.schedule tr.exam    { color: #FF0000; background: #ccf; }
+  table.schedule tr.recitation { background: #ccf; }
+  table.schedule tr.recitation.alt { background: #ccf; }
+  table.schedule tr.lechead { font-weight: bold; text-align: left; height:20px}
+  
+  
+  
+  /* end cs202 additions */
+  
+  blockquote {
+  	margin-left: 2rem;
+  	padding-left: 1rem;
+  }
+  blockquote > h3:first-child {
+  	margin-top: 0.5rem;
+  }
+  blockquote, blockquote.solution.note {
+  	border-left: 0.25rem solid rgba(0, 0, 80, 0.25);
+  }
+  .solution.shown, .solution-collapsed.shown {
+  	animation: slide-down .3s ease-out;
+  }
+  .solution, blockquote.highlight {
+  	border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+  	background: #fffff0;
+  	padding-top: 0.25rem;
+  	padding-bottom: 0.25rem;
+  	padding-right: 1rem;
+  }
+  .solution-collapsed, blockquote.note {
+  	background: #f0f0ff;
+  	padding-top: 0.25rem;
+  	padding-bottom: 0.25rem;
+  	padding-right: 1rem;
+  }
+  .solution-collapsed {
+  	display: table;
+  	border-left: 0rem none;
+  	margin-left: 0rem;
+  	font-size: smaller;
+  }
+  .larger {
+  	font-size: larger;
+  }
+  a.js-solution.hide {
+  	font-size: smaller;
+  }
+  a.js-solution.hide.all {
+  	font-size: inherit;
+  }
+  .githubref {
+  	text-align: right;
+  	margin-top: -0.5rem;
+  	font-style: italic;
+  	font-size: 0.75rem;
+  }
+  .float-left {
+  	float: left;
+  }
+  .float-right {
+  	float: right;
+  }
+  @keyframes slide-down {
+  	0% { opacity: 0; }
+  	100% { opacity: 1; }
+  }
+  .post {
+  	margin-bottom: 3rem;
+  }
+  .post img {
+  	max-width: 100%;
+  }
+  .tall > img {
+  	max-height: 50vh;
+  }
+  h1, h2, h3, h4 {
+  	font-family: "brix-slab", sans-serif;
+  }
+  h1 {
+  	font-weight: 900;
+  }
+  h2 {
+  	margin-top: 3rem;
+  	font-weight: 700;
+  }
+  h2:first-child {
+  	margin-top: 0;
+  }
+  .h3, h3 {
+  	font-size: 1.5rem;
+  }
+  .h4, h4 {
+  	font-size: 1.25rem;
+  	font-style: italic;
+  }
+  h3 {
+  	margin-top: 1.5rem;
+  }
+  h3 > code {
+  	color: inherit;
+  }
+  .container th, .container td {
+  	padding: 0.15rem 1.5rem 0.15rem 0;
+  }
+  .container table {
+  	margin: 0.85rem 0;
+  	border-spacing: 0;
+  }
+  tr.even > td,
+  table.alternate > tbody > tr:nth-child(even) > td {
+  	background: #f0f0ff;
+  }
+  tr.separator > td, tr.separator > th {
+  	background: #d8d8f8;
+  }
+  td > p:first-child, th > p:first-child {
+  	margin-top: 0.25rem;
+  }
+  td > p:last-child, th > p:last-child {
+  	margin-bottom: 0.25rem;
+  }
+  table.padleft > thead > tr > th:first-child,
+  table.padleft > tbody > tr > td:first-child,
+  table.padleft > tbody > tr > th:first-child {
+  	padding-left: 0.35rem;
+  }
+  th.r {
+  	font-weight: normal;
+  }
+  tr.row-wide-padding > td {
+  	padding-left: 3em;
+  	padding-right: 3em;
+  }
+  tr.row-wide-padding > td:first-child {
+  	padding-left: 0;
+  }
+  tr.row-wide-padding > td:last-child {
+  	padding-right: 0;
+  }
+  tr.row-space-above > td {
+  	padding-top: 3em;
+  }
+  div.sp {
+  	margin-top: 3em;
+  }
+  
+  blockquote.float-left {
+  	margin-left: 0;
+  	padding-left: 0;
+  	border-left: 0 none;
+  	margin-right: 3rem;
+  }
+  blockquote.float-left.half-width {
+  	min-width: 25rem;
+  	max-width: 100%;
+  }
+  
+  /* prettier table types */
+  table.wikitable > tr > th,
+  table.wikitable > tr > td,
+  table.wikitable > * > tr > th,
+  table.wikitable > * > tr > td {
+  	border: 1px solid #a2a9b1;
+  	padding: 0.2em 0.4em;
+  }
+  table.wikitable th {
+  	text-align: center;
+  	background-color: #eaecf0;
+  }
+  td.hgray, tr.hgray {
+  	background-color: #888888;
+  }
+  td.hpink, tr.hpink {
+  	background: #ff80bb;
+  }
+  
+  table.truthtable > * > tr > th,
+  table.truthtable > * > tr > td {
+  	border: 2px solid #a2a9b1;
+  	padding: 0.6em;
+  	text-align: center;
+  }
+  
+  table.nowrap1 > * > tr > th:first-child,
+  table.nowrap1 > * > tr > td:first-child {
+  	white-space: nowrap;
+  }
+  table.text-right-1 > * > tr > th:first-child,
+  table.text-right-1 > * > tr > td:first-child {
+  	text-align: right;
+  }
+  table.text-right-2 > * > tr > th:nth-child(2),
+  table.text-right-2 > * > tr > td:nth-child(2) {
+  	text-align: right;
+  }
+  .text-left {
+  	text-align: left;
+  }
+  .text-center {
+  	text-align: center;
+  }
+  .text-right {
+  	text-align: right;
+  }
+  
+  hr.c {
+  	clear: both;
+  	margin: 0;
+  	border: 0 none;
+  	height: 0;
+  }
+  
+  .hellobackground {
+  	position: fixed;
+  	transform: rotate(-15deg);
+  	opacity: 0.15;
+  	z-index: -1;
+  	top: -3rem;
+  	left: -2.5rem;
+  }
+  .float-left.rotate-img-m5 {
+  	margin-right: 1.5em;
+  }
+  .float-right.rotate-img-5 {
+  	margin-left: 1.5em;
+  }
+  img.rotate-img-5, .rotate-img-5 img {
+  	transform: rotate(5deg);
+  }
+  img.rotate-img-m5, .rotate-img-m5 img {
+  	transform: rotate(-5deg);
+  }
+  
+  figure > img {
+  	max-width: 100%;
+  	object-fit: scale-down;
+  }
+  
+  .navbar-has-drafts {
+  	background: yellow;
+  }
+  
+  .hidden {
+  	display: none;
+  }
+  hr.prbr {
+  	border: 0 none;
+  }
+  hr.twoem {
+  	border: 0 none;
+  	margin-top: 2em;
+  }
+  hr.fourem {
+  	border: 0 none;
+  	margin-top: 4em;
+  }
+  hr.eightem {
+  	border: 0 none;
+  	margin-top: 8em;
+  }
+  hr.sixteenem {
+  	border: 0 none;
+  	margin-top: 16em;
+  }
+  
+  @media print {
+  html {
+  	font-size: 125%;
+  }
+  h1 {
+  	font-size: 2rem;
+  }
+  h2 {
+  	font-size: 1.5rem;
+  	margin-top: 2rem;
+  }
+  .prbr {
+  	page-break-before: always;
+  	margin-top: 0;
+  }
+  @page {
+  	margin-top: 0.75in;
+  	margin-bottom: 0.75in;
+  }
+  .hellobackground {
+  	display: none;
+  }
+  .print-hide-solutions .solution, .print-hide-solutions .solution-collapsed {
+  	display: none;
+  }
+  a, a:not(.btn) {
+  	color: inherit;
+  	text-decoration: none;
+  }
+  }
+  
+  @media not print {
+  .pronly {
+  	display: none;
+  }
+  }
+  
+  .navbar .gsc-control-cse {
+  	padding: 0;
+  	padding-top: .5rem;
+  	padding-left: 1rem;
+  	background: inherit;
+  	border: 0 none;
+  }
+  </style>
+</head>
+<body>
+<nav>
+<a href="../index.html">Home</a> |
+<a href="../syllabus.html">Schedule</a> |
+<a href="../policies.html">Policies and grading</a> |
+<a href="../labs.html">Labs</a> |
+<a href="../setup.html">Infrastructure</a> |
+<a href="../exams.html">Exams</a></li> |
+<!--<a href="../tools.html">Tools</a></li>-->
+<a href="../reference.html">Reference materials</a> |
+<a href="../announcements.html">Announcements</a>
+</nav>
+<p></p>
+<header id="title-block-header">
+<h1 class="title">CS202: Lab 5: File system</h1>
+</header>
+<p></p>
+<div class="post">
+<h2 id="introduction">Introduction</h2>
+<p>In this lab, you will implement (pieces of) a simple disk-based file system. There is not a lot of code to write; instead, a lot of the work of the lab is understanding the system that you’ve been given.</p>
+<p>By the end of the lab, you will be able to run your lab 2 <code>ls</code> against this lab’s file system.</p>
+<h3 id="getting-started">Getting Started</h3>
+<p>You’ll be working on the devbox as usual. From within the devbox, obtain the lab files as follows. We assume that you have set up the upstream as described in the <a href="../setup.html#localclone">lab setup</a>.</p>
+<pre><code>$ cd ~/cs202
+$ git fetch upstream
+$ git merge upstream/main</code></pre>
+<p>This lab’s files are located in the <code>lab5</code> subdirectory.</p>
+<p>If you have any “conflicts” from lab 4, <a href="https://cs61.seas.harvard.edu/site/ref/git/#conflicts">resolve them</a> before continuing further. Run <code>git push</code> to save your work back to your personal repository.</p>
+<p>Below, we describe the software architecture and file system structure for the lab.</p>
+<h2 id="fuse">FUSE</h2>
+<p>The file system that we will build is implemented as a user-level process. This file system's storage will be a file (in the example given below, we call it <code>testfs.img</code>) that lives in the normal file system of your devbox. Much of your code will treat this file as if it were a disk.</p>
+<p>This entire arrangement (file system implemented in user space with arbitrary choice of storage) is due to software called <a href="http://fuse.sourceforge.net/">FUSE (Filesystem in Userspace)</a>. In order to really understand what FUSE is doing, we need to take a brief detour to describe <em>VFS</em>. Linux (like Unix) has a layer of kernel software called VFS; conceptually, every file system sits <em>below</em> this layer, and exports a uniform interface to VFS. (You can think of any potential file system as being a "driver" for VFS; VFS asks the software below it to do things like "read", "write", etc.; that software fulfills these requests by interacting with a disk driver, and interpreting the contents of disk blocks.) The purpose of this architecture is to make it relatively easy to plug a new file system into the kernel: the file system writer simply implements the interface that VFS is expecting from it, and the rest of the OS uses the interface that VFS exports to it. In this way, we obtain the usual benefits of pluggability and modularity.</p>
+<p>FUSE is just another "VFS driver", but it comes with a twist. Instead of FUSE implementing a disk-based file system (the usual picture), it responds to VFS's requests by asking a user-level process (which is called a "FUSE driver") to respond to it. So the FUSE kernel module is an adapter that speaks "fuse" to a user-level process (and you will be writing your code in this user-level process) and "VFS" to the rest of the kernel.</p>
+<p>Meanwhile, a FUSE driver <em>can use whatever implementation it wants</em>. It could store its data in memory, across the network, on Jupiter, whatever. In the setup in this lab, the FUSE driver will interact with a traditional Linux file (as noted above), and pretend that this file is a sector-addressable disk.</p>
+<table>
+<colgroup>
+<col style="width: 45%" />
+<col style="width: 54%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><p>The FUSE driver registers a set of <em>callbacks</em> with the FUSE system (via <code>libfuse</code> and ultimately the FUSE kernel module); these callbacks are things like read, write, etc. A FUSE driver is associated with a particular directory, or <em>mount point</em>. The concept of mounting was explained in <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/file-intro.pdf">OSTEP 39</a> (see 39.17). Any I/O operations requested on files and directories under this mount point are dispatched by the kernel (via VFS, the FUSE kernel module, and <code>libfuse</code>) to the callbacks registered by the FUSE driver.</p>
+<p>To recap all of the above: the file system user interacts with the file system roughly in this fashion:</p>
+<ol type="1">
+<li>When the file system user, Process A, makes a request to the system, such as listing all files in a directory via <code>ls</code>, the <code>ls</code> process issues one or more system calls (<code>stat()</code>, <code>read()</code>, etc.).</li>
+<li>The kernel hands the system call to VFS.</li>
+<li>VFS finds that the system call is referencing a file or directory that is managed by FUSE.</li>
+<li>VFS then dispatches the request to FUSE, which dispatches it to the corresponding FUSE driver (which is where you will write your code).</li>
+<li>The FUSE driver handles the request by interacting with the "disk", which is implemented as an ordinary file. The FUSE driver then responds, and the responses go back through the chain.</li>
+</ol></td>
+<td><img src="lab5-fuse-diagram.svg" /></td>
+</tr>
+</tbody>
+</table>
+<div id="fuse-example">
+<p>Here's an example from the staff solution to show what this looks like, where <code>testfs.img</code> is a disk image with only the root directory and the file <code>hello</code> on its file system:</p>
+<pre><code># create a directory to serve as a mount point
+$ mkdir mnt 
+
+# see what file system mnt is associated with
+$ df mnt    
+Filesystem     1K-blocks    Used Available Use% Mounted on
+/dev/sda1        7092728 4536616   2172780  68% /
+
+# notice, &#39;mnt&#39; is empty
+$ ls mnt    
+
+# mount testfs.img at mnt:
+$ build/fsdriver testfs.img mnt 
+
+# below, note that mnt&#39;s file system is now different
+$ df mnt 
+Filesystem          Size  Used Avail Use% Mounted on
+cs202fs#testfs.img  8.0M   24K  8.0M   1% /home/Vagrant/cs202/lab5/mnt
+
+# and there&#39;s the hello file...
+$ ls mnt 
+hello
+
+# ...which we can read with any program
+$ cat mnt/hello 
+Hello, world!
+
+# now unmount mnt
+$ fusermount -u mnt 
+
+# and its associated file system is back to normal
+$ df mnt 
+Filesystem     1K-blocks    Used Available Use% Mounted on
+/dev/sda1        7092728 4536616   2172780  68% /
+
+# and hello is gone, but still lives in testfs.img
+$ ls mnt 
+$</code></pre>
+</div>
+<p>Note that in the above example, after we run fsdriver, the kernel is actually dispatching the all the <code>open()</code>, <code>read()</code>, <code>readdir()</code>, etc. calls that <code>ls</code> and <code>cat</code> make to our FUSE driver. The FUSE driver takes care of searching for a file when <code>open()</code> is called, reading file data when <code>read()</code> is called, and so on. When fusermount is run, our file system is unmounted from <code>mnt</code>, and then all I/O operations under <code>mnt</code> return to being serviced normally by the kernel.</p>
+<h2 id="ourfs">Our File System</h2>
+<p>Below, we give an overview of the features that our file system will support; along the way, we review some of the file system concepts that we have studied in class and the reading.</p>
+<h3 id="on-disk-file-system-structure">On-Disk File System Structure</h3>
+<p>Most UNIX file systems divide available disk space into two main types of regions: <em>inode</em> regions and <em>data</em> regions. UNIX file systems assign one <em>inode</em> to each file in the file system; a file's inode holds a file's meta-data (pointers to data blocks, etc.). The data regions are divided into much larger (typically 4KB or more) <em>data blocks</em>, within which the file system stores file data and directory data. Directory entries (the "data" in a directory) contain file names and inode numbers; a file is said to be <em>hard-linked</em> if multiple directory entries in the file system refer to that file's inode. Both files and directories logically consist of a series of data blocks; these blocks can be scattered throughout the disk much as the pages of a process's virtual address space can be scattered throughout physical memory.</p>
+<p>Unlike most UNIX file systems, we make a simplification in the layout of the file system: there is only one region on the disk, in which both inode blocks and data blocks reside. Furthermore, each inode is allocated its own disk block instead of being packed alongside other inodes in a single disk block.</p>
+<h4 id="sectors-and-blocks">Sectors and Blocks</h4>
+<p>Disk perform reads and writes in units of <em>sectors</em>, which are typically 512 bytes. However, file systems allocate and use disk storage in units of <em>blocks</em> (for example, 4KB, or 8 sectors). Notice the distinction between the two terms: <em>sector size</em> is a property of the disk hardware, whereas <em>block size</em> is a creation of the file system that uses the disk. A file system's block size must be a multiple of the sector size of the underlying disk. As explained in class, there are advantages to making the block size larger than the sector size.</p>
+<p>Our file system will use a block size of 4096 bytes.</p>
+<table>
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 51%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><h4 id="superblocks">Superblocks</h4>
+<p>File systems typically place important meta-data at reserved, well-known disk blocks (such as the very start of the disk). This meta-data describes properties of the entire file system (block size, disk size, meta-data required to find the root directory, the time the file system was last mounted, the time the file system was last checked for errors, and so on). These special blocks are called <em>superblocks</em>. Many "real" file systems maintain multiple replicas of superblocks, placing them far apart on the disk; that way, if one of them is corrupted or the disk develops a media error in that region, the other replicas remain accessible.</p>
+<p>Our file system will have a single superblock, which will always be at block 0 on the disk. Its layout is defined by <code>struct superblock</code> in <code>fs_types.h</code>. Block 0 is typically reserved to hold boot loaders and partition tables, so file systems generally do not use the very first disk block. Since our file system is not meant to be used on a real disk, we use block 0 to store the superblock for simplicity.</p>
+<p>The superblock in our file system contains a reference to a block containing the "root" inode (the <code>s_root</code> field in <code>struct superblock</code>). The "root" inode is the inode for the file system's <em>root directory</em>. This inode stores pointers to blocks; these blocks, together, contain a sequence of <code>dirent</code> structures. Each structure includes a file and an inode number (one can think of this as assigning a given "name" to a given inode); the collection of these structures forms the content of the file system's root directory. These contents can include further directories, etc.</p></td>
+<td><img src="disk.svg" /></td>
+</tr>
+</tbody>
+</table>
+<h4 id="the-block-bitmap-managing-free-disk-blocks">The Block Bitmap: Managing Free Disk Blocks</h4>
+<p>In the same way that the kernel must manage the system's physical memory to ensure that a given physical page is used for only one purpose at a time, a file system must manage the blocks of storage on a disk to ensure that a given disk block is used for only one purpose at a time. In WeensyOS, you kept the <code>physical_pageinfo</code> structures for all physical pages in an array, <code>pageinfo</code>, to keep track of the free physical pages in <code>kernel.c</code>. In file systems it is common to keep track of free disk blocks using a <em>bitmap</em> (essentially, an array of bits, one for each resource that is being tracked). A given bit in the bitmap is set if the corresponding block is free, and clear if the corresponding block is in use.</p>
+<p>The bitmap in our file system always starts at disk block 1, immediately after the superblock. For simplicity we will reserve enough <em>bitmap blocks</em> to hold one bit for each block in the entire disk, including the blocks containing the superblock and the bitmap itself. We will simply make sure that the bitmap bits corresponding to these special, "reserved" areas of the disk are always clear (marked in-use). Note that, since our file system uses 4096-byte blocks, each bitmap block contains 4096*8=32768 bits, or enough bits to track 32768 disk blocks.</p>
+<h4 id="file-metadata">File Metadata</h4>
+<p>The layout of the meta-data describing a file in our file system is described by <code>struct inode</code> in <code>fs_types.h</code>. This meta-data includes the file's size, type (regular file, directory, symbolic link, etc.), time stamps, permission information, and pointers to the data blocks of the file. Because our file system supports hard links, one inode may be referred to by more than one name -- which is why the inode itself does not store the file "name". Instead, <em>directory entries</em> give names to inodes (as noted earlier).</p>
+<p>The <code>i_direct</code> array in <code>struct inode</code> contains space to store the block numbers of the first 10 (<code>N_DIRECT</code>) blocks of the file, which we will call the file's <em>direct</em> blocks. For small files up to 10*4096 = 40KB in size, this means that the block numbers of all of the file's blocks will fit directly within the <code>inode</code> structure itself. For larger files, however, we need a place to hold the rest of the file's block numbers. For any file greater than 40KB, an additional disk block, called the file's <em>indirect block</em>, holds up to 4096/4 = 1024 additional block numbers, pushing the maximum file size up to (10 + 1024)*4096 = 4136KB, or a little over 4MB. The file system also supports <em>double-indirect</em> blocks. A double-indirect block (<code>i_double</code> in the <code>inode</code> structure) stores 4096/4 = 1024 additional <em>indirect</em> block numbers, which themselves each store 1024 additional direct block numbers. This affords an additional 1024*1024*4096 = 4GB worth of data, bringing the maximum file size to a little over 4GB, in theory. To support even larger files, real-world file systems typically support <em>triple-indirect</em> blocks (and sometimes beyond).</p>
+<h4 id="other-features">Other Features</h4>
+<p>Our file system supports all the traditional UNIX notions of file ownership, permissions, hard and symbolic links, time stamps, and special device files. Perhaps surprisingly, much of this functionality will come for free (or very low cost) after writing just a small number of core file system operations. Some of the ease in supporting these traditional UNIX file system notions comes from FUSE.</p>
+<h2 id="goal">Goal</h2>
+<p>You will implement some components of the FUSE driver (and hence the file system): allocating disk blocks, mapping file offsets to disk blocks, and freeing disk blocks allocated in inodes. In order to do this, you will have to familiarize yourself with the provided code and the various file system interfaces.</p>
+<h2 id="source-files">Source files</h2>
+<ul>
+<li><code>bitmap.c</code>, <code>bitmap.h</code>: operations for manipulating the free disk block bitmap.</li>
+<li><code>dir.c</code>, <code>dir.h</code>: operations for manipulating directories, including adding entries to directories and walking the directory structure on-disk to access a file.</li>
+<li><code>fs_types.h</code>: contains structure and macro definitions relevant to the layout of the file system.</li>
+<li><code>inode.c</code>, <code>inode.h</code>: operations for reading and writing data to inodes on-disk.</li>
+<li><code>disk_map.c</code>, <code>disk_map.h</code>: contains the <code>flush_block()</code> and <code>diskaddr()</code> functions, both of which are vital for the functions that you will write.</li>
+<li><code>fsdriver.c</code>: the main source file for the file system driver.</li>
+<li><code>fsformat.c</code>: the main source file for the file system formatting utility.</li>
+</ul>
+<p>The main file system code that we've provided for you resides in <code>fsdriver.c</code>. This file contains all the FUSE callbacks to handle I/O syscalls, as well as the <code>main</code> function. Once the path to the disk image and the path to the mount point (<code>testfs.img</code> and <code>mnt</code> respectively in the supplied <a href="#fuse-example">example</a>) have been read from the command line arguments, our FUSE driver uses <code>mmap()</code> to map the specified disk image into memory. This happens in the <code>map_disk_image</code> function (defined in <code>disk_map.c</code>), which itself initializes some file system metadata. Then, <code>fsdriver.c</code> calls <code>fuse_main</code>, which handles kernel dispatches to our registered callbacks. These callbacks will invoke the functions that you write in the coming exercises.</p>
+<p>As stated in class, <code>mmap</code> reserves a portion of the running process's virtual address space to provide read and write access to a file as if that file were an array in memory. For example, if <code>file</code> is a pointer to the first byte of a memory-mapped file, writing <code>((char *)file)[5] = 3</code> is approximately equivalent to the two calls <code>lseek(fd, 5, SEEK_SET)</code> and then <code>write(fd, &lt;location of memory that holds byte 3&gt;, 1)</code>. To flush any in-memory changes you've made to a file onto the disk, you would use the <code>msync</code> function. As always, you can check the man pages for more information on these syscalls. For this lab, you will not need to be intimately familiar with their operation, but you should have a high-level understanding of what they do.</p>
+<div class="highlight">
+<p><span class="header">Heads up: some key tips for the lab.</span></p>
+<ul>
+<li><p>It’s virtually impossible to do this lab correctly without reading the supplied code and specs carefully. This includes comments, programming idioms in the supplied code, specs of functions that you are supposed to call, specs of functions that you are supposed to write, and more.</p></li>
+<li><p>Expanding on the prior point: if you’re not sure how to do something, look around in the same file for how <em>other</em> functions are implemented in the supplied code; this will give you programming hints.</p></li>
+<li><p>As usual, bugs in earlier exercises may show up only in later exercises, or in later grading tests.</p></li>
+<li><p>Finally, you will very likely need to use the debugger (<code>gdb</code>). We include instructions below on running the driver under <code>gdb</code>; for gdb-specific commands, such as breakpoint-setting, please see <a href="lab1.html">lab 1</a>.</p></li>
+</ul>
+</div>
+<h2 id="the-work">The work</h2>
+<div class="required">
+<p><span class="header">Exercise 1.</span> Before coding in the driver, run <code>./chmod-walk</code> in the Lab 5 directory. This will set up permissions in the directories leading up to your lab directory correctly so that you will be able to run the driver successfully. (If you do not run this script, FUSE will be unable to mount or unmount file systems in your lab directory.)</p>
+</div>
+<p>When you run the FUSE driver (<code>$ build/fsdriver testfs.img mnt</code>), the function <code>map_disk_image</code> will set the <code>bitmap</code> pointer. After this, we can treat <code>bitmap</code> as a packed array of bits, one for each block on the disk. See, for example, <code>block_is_free</code>, which simply checks whether a given block is marked free in the bitmap.</p>
+<div class="required">
+<p><span class="header">Exercise 2.</span> Implement <code>alloc_block</code> in <code>bitmap.c</code>. It should find a free disk block in the bitmap, mark it used, and return the number of that block. When you allocate a block, you should immediately flush the changed bitmap block to disk with <code>flush_block</code>, to help file system consistency. Under the hood, <code>flush_block</code> calls <code>msync</code> to schedule the disk block in memory to get flushed to the actual disk image.</p>
+<p><strong>Note:</strong> You should use <code>free_block</code> as a model.</p>
+<p>Use <code>make grade</code> to test your code. Your code should now pass the "alloc_block" test.</p>
+</div>
+<p> </p>
+<div class="highlight">
+<h2 id="debugging">Debugging</h2>
+<p><span class="header">The output of our <code>make grade</code> will usually not provide you with enough information to debug a problem. Here are some debugging guidelines.</span></p>
+<p>When the grading script fails, look at the scripts in <code>test/</code> to see what is actually happening. Some of the tests are in the <code>fs_test()</code> function in <code>fsdriver.c</code>. Others are invoked by separate C programs. For debugging, you will need to identify which test or test program is causing the failure; this isn’t a matter of using <code>gdb</code> but rather of doing detective work on the grading script and the supplied code.</p>
+<p>Also, “Transport endpoint is not connected” and “Software caused connection abort” are errors that user programs see when the file system driver panics or otherwise crashes and is no longer handling system calls (<code>open()</code>, <code>read()</code>, etc.) for that mount point. So, when a program starts spouting these errors (for example, from a grading script), you will need to run the driver in gdb to see where it’s panicking.</p>
+<p>Here is a quick howto:</p>
+<p><strong>Running the driver in gdb</strong>:</p>
+<p>In one window:</p>
+<pre><code>    $ gdb build/fsdriver
+    &lt;set breakpoints, as usual&gt;
+    (gdb) run -d testfs.img mnt </code></pre>
+<p>Then in another window:</p>
+<pre><code>    # manually run anything driven from the test/ directory.
+    # for example:
+    $ build/posixio
+    # or
+    $ build/stressfs</code></pre>
+<p>Note that you can also run these programs in gdb.</p>
+<p><strong>Printf debugging</strong>:</p>
+<p>You may prefer “printf debugging” (though gdb is likely to be more effective for this lab). For that purpose, you can run the driver “standalone” like this:</p>
+<pre><code>$ build/fsdriver -d testfs.img mnt</code></pre>
+<p>This command runs the driver in <em>debugging mode</em> and mounts <code>testfs.img</code> at <code>mnt</code>. In debugging mode, the driver does not exit until you press Ctrl-C. This means that you cannot interact with the file system via the terminal containing the command above; instead, you will need to open up a new terminal and interact with the file system from there. While in debugging mode, <code>fsdriver</code> will print to the console a trace of the syscalls dispatched to the driver; any <code>printf</code>s that you inserted in the driver will also be displayed. Once you run the command above, you should see something like:</p>
+<pre><code>    FUSE library version: 2.9.2
+    nullpath_ok: 0
+    nopath: 0
+    utime_omit_ok: 0
+    unique: 1, opcode: INIT (26), nodeid: 0, insize: 56, pid: 0
+    INIT: 7.23
+    flags=0x0003f7fb
+    max_readahead=0x00020000
+    INIT: 7.19
+    flags=0x00000011
+    max_readahead=0x00020000
+    max_write=0x00020000
+    max_background=0
+    congestion_threshold=0
+    unique: 1, success, outsize: 40
+    ...</code></pre>
+<p>Now, open up a new terminal, and interact with the file system to see the debugging outputs. Something like:</p>
+<pre><code>    $ ls mnt </code></pre>
+<p>should cause the original terminal to print germane output.</p>
+<p>You can also run the test programs as well, either in <code>gdb</code> (to help you synchronize calls from file system users to your drive) or standalone.</p>
+<p><strong>A few other things to keep in mind</strong>:</p>
+<ol type="1">
+<li><p>Before any of the above commands work, you will need to create a disk image to use for testing. The easiest way to do this is to run <code>test/testbasic.bash</code>. As a side effect, this creates a disk image, <code>testfs.img</code>, which is set up properly for the internal tests in the driver.</p></li>
+<li><p>It may be useful to run basic tests on the driver. To that end, run:</p>
+<pre><code> $ build/fsdriver testfs.img mnt --test-ops</code></pre></li>
+</ol>
+<p>The command above runs the internal file system tests and then exits.</p>
+</div>
+<p> </p>
+<div class="highlight">
+<p><span class="header">Cleaning up.</span> During the course of testing your FUSE driver, various combinations of operations may cause your FUSE driver to stop functioning or enter a non-clean state. It may be helpful to search Piazza for information about specific error messages.</p>
+<p>More generally, to get your system to a clean starting state, you can do:</p>
+<pre><code>    $ fusermount -u mnt      # unmount the driver
+    $ test/makeimage.bash    # make a clean testfs.img
+    $ rm -rf mnt             # remove the mounting directory and its residents
+    $ mkdir mnt              # recreate the mounting directory</code></pre>
+<p>You may wish to encapsulate these actions in a shell script.</p>
+<p>Once you have executed the above lines, you start the driver again with:</p>
+<pre><code>    $ build/fsdriver -d testfs.img mnt</code></pre>
+</div>
+<h2 id="file-operations">File Operations</h2>
+<p>We have provided various functions in <code>dir.c</code> and <code>inode.c</code> to implement the basic facilities you will need to interpret and manage <code>inode</code> structures, scan and manage the entries of directories, and walk the file system from the root to resolve an absolute pathname. Read through <em>all</em> of the code in these files and make sure you understand what each function does before proceeding.</p>
+<div class="required">
+<p><span class="header">Exercise 3.</span> Implement <code>inode_block_walk</code> and <code>inode_get_block</code> in <code>inode.c</code>.</p>
+<p>These are the workhorses of the file system. For example, <code>inode_read</code> and <code>inode_write</code> aren’t much more than the bookkeeping atop <code>inode_get_block</code> necessary to copy bytes between scattered blocks and a sequential buffer.</p>
+<p>Their signatures are:</p>
+<pre><code>int inode_block_walk(struct inode *ino, uint32_t filebno, uint32_t **ppdiskbno, bool alloc);
+int inode_get_block(struct inode *ino, uint32_t filebno, char **blk);</code></pre>
+<p><code>inode_block_walk</code> has similar logic to the virtual memory lookup function in lab4. It finds the disk block number slot for the 'filebno'th block in inode 'ino', and sets '*ppdiskbno' to point to that slot. <code>inode_get_block</code> goes one step further and sets <code>*blk</code> to the start of the block, such that by using <code>*blk</code>, we can access the contents of the block. It also allocates a new block if necessary.</p>
+<p>The pointers-to-pointers may be confusing. It’s best to draw pictures, or look at other code in <code>inode.c</code>, or think about how to <em>call</em> the function. Also, as a reminder: in C, when we want to return multiple values from a function (or return one value, in a function returning an int status code), we set up the function to take a pointer (address) as a parameter, and we put the return value in the supplied address (by dereferencing the pointer). As an example, if we have a function <code>f(int* p)</code>, the implementation of <code>f</code> can return an int to the caller by storing into (dereferencing) the supplied address, with a line like <code>*p = 5</code>. This identical pattern holds when the return value is itself a pointer. In our example, the return value is an <code>uint32_t*</code> (an address whose contents will be a 32-bit block number). So, the caller passes storage for that <code>uint32_t*</code>: an <code>uint32_t**</code>.</p>
+<p>Use <code>make grade</code> to test your code. Your code should pass the "inode_open" and "inode_get_block" tests.</p>
+</div>
+<p>After Exercise 3, you should be able to read and write to the file system. Try something like</p>
+<pre><code>$ echo &quot;hello&quot; &gt; &quot;mnt/world&quot;; cat &quot;mnt/world&quot;</code></pre>
+<div class="required">
+<p><span class="header">Exercise 4.</span> Implement <code>inode_truncate_blocks</code> in <code>inode.c</code>. <code>inode_truncate_blocks</code> frees data and metadata blocks that an inode allocated but no longer needs. This function is used, for instance, when an inode is deleted; the space reserved by the inode must be freed so that other files can be created on the system.</p>
+<p>Use <code>make grade</code> to test your code. Your code should pass the "inode_flush/inode_truncate/file rewrite" tests.</p>
+</div>
+<p><br />
+</p>
+<div class="required">
+<p><span class="header">Exercise 5.</span> Implement <code>inode_link</code> and <code>inode_unlink</code> in <code>inode.c</code>. <code>inode_link</code> links an inode referenced by one path to another location, and <code>inode_unlink</code> removes a reference to an inode at a specified path. Make sure that you properly increment the link count in an inode when linking and decrement the link count when unlinking. Don't forget to free an inode when its link count reaches zero!</p>
+<p><code>inode_link</code> and <code>inode_unlink</code> allow us to exploit the level of indirection provided by using inodes in our file system (as opposed to storing all file meta-data inside of directories, for instance) and manage referencing inodes with multiple names. The <code>inode_unlink</code> operation is particularly important as it allows us to release the space reserved for an inode, acting as a "remove" operation when an inode's link count is one.</p>
+<p>Use <code>make grade</code> to test your code. Your code should pass the "inode_link/inode_unlink" tests.</p>
+</div>
+<p>After Exercise 5, you should be able to make hard links. Try something like</p>
+<pre><code>$ echo &quot;hello&quot; &gt; &quot;mnt/world&quot;; ln &quot;mnt/world&quot; &quot;mnt/hello&quot;; rm &quot;mnt/world&quot;; cat &quot;mnt/hello&quot;</code></pre>
+<p>The tests after "inode_link/inode_unlink" are all effectively stress tests, in some way or another, for the driver. Each of them relies on the core functionality that you implemented; some can fail if you didn't handle certain edge cases correctly. If you fail one of these tests, go back and check the logic in your code to make sure you didn't miss anything.</p>
+<div class="required">
+<p><span class="header">Exercise 6.</span> Run your <code>ls</code> from lab 2 against the file system in <code>mnt</code>. Paste the output of</p>
+<pre><code>    $ /path/to/your/ls -alR mnt</code></pre>
+<p>into answers.txt. If you have a non-working lab 2, then just note that in the answers.txt file.</p>
+<p>You can have fun – not graded – using the fact that you are writing both <code>ls</code> and implementing the file system. For example, you could consider having your file system stuff coded messages in extraneous <code>dirents</code>, and then interpret/decode them in <code>ls</code>.</p>
+</div>
+<h2 id="extra-credit-questions">Extra credit questions</h2>
+<p>Do either of the following for extra credit (you can do both, but extra credit is given for only one). As in lab4, the points given will not be commensurate with effort required.</p>
+<div class="required">
+<p><span class="header">Exercise 7.</span> The file system is likely to be corrupted if it gets interrupted in the middle of an operation (for example, by a crash or a reboot). Implement <a href="http://portal.acm.org/citation.cfm?id=350853.350863">soft updates</a> or journalling to make the file system crash-resilient and demonstrate some situation where the old file system would get corrupted, but yours doesn't.</p>
+</div>
+<p><br />
+</p>
+<div class="required">
+<p><span class="header">Exercise 8.</span> Currently, our file system allocates one block (4096 bytes) per inode. However, each <code>struct inode</code> only takes up 98 bytes. If we were clever with file system design, we could store 4096/96 = 41 inodes in every block. Modify the file system so that inodes are stored more compactly on disk. You may want to make the file system more like a traditional UNIX file system by splitting up the disk into inode and data regions, so that it is easier to reference inodes by an index (generally called an "inum" for "inode number") into the inode region.</p>
+</div>
+<h2 id="further-questions">Further questions</h2>
+<div class="question">
+<p>Answer the following questions in <code>answers.txt</code>.</p>
+<ol type="1">
+<li>How long approximately did it take you to do this lab?</li>
+<li>Do you feel like you gained an understanding of how to build a file system in this lab? Please suggest improvements.</li>
+</ol>
+</div>
+<h2 id="submission">Submission</h2>
+<p>Handing in consists of three steps:</p>
+<ol type="1">
+<li><p><strong>Executing this checklist</strong>:</p>
+<ul>
+<li>Make sure your code builds, with <strong>no compiler warnings</strong>.</li>
+<li>Make sure you’ve used <code>git add</code> to add any files that you’ve created.</li>
+<li>Fill out the top of the <code>answers.txt</code> file, including your name and NYU Id</li>
+<li>Make sure you’ve answered every question in <code>answers.txt</code></li>
+<li>Make sure you have answered all code exercises in the files.</li>
+<li>Create a file called <code>slack.txt</code> noting how many slack days you have used for this assignment. (This is to help us agree on the number that you have used.) Include this file even if you didn’t use any slack days.</li>
+<li><code>git add</code> and commit the slack.txt file</li>
+</ul></li>
+<li><p><strong>Push your code to GitHub, so we have it</strong>:</p>
+<pre><code>$ cd ~/cs202/lab5 
+$ make clean
+$ git commit -am &quot;hand in lab5&quot;
+$ git push origin 
+
+Counting objects: ...
+....
+To  git@github.com:nyu-cs202/labs-21fa-&lt;YourGithubUsername&gt;.git
+  7337116..ceed758  main -&gt; main</code></pre></li>
+<li><p><strong>Actually submit, by timestamping and identifying your pushed code</strong>:</p>
+<ul>
+<li>Decide which git commit you want us to grade, and copy its id (you will paste it in the next sub-step). A <a href="http://cs61.seas.harvard.edu/wiki/2014/Git#Repositories">commit id is a 40-character hexadecimal string</a>. Usually the commit id that you want will be the one that you created last. The easiest way to obtain the commit id for the last commit is by running the command <code>git log -1 --format=oneline</code>. This prints both the commit id and the initial line of the commit message. If you want to submit a previous commit, there are multiple ways to get the commit id for an earlier commit. One way is to use the tool <code>gitk</code>. Another is <code>git log -p</code>, as explained <a href="http://cs61.seas.harvard.edu/wiki/2014/Git#Logging">here</a>, or <code>git show</code>.</li>
+<li>Now go to NYU Brightspace; there will be an entry for this lab. Paste <em>only</em> the commit id that you just copied.</li>
+<li>You can submit as many times as you want; we will grade the last commit id submitted to Brightspace.</li>
+</ul></li>
+</ol>
+<p><strong>NOTE:</strong> <em>Ground truth is what and when you submitted to Brightspace. Thus, a non-existent commit id in Brightspace means that you have not submitted the lab, <strong>regardless</strong> of what you have pushed to GitHub. And, the time of your submission for the purposes of tracking lateness is the time when you upload the id to Brightspace, not the time when you executed <code>git commit</code>.</em></p>
+<p><strong>This completes the lab.</strong></p>
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>The diagram explaining FUSE is adapted from the diagram displayed on FUSE's homepage.</p>
+<p>This lab is an edited version of a lab written by Isami Romanowski. (He in turn adapted code from MIT's JOS, porting it to the FUSE and Linux environment, adding inodes and more.)</p>
+</body>
+</html>

@@ -1,0 +1,229 @@
+1.  stack:
+0xffee9000
+0x324
+0x202
+8 //line 8 is return address of g
+
+stack pointer:
+8 
+
+frame pointer：
+/*
+popq %rbp:
+//store the element 
+//at the location of %rsp
+//in %rbp
+movq (%rsp), %rbp
+addq $8, %rsp
+*/
+0xffee0018
+/*
+b/c the old %rbp
+was stored at %rsp first
+*/
+
+
+
+
+2. 
+off_t file_size(int fd)
+{
+  struct stat status;
+  if(fstat(fd, &status) < 0)
+  {
+     return -1; 
+  }
+  return status.st_size;
+}
+/*
+man stat
+ret value:
+On success, zero is returned
+On error, -1 is returned
+*/
+
+
+
+
+
+
+3.
+void start()
+{
+	BoolQueue bq;
+	sthread_t producer_tid;
+	sthread_t consumer_tid[5];
+	
+	sthread_create(&producer_tid, produce, &bq);
+	
+	for(int i = 0; i < 5; i++)
+	{
+		sthread_create(&consumer_tid[i], consume, &bq);
+	}	
+	
+	sthread_join(producer_tid);
+	/*waits for the thread specified by
+      	thread to terminate*/
+
+	for(int i = 0; i < 5; i++)
+	{
+		sthread_join(&consumer_tid[i]);
+	}		 
+}
+
+void produce(void* arg)
+{
+	BoolQueue* bq = (BoolQueue*)arg;
+
+	for(int i = 0; i < 22; i++)
+	{
+		bq->enqueue(true);
+	}
+	
+	for(int i = 0; i < 5; i++)
+	{
+		bq->enqueue(false);
+	}
+}
+
+void consume(void* arg)
+{
+	BoolQueue* bq = (BoolQueue*)arg;
+
+	while(bq->dequeue() == true)
+	{
+		printf("hello\n");
+	}
+
+	sthread_exit();
+}
+
+
+
+
+
+4.
+fork()
+creates a new process by duplicating the calling process
+new process = child 
+calling process = parent
+
+5.
+exec()
+replaces a process's memory space (text, data)
+with that of a newly loaded program
+ 
+execve()
+executes the program referred to by pathname
+causes the program that is being run by the calling process
+to be replaced with a new program,
+with newly initialized stack, heap, and data segments
+
+
+6.
+man mmap
+man - an interface to the system reference manuals
+
+
+
+7.
+class Grouper {
+public:
+	Grouper(); // initializes state and synchronization variables
+	˜Grouper();
+
+	void Enter();
+	void Exit();
+private:
+	bool is_room; // tracks the state. true means "there is room".
+	int num_in_group;
+	mutex m;
+	cond cv_is_room;
+	cond group_form; 
+		
+};
+
+Grouper::Grouper()
+{
+	is_room = true; // Monitor begins in the state "there is room"
+	num_in_group = 0;
+	mutex_init(&m);
+	cond_init(&cv_is_room);
+	cond_init(&group_form);
+}
+
+void
+Grouper::Enter()
+{
+	m.acquire();
+
+	while(is_room == false)
+	{
+		cond_wait(&m, &cv_is_room); 		
+	}
+
+	num_in_group++;
+
+	if(num_in_group == 10)
+	{
+		is_room = false;
+		cond_broadcast(&m, &cv_group_form); //forgot &m 
+	}
+	
+	/*did not write below while loop*/
+	while(is_room == true) //alternate: while(num_in_group < 10) 
+	{//当人不够10个的时候, 不能成为一组
+		cond_wait(&m, &cv_group_form);	
+	}
+	m.release();	
+}
+
+void
+Grouper::Exit()
+{
+	m.acquire();
+	if(num_in_group > 0)
+	{
+		num_in_group--;	
+	}
+	if(num_in_group == 0)
+	{	
+		is_room = true;
+		cond_broadcast(&m, &cv_is_room); //forgot &m 
+	}
+	m.release();
+}
+
+
+
+
+
+
+
+
+8
+1st level: 2^7
+3rd level: 2^7
+page size: 2^9
+vpn is 21 bits implies 2^21 virtual pages per process
+
+
+
+
+9
+lay out the allocated memory so that the last legitimateLY
+ALLOCATED byte is ON the last byte of the ALLOCATED
+page (this "wastes" first part of A page) 
+mark the NEXT VIRTUAL page (pass THE ARRAY)
+as "not in use"
+
+
+
+
+10
+an entity that implicitly schedules cpu
+interrupts or mutexes
+interrupts force the interrupt handler to run
+mutexes, by blocking threads, they are implicitly allocating cpu
+
+ 

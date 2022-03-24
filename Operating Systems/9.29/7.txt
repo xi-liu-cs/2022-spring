@@ -1,0 +1,324 @@
+Class 7
+CS 202
+29 September 2021
+
+On the board
+------------
+
+1. Last time
+2. Advice
+3. Practice with concurrent programming
+4. Implementations of spinlocks, mutexes
+5. Deadlock (intro)
+
+---------------------------------------------------------------------------
+
+[we will use handout05.pdf, which was released last time]
+
+1. Last time
+
+    - Condition variables
+    - Monitors
+    - Standards
+
+
+2. Advice for concurrent programming
+
+    A. Top-level piece of advice: SAFETY FIRST.
+
+	--Locking at coarse grain is easiest to get right, so do
+	that (one big lock for each big object or collection of
+	them)
+	
+	--Don't worry about performance at first
+
+	--In fact, don't even worry about liveness at first
+	
+	    --In other words don't view deadlock as a disaster
+
+	--Key invariant: make sure your program never does the wrong thing
+
+    C. More detailed advice: design approach
+
+	[We will use item #1 on handout as a case study.....]
+
+	--Here's a four-step design approach:
+	
+	    1. Getting started:
+	     
+		 1a. Identify units of concurrency. Make each a thread with
+		 a go() method or main loop. Write down the actions a thread
+		 takes at a high level.  
+		 
+		 1b. Identify shared chunks of state. Make each shared
+		 *thing* an object. Identify the methods on those objects,
+		 which should be the high-level actions made *by* threads
+		 *on* these objects. Plan to have these objects be monitors.
+		 
+		 1c. Write down the high-level main loop of each thread. 
+	     
+	    Advice: stay high level here. Don't worry about synchronization 
+	    yet. Let the objects do the work for you. 
+	     
+	    Separate threads from objects. The code associated with a
+	    thread should not access shared state directly (and so there
+	    should be no access to locks/condition variables in the
+	    "main" procedure for the thread). Shared state and
+	    synchronization should be encapsulated in shared objects. 
+
+	    --QUESTION: how does this apply to the example on the
+	    handout?
+		--separate loops for producer(), consumer(), and
+		synchronization happens inside MyBuffer.
+	     
+	    Now, for each object: 
+	     
+	    2. Write down the synchronization constraints on the
+	    solution. Identify the type of each constraint: mutual
+	    exclusion or scheduling. For scheduling constraints, ask,
+	    "when does a thread wait"?
+
+		--NOTE: usually, the mutual exclusion constraint is
+		satisfied by the fact that we're programming with
+		monitors.
+
+		--QUESTION: how does this apply to the example on the
+		handout?
+		    --Only one thread can manipulate the buffer at a time
+		    (mutual exclusion constraint)
+		    --Producer must wait for consumer to empty slots if all
+		    full (scheduling constraint)
+		    --Consumer must wait for producer to fill slots if all
+		    empty (scheduling constraint)
+
+	    3. Create a lock or condition variable corresponding to each 
+	    constraint 
+
+		--QUESTION: how does this apply to the example on the
+		handout?
+		    --Answer: need a lock and two condition variables.
+		    (lock was sort of a given from the fact of a monitor).
+	     
+	    4. Write the methods, using locks and condition variables for 
+	    coordination  
+	
+
+    D. More advice
+
+	1. Don't manipulate synchronization variables or shared state
+	variables in the code associated with a thread; do it with the
+	code associated with a shared object.  
+      
+	    --Threads tend to have "main" loops. These loops tend to
+	    access shared objects. *However*, the "thread" piece of it
+	    should not include locks or condition variables. Instead,
+	    locks and CVs should be encapsulated in the shared objects.
+
+	    --Why?
+
+		(a) Locks are for synchronizing across multiple threads.
+		Doesn't make sense for one thread to "own" a lock.
+
+		(b) Encapsulation -- details of synchronization are
+		internal details of a shared object. Caller should not
+		know about these details.  "Let the shared objects do
+		the work."
+
+	    --Common confusion: trying to acquire and release locks
+	    inside the threads' code (i.e., not following this advice).
+	    Bad idea! Synchronization should happen within the shared
+	    objects. Mantra: "let the shared objects do the work".
+	
+	    --Note: our first example of condition variables --
+	    handout04, item 2b -- doesn't actually follow the advice, but
+	    that is in part so you can see all of the parts working
+	    together.
+
+	2. Different way to state what's above:
+	
+	    --You want to decompose your problem into objects, as in
+	    object-oriented style of programming.
+
+	    --Thus:
+
+	       (1) Shared object encapsulates code, synchronization 
+		   variables, and state variables 
+
+               (2) Shared objects are separate from threads 
+
+
+3. Practice with concurrent programming
+
+    --sleeping barber question (HW4). use it as practice.
+    
+        side note: (definition of practice when it comes to technical
+        work = trying it on your own WITHOUT looking at the solution.)
+
+    --we guarantee to test concurrent programming in this course
+
+    --today, we work a different example:
+
+	--workers interact with a database
+	    --motivation: banking, airlines, etc.
+
+	--readers never modify database
+
+	--writers read and modify data
+
+	--using only a single mutex lock would be overly restrictive.
+	Instead, want
+	    --many readers at the same time
+	    --only one writer at a time
+
+    --let's follow the concurrency advice .....
+
+	    1. Getting started
+		a. what are units of concurrency? [readers/writers]
+		b. what are shared chunks of state? [database]
+		c. what does the main function look like?
+		    read() 
+			check in -- wait until no writers
+			access DB
+			check out -- wake up waiting writer, if appropriate
+
+		    write()
+			check in -- wait until no readers or writers
+			access DB
+			check out -- wake up waiting readers or writers
+
+	    2. and 3. Synchronization constraints and objects
+
+		--reader can access DB when no writers (condition:
+		okToRead)
+
+		--writer can access DB when no other readers or writers
+		(condition: okToWrite)
+
+		--only one thread manipulates shared variables at a
+		time. NOTE: **this does not mean only one thread in the
+		DB at a time** (mutex)
+
+    
+	    4. write the methods
+
+		--inspiration required:
+		    int AR = 0; // # active readers
+		    int AW = 0; // # active writers
+		    int WR = 0; // # waiting readers
+		    int WW = 0; // # waiting writers
+	
+		--see handout for the code
+
+    --QUESTION: why not just hold the lock all the way through "Execute
+    req"? (Answer: the whole point was to expose more concurrency,
+    i.e., to move away from exclusive access.)
+
+    --QUESTION: what if we had shared locks? The implementation of
+    shared locks is given on the handout
+
+4. Implementation of mutexes
+
+    Going to continue to assume sequential consistency...
+
+    How might we provide the lock()/unlock() abstraction?
+
+    (a) Peterson's algorithm....
+
+        --...solves critical section in that it satisfies mutual
+        exclusion, progress, bounded waiting
+
+        --but expensive (busy waiting), requires number of threads to be
+        fixed statically, and assumes sequential consistency
+
+        --(see a textbook)
+
+    (b) disable interrupts?
+
+        --works only on a single CPU
+
+        --cannot expose to user processes
+
+    (c) spinlocks
+
+        --see handout
+
+            * buggy approach: what's wrong with this?
+
+            * non-buggy approach: why does this work?
+
+        --works in multi-CPU environment
+
+        --but issue: a spinlock is no good for cases when
+        time-to-acquire-lock expected to be long (for example, waiting
+        for disk accesses to complete). this is because of busy waiting
+        and the fact that waiting chews cycles that could have been
+        spent on another task (in the kernel or in user space).
+
+        --for more about spinlocks in Linux, see:
+            https://www.kernel.org/doc/Documentation/locking/spinlocks.txt
+
+        --NOTE: the spinlocks that we presented (test-and-set, or
+        test-and-test-and-set) can introduce performance issues when
+        there is a lot of contention. These performance issues arise
+        even if the programmer is using spinlocks correctly. The
+        performance issues result from cross-talk among CPUs (which
+        undermines caching and generates traffic on the memory bus). If
+        we have time later, we will study a remediation of this issue
+        (or search the Web for "MCS locks").
+        
+        --In everyday application-level programming, spinlocks will not
+        be something you use. Mainly matters inside kernel. But you
+        should know what these are for technical literacy, and to see
+        where the mutual exclusion is truly enforced on modern hardware.
+
+    (d) mutexes: spinlock + a queue
+
+        --textbook describes one implementation
+
+        --see handout for another
+
+5. Deadlock 
+
+    --simple example based on two locks
+
+
+
+[thanks to David Mazieres and Mike Dahlin for content in portions of
+this lecture.]
+
+6. Semaphores
+
+    --Advice: don't use these. We're mentioning them only for
+    completeness and for historical reasons: they were the first
+    general-purpose synchronization primitive, and they were the first
+    synchronization primitive that Unix supported.
+
+    --Introduced by Edsger Dijkstra in late 1960s
+    
+    --Semaphore is initialized with an integer, N
+
+    --Two functions:
+	--Down() and Up() [also known as P() and V()]
+	--The guarantee is that Down() will return only N more times
+	than Up() is called
+	--Basically a counter that, when it reaches 0, causes a thread
+	to sleep()
+
+    --Another way to say the same thing:
+	--Semaphore holds a count
+	--Down() is an atomic operation that waits for the count to
+	become positive; it then decrements the count by 1
+	--Up() is an atomic operation that increments the count by 1 and
+	then wakes up a thread waiting on Down(), if any
+
+    --Reasons we recommend against their use:
+	--semaphores are dual-purpose (for mutual exclusion and
+	scheduling constraints), so hard to read code and hard to get
+	code right
+	--semaphores have hidden internal state
+	--getting a program right requires careful interleaving of
+	"synchronization" and "mutex" semaphores
+    
+    --(In this class, we require you to use condition variables and
+    mutexes; semaphores will be considered incorrect.)
+

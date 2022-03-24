@@ -1,0 +1,176 @@
+general file system
+os 39 - 42
+
+most important:
+os 40
+
+
+
+inode.c
+fs_types.h
+
+if vagrant ssh failed
+vagrant reload
+
+FUSE = filesystem in userspace
+FUSE driver is associated with a particular directory,
+mount point
+os525: mount = paste a new file system onto
+the directory tree at that point
+
+For any file greater than 40KB,
+an additional disk block,
+called the file's indirect block,
+holds up to 4096/4 = 1024 additional block numbers,
+pushing the maximum file size up to (10 + 1024)*4096 = 4136KB
+
+BLKSIZE = 4096
+size 
+
+(total bits in disk)/(# bits in a block) = number of blocks
+
+
+each bitmap entry is a 32 bit integer
+the integer represent whether a disk block is free or not
+
+
+callback: way to implement syscalls
+inode read, implement read syscalls
+
+writing ((char *)file)[5] = 3 
+is approximately equivalent to the two calls
+lseek(fd, 5, SEEK_SET) 
+and then
+write(fd, <location of memory that holds byte 3>, 1)
+
+
+fs_types.h
+a block is allocated iff its value is != 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--
+int
+inode_block_walk(struct inode *ino, uint32_t filebno, uint32_t **ppdiskbno, bool alloc)
+{
+	// LAB: Your code here.
+	int alloc_b = 0;
+	if(alloc)
+	{
+		alloc_b = alloc_block();
+	}
+
+	if(filebno < N_DIRECT)
+	{
+		*ppdiskbno = diskaddr(ino->i_direct[filebno]);
+		free_block(*ppdiskbno);
+	}
+
+	else if((filebno < N_DIRECT + N_INDIRECT) && (alloc_b == -ENOSPC))
+	{
+		return -ENOSPC;
+	}
+
+	else if((filebno < N_DIRECT + N_INDIRECT) && alloc)
+	{
+		*ppdiskbno = diskaddr(ino->i_indirect) + (filebno - N_DIRECT);
+		free_block(*ppdiskbno);
+	}
+
+	else if((filebno < N_DIRECT + N_INDIRECT + N_DOUBLE) && alloc)
+	{
+		*ppdiskbno = diskaddr(ino->i_double) + (filebno - N_DIRECT - N_INDIRECT);
+		free_block(*ppdiskbno);
+	}
+
+	else if((filebno < N_DIRECT + N_INDIRECT) && alloc == 0)
+	{
+		return -ENOENT;
+	}
+
+	else if(filebno >= N_DIRECT + N_INDIRECT + N_DOUBLE)
+	{
+		return -EINVAL;
+	}
+
+	return 0;
+	//panic("inode_block_walk not implemented");
+}
+
+
+
+
+
+
+
+
+
+
+removed free_block() in allocate_helper,
+because alloc_block has flush 
+
+BLKSIZE/sizeof(uint32_t) = 4096/4 = 1024
+
+data are leafs of inode structure
+
+
+
+
+dir.c
+walk_path
+// If we cannot find the file but find the directory it should be in,
+// set *pdir and copy the final path element into lastelem.
+
+
+
+
+
+
+
+
+如果filebno < N_DIRECT + N_INDIRECT + N_DOUBLE的话, 是不是只有3种情况
+1. allocate 1 个 i_double block和 1个 i_indirect 
+2. 只allocate一个i_indirect
+3. 什么都不allocate
+
+
+
+
+这么访问一个double indirect block对吗
+		int remain = filebno - N_DIRECT - N_INDIRECT;
+		uint32_t * ptr = diskaddr(find_slot_double(ino, filebno));
+		*ppdiskbno = ptr + (remain % N_INDIRECT);
+
+uint32_t find_slot_double(struct inode * ino, u_int32_t filebno)
+{
+	int remain = filebno - N_DIRECT - N_INDIRECT;
+	uint32_t * ptr = (uint32_t *)diskaddr(ino->i_double);
+	return ptr[remain / N_INDIRECT];
+}
+
+
+
+
+
+debug
+inode.c
+in inode_read:
+printf("233 buf is: %s\n", (char *)buf);
+before return

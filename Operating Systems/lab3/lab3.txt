@@ -1,0 +1,242 @@
+since i have an extra clone inside cs202
+go deeper inside labs
+get to use
+$ git fetch upstream
+$ git merge upstream/main
+
+vagrant@bullseye:~/cs202/labs-21fa-XiLiu13$ ls
+README.md  lab1  lab2  lab3
+
+then go to github laptop
+1. fetch origin
+2. pull origin
+
+
+---
+grep:
+https://www.gnu.org/software/grep/manual/grep.html#Generic-Program-Information
+
+
+wildcard 
+https://tldp.org/LDP/GNU-Linux-Tools-Summary/html/x11655.htm
+
+deduct a large number of points
+from any project that uses sleep
+when it should wait on a condition variable.
+
+To see a concrete example, run the following command:
+
+$ grep "void" sthread.h
+grep scans the file sthread.h
+and prints out each line that contains the term void.
+You should get the following output:
+
+There will be one queue for all customer threads 
+and one queue for all supplier threads
+
+
+
+
+
+
+
+There will be one queue for all customer threads
+and one queue for all supplier threads.
+This task queue must allow for multiple worker
+threads to simultaneously attempt to add
+or remove jobs while still maintaining the
+integrity of the queue's internal data structures
+by using locks (i.e., your task queue must be thread-safe)
+
+
+
+taskqueue()
+create locks and condition variables
+to make it thread-safe
+
+
+
+
+process : running program
+thread : 1 point of execution
+
+1. i/o intensive
+2. multiple cpu, modern computer
+
+
+multi-process (book more cpus or classrooms):
+cs, math, literature
+3 classrooms, 1 topic 1 classroom
+(econ: decorate room as good as possible, disregard cost)
+
+
+multi-thread:
+make cpu busy all the time
+share same room
+(econ: spend all the money that you have)
+
+		multi-process	multi-thread
+data sharing	hard		easy
+synchronization	easy		hard
+utilization of cpu	low		high
+creation & switch	hard		easy
+program & debug	easy		hard
+reliability		high		low
+
+
+
+allocate new process, a lot of stuff from scratch
+new thread, share address space
+
+the bad of 1 thread affect all other threads
+
+
+
+initialize mutex & condition variable
+mutex_t
+cond_t
+mutex_lock
+mutex_unlock
+cond_wait, let other thread to move on
+cond_broadcast, unblock all threads currently
+blocked on the specified condition variable cond
+//above functions abstracted by header file
+<sthread.h>
+init
+destroy
+
+
+
+
+
+T.A.
+lock(&m) //1.
+while(ready == false) //2. shared var
+{ wait(&cv, &m) } //3.
+unlock(&m)
+
+
+T.B.
+ready = true
+signal(&cv, &m)
+
+//between 2 and 3, T.B. execute, signaled (unblock), then wait
+//wait forever
+//fix is add lock and unlock to T.B.
+
+
+
+
+
+
+ctrl + shift + p 
+> enable error squiggles
+
+
+
+size variable has the same
+name with size() function,
+so this is not allowed
+
+
+
+
+
+EStore:
+items, shipping price, discount 
+//use mutex to track changes here
+
+buyers buy items (when buy, must read & write)
+suppliers supply items
+
+task generator
+task queue
+1 queue for supplier
+1 queue for buyer
+
+lock first before enqueue, dequeue
+
+
+
+estoresim.cpp
+startSimulation(int maxTasks)
+maxTasks is the max number of elements want to put in the queue,
+not the max size of queue
+
+
+thread_join at the very end b/c we want the threads to
+execute at the same time
+if join immediately after create,
+then 1 thread execute after another
+
+
+
+
+
+
+You should implement the EStore as a monitor;
+that is, there should be a single lock on the entire store,
+which is acquired upon entering any of the store's 
+methods and released upon exit
+
+
+
+
+
+cannot call mutex_lock and mutex_lock
+then it will stuck
+so cannot use removeItem in buyItem
+
+enqueueStops?
+EStore.cpp : addStock , wake any waiters?
+	    priceItem, wake?
+in supplier estoresim.cpp
+it was t.handler(t.arg) //from gao
+
+
+should i put stuff in destructors?
+buyManyItems?
+
+
+
+--
+cannot vagrant up
+cd base-image
+vagrant halt
+vagrant ssh-config &> vagrant.log
+vagrant up &> vagrant.log
+cat vagrant.log
+vagrant ssh
+--
+
+internet issue:
+cd base-image
+vagrant halt
+vagrant up; vagrant ssh
+
+
+--
+EStore buyManyItems
+cannot check in a loop whether it is valid,
+then purchase the item
+because the conditions of things can change across time
+
+
+
+
+---
+extra credit = 5% of lab
+
+
+---
+because size() and empty() are private methods
+only public methods should be protected by mutex
+private methods are called by blocks of code that 
+are already protected by mutex
+
+---
+enqueue
+broadcast or signal?
+is my item->access valid?
+
+对到removeItem EStore.cpp

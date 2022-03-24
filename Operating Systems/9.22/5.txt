@@ -1,0 +1,367 @@
+Class 5
+CS 202
+22 September 2021
+
+On the board
+------------
+
+1. Last time
+2. Intro to concurrency, continued
+3. Managing concurrency
+4. Mutexes
+5. [next time] Condition variables
+6. Semaphores
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    - process birth
+    - shell 
+    - file descriptors
+    - more shell
+    - processes: the OS's view
+    - intro to threads
+    - began intro to concurrency
+
+2. Intro to concurrency, cont'd
+
+    --handout:
+
+        1a:  x = 1 or x = 2.
+        1b:  x = 13 or x = 25.
+        1c:  x = 1 or x = 2 or x = 3 
+
+            say x is at mem location 0x5000
+
+            f is "x = x+1;", which might compile to:
+
+            movq 0x5000, %rbx    # load from address 0x5000 into register
+            addq $1, %rbx        # add 1 to the register's value
+            movq %rbx, 0x5000    # store back
+
+
+            g is "x = x+2;", which might compile to:
+
+            movq 0x5000, %rbx    # load from address 0x5000 into register
+            addq $2, %rbx        # add 2 to the register's value
+            movq %rbx, 0x5000    # store back
+
+
+        2: incorrect list structure
+
+        3: incorrect count in buffer
+
+        all of these are called race conditions; not all of them are
+        errors, though
+
+        --worst part of errors from race conditions is that a program
+        may work fine most of the time but only occasionally show
+        problems. why?  (because the instructions of the various threads
+        or processes or whatevever get interleaved in a
+        non-deterministic order.)
+
+        --and it's worse than that because inserting debugging code may
+        change the timing so that the bug doesn't show up
+
+
+    --hardware makes the problem even harder
+
+        [look at panel 4, handout03; what is the correct answer?]
+
+        [answer: "it depends on the hardware"]
+
+        --sequential consistency not always in effect
+
+        --sequential consistency means:
+
+            --maintain program order on individual processors
+
+            --ensuring that writes happen to each memory location
+            (viewed separately) in the order that they are issued
+
+    --Memory consistency: what's the point?
+
+        - On multiple CPUs, we can get "interleavings" _that are
+        impossible on single-CPU machines_. In other words, the number
+        of interleavings that you have to consider is _worse_ than
+        simply considering all possible interleavings of sequential
+        code.
+
+        - explain why: caching, compiler reordering, ...
+
+
+    --assume sequential consistency until we explicitly relax it
+
+
+
+3. Managing concurrency
+
+    * critical sections
+    * protecting critical sections
+    * implementing critical sections
+
+    --step 1: the concept of *critical sections*
+
+        --Regard accesses of shared variables (for example, "count" in
+        the bounded buffer example) as being in a _critical section_
+
+        --Critical sections will be protected from concurrent execution
+
+	--Now we need a solution to _critical section_ problem
+
+	--Solution must satisfy 3 properties:
+
+	    1. mutual exclusion
+		only one thread can be in c.s. at a time		
+                [this is the notion of atomicity]
+
+	    2. progress
+		if no threads executing in c.s., one of the threads
+		trying to enter a given c.s. will eventually get in
+		
+	    3. bounded waiting
+		once a thread T starts trying to enter the critical
+		section, there is a bound on the number of other threads
+		that may enter the critical section before T enters
+
+	--Note progress vs. bounded waiting 
+
+	    --If no thread can enter C.S., don't have progress 
+
+	    --If thread A waiting to enter C.S. while B repeatedly
+	    leaves and re-enters C.S. ad infinitum, don't have bounded
+	    waiting 
+
+        --We will be mostly concerned with mutual exclusion (in fact,
+        real-world synchronization/concurrency primitives often don't
+        satisfy bounded waiting.)
+
+    --step 2: protecting critical sections. 
+
+        --want lock()/unlock() or enter()/leave() or acquire()/release()
+
+	    --lots of names for the same idea
+
+	    --mutex_init(mutex_t* m), mutex_lock(mutex_t* m),
+	    mutex_unlock(mutex_t* m),....
+
+	    --pthread_mutex_init(), pthread_mutex_lock(), ...
+
+	--in each case, the semantics are that once the thread of
+	execution is executing inside the critical section, no other
+	thread of execution is executing there
+
+    --step 3: implementing critical sections
+
+        --"easy" way, assuming a uniprocessor machine: 
+
+            enter() --> disable interrupts
+            leave() --> reenable interrupts
+
+            [convince yourself that this provides mutual exclusion]
+
+        --we will study other implementations later. for now, focus
+        on the use
+
+
+4. Mutexes
+
+    --using critical sections
+        
+        --linked list example
+
+        --bounded buffer example
+
+    --why are we doing this?
+
+        --because *atomicity* is required if you want to reason about
+        code without contorting your brain to reason about all possible
+        interleavings
+
+        --atomicity requires mutual exclusion aka a solution to critical
+        sections
+
+        --mutexes provide that solution
+
+        --once you have mutexes, don't have to worry about arbitrary
+        interleavings. critical sections are interleaved, but those are
+        much easier to reason about than individual operations.
+
+        --why? because of _invariants_.
+
+            examples of invariants:
+
+            "list structure has integrity"
+
+            "'count' reflects the number of entries in the buffer"
+
+        the meaning of lock.acquire() is that if and only if you get
+        past that line, it's safe to violate the invariants.
+
+        the meaning of lock.release() is that right _before_ that line,
+        any invariants need to be restored.
+
+        the above is abstract.
+
+        let's make it concrete:
+
+            invariant: "list structure has integrity"
+
+            so protect the list with a mutex
+
+            only after acquire() is it safe to manipulate the list
+
+    --by the way, why aren't we worried about *processes* trashing each
+    other's memory? (because the OS, with the help of the hardware,
+    arranges for two different processes to have isolated memory space.
+    such isolation is one of the uses of virtual memory, which we will
+    study in a few weeks.) 
+
+
+5. Condition variables
+
+    A. Motivation
+
+        --producer/consumer queue 
+
+	    --very common paradigm. also called "bounded buffer":
+
+	        --producer puts things into a shared buffer
+	        --consumer takes them out
+	        --producer must wait if buffer is full; consumer must
+	          wait if buffer is empty
+	        --shows up everywhere
+		    --Soda machine: producer is delivery person, consumer
+		        is soda drinkers, shared buffer is the machine
+		    --OS implementation of pipe()
+		    --DMA buffers
+                
+	--producer/consumer queue using mutexes (see handout04, 2a)
+
+	    --what's the problem with that?
+
+	    --answer: a form of *busy waiting* 
+
+	--It is convenient to break synchronization into two types:
+
+	    --*mutual exclusion*: allow only one thread to access a given
+	    set of shared state at a time
+
+	    --*scheduling constraints*: wait for some other thread to do
+	    something (finish a job, produce work, consume work, accept
+	    a connection, get bytes off the disk, etc.)
+
+
+    B. Usage
+
+	--API
+
+	    --void cond_init (Cond *, ...); 
+		--Initialize
+
+	    --void cond_wait(Cond *c, Mutex* m);
+		--Atomically unlock m and sleep until c signaled 
+		--Then re-acquire m and resume executing 
+
+	    --void cond_signal(Cond* c);
+		--Wake one thread waiting on c
+
+		[in some pthreads implementations, the analogous
+		call wakes *at least* one thread waiting on c. Check the
+		the documentation (or source code) to be sure of the
+		semantics. But, actually, your implementation shouldn't
+		change since you need to be prepared to be "woken" at
+		any time, not just when another thread calls signal().
+		More on this below.]
+
+	    --void cond_broadcast(Cond* c);
+		--Wake all threads waiting on c
+
+    C. Important points
+
+        (1) We MUST use "while", not "if". Why?
+
+	    --Because we can get an interleaving like this:
+
+	        --The signal() puts the waiting thread on the ready list
+	        but doesn't run it
+
+	        --That now-ready thread is ready to acquire() the mutex
+	        (inside cond_wait()).
+
+	        --But a *different* thread (a third thread: not the
+	        signaler, not the now-ready thread) could acquire() the
+	        mutex, work in the critical section, and now invalidates
+	        whatever condition was being checked
+
+	        --Our now-ready thread eventually acquire()s the
+	        mutex...
+
+	        --...with no guarantees that the condition it was
+	        waiting for is still true
+	        
+	    --Solution is to use "while" when waiting on a condition
+	    variable
+
+	    --DO NOT VIOLATE THIS RULE; doing so will (almost always)
+	    lead to incorrect code
+
+            --NOTE: NOTE: NOTE: There are two ways to understand
+            while-versus-if:
+            (a) It's the 'while' condition that actually guards the program.
+            (b) There's simply no guarantee when the thread comes out of
+            wait that the condition holds. 
+        
+        (2) cond_wait releases the mutexes and goes into the waiting
+        state in one function call (see panel 2b of handout 04). 
+
+            --QUESTION: Why?
+
+	    --Answer: can get stuck waiting.
+
+	        Producer: while (count == BUFFER_SIZE)
+	        Producer: release()
+	        Consumer: acquire()
+	        Consumer: .....
+	        Consumer: cond_signal(&nonfull)
+	        Producer: cond_wait(&nonfull)
+
+	    --Producer will never hear the signal!
+
+6. Semaphores
+
+    --Advice: don't use these. We're mentioning them only for
+    completeness and for historical reasons: they were the first
+    general-purpose synchronization primitive, and they were the first
+    synchronization primitive that Unix supported.
+
+    --Introduced by Edsger Dijkstra in late 1960s
+    
+    --Semaphore is initialized with an integer, N
+
+    --Two functions:
+	--Down() and Up() [also known as P() and V()]
+	--The guarantee is that Down() will return only N more times
+	than Up() is called
+	--Basically a counter that, when it reaches 0, causes a thread
+	to sleep()
+
+    --Another way to say the same thing:
+	--Semaphore holds a count
+	--Down() is an atomic operation that waits for the count to
+	become positive; it then decrements the count by 1
+	--Up() is an atomic operation that increments the count by 1 and
+	then wakes up a thread waiting on Down(), if any
+
+    --Reasons we recommend against their use:
+	--semaphores are dual-purpose (for mutual exclusion and
+	scheduling constraints), so hard to read code and hard to get
+	code right
+	--semaphores have hidden internal state
+	--getting a program right requires careful interleaving of
+	"synchronization" and "mutex" semaphores
+    
+    --(In this class, we require you to use condition variables and
+    mutexes; semaphores will be considered incorrect.)
+

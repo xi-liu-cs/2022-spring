@@ -1,0 +1,428 @@
+Class 1
+CS 202
+08 September 2021
+
+On the board
+------------
+
+CS202(-001): Operating Systems
+Instructor: Michael Walfish
+TAs: 
+http://www.cs.nyu.edu/~mwalfish/classes/21fa
+
+1. Introduction and goals
+2. What is an operating system? 
+3. Why study systems?
+4. How will we study systems?
+5. Mechanics and admin
+6. History 
+
+---------------------------------------------------------------------------
+
+[START RECORDING]
+
+1. Introduction and goals
+
+    --Hello
+	
+    --Introduce TAs
+
+    --Class goals
+
+        a. learn how systems, especially operating systems, work
+
+        b. learn abstractions and concepts in operating systems...
+
+	c. ... which will be useful beyond OSes (other large-scale
+	systems, etc.)
+
+2. What is an operating system? 
+
+    [draw picture of hardware (memory, CPU, disk, I/O), OS, user-level
+    programs]
+
+    [OS includes OS services: processes, virtual memory, file system
+    (file contents, directories and file names), security, networking,
+    inter-process communication, time, terminals, etc.]
+
+    --Purpose of OS: provide services to user-level programs
+
+    --Definition: An operating system creates, for processes, a machine
+    that is easier to program than the raw hardware would be.
+
+    --this software is classically described as doing two things:
+
+	1. managing the resources of the machine 
+	    --example: scheduling -- give every process some of the CPU
+            --example: virtual memory: give every process some physical memory
+
+       	    resource management means that one bad program doesn't
+	    screw up another. OS does:
+	        --multiplexing
+	        --isolation, protection
+	        --sharing
+
+   
+	2. abstracting the hardware 
+	    --hide details of hardware (OS gets dirty; programmers don't)
+            --hardware is nasty to program directly!
+                --consider what is involved in getting things to the disk.....
+ 
+           this provides essential convenience and portability.
+
+	    you really don't want applications to have to program the
+	    bare hardware
+		--would lead to lots of repeated code
+		--and unclear how to run more than one application at
+		once, particularly more than one that are mutually
+		distrustful.
+
+        other modern relevance: such abstraction also allows the operating
+        system to make changes to the underlying hardware without impacting
+        applications. For example, as you walk around browsing the internet
+        on a phone, your phone is switching between WiFi and cellular networks.
+        By abstracting away details of the network, applications are entirely
+        unaware of this switch and it appears seamless. Similarly, laptops will
+        switch between two GPUs in order to save power when using a battery.
+        Abstracting the hardware ensures that applications do not need to be
+        modified when adopting such techniques.
+	    
+    --what are examples of managing resources and providing abstractions?
+
+        file systems, I/O, memory, scheduling
+
+        * file systems:
+
+	        --abstraction: illusion file is continuous array of
+	        bytes; it's not
+
+		    fd = open("/tmp/foo", WR_ONLY)
+		    rc = write(fd, "abc...z", 26)
+
+		    abstractions here:
+		        --files
+		        --file descriptors
+		        --location of the file: applications can be
+		        entirely unaware of whether the file they are
+		        writing to goes on a hard disk inside the computer,
+		        a USB stick attached to the computer, a remote
+		        storage service like Dropbox or iCloud, etc.
+
+	        --isolation: user program can't write to a file unless
+	        it has permission. 
+
+	            in some cases, for example, smart phones, the system
+	            goes even further and gives each application the
+	            impression that it is the only one who can change the
+	            file system. This has become particularly important in
+	            order to ensure that applications cannot stomp on each
+	            other's data, and reduce the kinds of errors the
+	            programmer must consider when writing programs.
+
+        * text input:
+            -- abstraction: illusion that input, whether coming
+            from a soft keyboard displayed on a touch screen, a
+            physical keyboard, or things like Braille keyboard all
+            act the same. Programs are unaware of your input method.
+            (Ultimately looks like a file.)
+
+            -- isolation: need to ensure that keystrokes go to a single
+            program. Particularly important when entering sensitive inputs
+            such as passwords. Modern operating systems provide isolated
+            text entry paths just to avoid leaks for this input.
+
+        * memory:
+       
+       	    movl 0x1248, %rdx   [means "get contents of 0x1248 and put in %rdx"]
+       
+       	    --abstraction: user program thinks it is reading from
+       	    0x1248; it is not
+       
+       		--more generally, user program thinks it has a linear,
+       		contiguous address space; it does not
+       
+       	    --isolation: user program can't write to another user's
+       	    memory
+       
+
+        * scheduling:
+
+	       --abstraction: process has the illusion that it is running
+	       continuously; it is not
+
+	       --isolation: user program that is hogging CPU gets switched
+	       out in favor of another user's program
+
+
+	       ***these are different points*** 
+		   --you could imagine telling the user program that it was
+		   getting switched out
+
+
+3. Why study systems?
+
+    "C? x86-64? My Future Is In Deep Learning!"
+
+    TPU example. If you want to have impact in the best places, you need
+    to understand systems.
+
+    "Doing systems means being at ease with the machine" --Brad Karp
+
+    a. It's essential to know "how things work."
+
+	-- doesn't matter what types of programs you work on,
+	knowing what is happening under the hood is essential to
+	debugging and improving performance. If you are building
+	phone applications, understanding what is going on in the OS
+	helpful with improving performance and battery life. If you
+	are using DNNs (deep neural networks), some of the concerns from
+	OSes impact how you batch things, how you schedule, etc.
+
+    b. The ideas are everywhere: resource management and abstraction,
+    for example.
+
+    c. There are design trade-offs that are fundamental
+
+	--between performance and simplicity
+	--between putting functions in hardware or software
+
+	--code must be efficient (so low-level?) ...
+	--...but abstract/portable (so high-level?)
+
+	--code must be powerful (so many features?)
+	--...but simple (thus a few composable building blocks?)
+
+	--another trade-off: between security and convenience
+
+	--and there are difficult interactions:
+	    --among features 
+	    --among behaviors: scheduler and memory allocator
+
+	--etc.
+
+    d. There are still unsolved problems!
+
+	--OS security remains a problem area. people defend their
+	operating systems by deploying firewalls.
+
+	--multicore: yes, the operating systems run, but there's an
+	argument that perhaps the abstractions should be different
+	(interaction between caches and address space abstractions)
+
+    e. Skills building
+
+	--the environment can be unforgiving (can have weird h/w, no
+	debugger, ...)
+	--this helps you get better
+
+
+4. How will we study (operating) systems?
+
+    a. Learn how stuff works
+        --sometimes through case studies
+
+    b. Learn specific techniques 
+	--time-tested solutions to hard problems
+	--avoid "hacks"
+        --examples: concurrent programming, journaling
+
+    c. Learn how to approach problems   
+	--fundamental issues
+	--concept of a design space
+
+    d. not a priority: details of deployed OSes (e.g., details of
+    Linux), but we may sometimes use these as examples
+
+    e. this class: lots of discussion of OS/HW boundary and
+    process/OS boundary (interfaces). Less attention to detailed
+        implementation of OS.
+
+5. Mechanics and admin
+
+    [write on the board]
+
+        communication
+
+           us-to-you: 3 ways:
+
+	        Web page: check this every day
+
+	        Campuswire (required)
+
+	        email
+
+            you-to-us:
+
+                Campuswire for course work
+
+                staff email list for admin/sensitive things
+
+	components of the course:
+	    --lectures 
+	    --labs 
+	    --exams
+	    --reading
+	    --homeworks
+
+	grading 
+
+	policies
+
+    --lectures: 
+
+	--please ask questions
+
+        --[scribbletogether]
+            
+	--before class: lecture notes online
+	--during class: scribble in real-time, you can scroll back, jump around
+	--after class: scribble posted
+
+    --labs: 
+
+	--key piece of the course
+
+        --one of our labs will be a miniOS that boots on real hardware
+
+        --labs could/should actually be fun 
+
+        --often: not much code to write (but lots to learn!)
+
+        --I used to tell students, "Start early". Now I say, "Start on
+        time".
+
+	--Regardless, you need to allocate time. 
+
+	--I'm expecting you to feel challenged by the labs. The concept
+	of "no pain, no gain" applies to learning. let's dive into
+	that...
+       
+            --The building of systems cannot be learned by lecture or
+            reading a textbook, nor by reading others' code.
+
+            --Indeed, programming is where the real learning happens,
+            that's the whole point
+
+            --Independent effort is essential
+
+            --Debugging is hard and time-consuming, but it's an
+            essential skill
+ 
+            --Only by producing working solution code yourself (without
+            looking at others’ solution code) will you learn to build
+            systems that solve problems you haven't seen before
+                (the blind alleys may feel like wasted time, but they
+                are teaching you how to avoid problems in the future,
+                how to be independent)
+
+            --Don't think of labs as having a grade.
+
+                (people sometimes think that they need to get all the points, they
+                get frustrated with the staff and TAs for not telling them how
+                to get the points. But that misunderstands the purpose.)
+
+                The purpose is to cause you to learn.
+                    [compare to exams: personal growth rare on an exam]
+
+
+        ----
+
+
+    --exams:
+        ad-hoc quizzes
+        midterm (10/27/21)
+        final
+	
+    --reading: see course page 
+
+    --homeworks: see course page
+
+    --recitation/review: see course page
+
+    --grading:
+        see course page.
+
+    --policies: 
+
+        --based on the survey replies, there appears to be some
+        confusion. Which of these is okay?
+
+            Handing in a classmate's solution 
+
+            Looking at a classmate's solution and then coding it by yourself afterward
+
+            Showing your code to a classmate who has questions
+
+            Modifying code that you find on StackExchange
+
+            Modifying code for a similar assignment that you find on GitHub
+
+            Looking at code for a similar assignment on GitHub, but not taking notes, and then coding it by yourself afterward
+    
+        The correct answer: ALL of these are ruled out by the policy.
+ 
+    --Please see the Web page, and let me say here:
+
+        -The collaboration and academic integrity policy is real
+
+             here's what's happened in prior years... 
+
+        --help on the labs: please ask for help, but please make sure
+        that you've really thought through your question on your own.	
+
+6. Abridged history of OSes
+
+    --We'll begin the story with Unix, but operating systems go back
+    earlier.
+   
+    --Unix: 1969 to early 1970s: Unix 
+        (from Thompson and Ritchie at Bell Labs)
+
+	--goal was to run on cheap hardware. PDP-7
+        https://en.wikipedia.org/wiki/Ken_Thompson#/media/File:Pdp7-oslo-2005.jpeg
+
+	--eventually got a PDP-11: only $40-$60k! 
+	    --> $250k-$375k in 2019 dollars
+
+            https://en.wikipedia.org/wiki/Ken_Thompson#/media/File:Ken_Thompson_(sitting)_and_Dennis_Ritchie_at_PDP-11_(2876612463).jpg
+
+	--small system: 9000 LOC
+
+        --no protection:
+            https://www.bell-labs.com/usr/dmr/www/odd.html
+
+    --Eventually, Thompson and Ritchie decide they need a new
+    programming language to write Unix in
+
+	--So C gets born
+
+    --Unix took over the world.
+
+	--Its abstractions are still in use everywhere
+
+	--(Which is arguably depressing)
+
+	--great example of a small number of mechanisms going very far
+	(high ratio of capabilities to mechanism)
+	
+	    a. stuff was added to Unix in the 1980s, at Berkeley
+
+	    b. Andy Tanenbaum: "System 7 was a dramatic improvement
+	    over its predecessors, and over its successors as well".
+
+    --Separate strand: in the 1970s, at Xerox PARC, people are trying to
+    build the personal computer....
+
+        --eventually led to the graphical interfaces and idioms we have today
+        (windowing systems, mouse, menus)
+
+        --hard to imagine why "personal computer" was revolutionary, but
+        keep in mind that when the PARC team started, telling someone
+        that you were going to build a personal computer was like
+        telling them that you would have a personal nuclear reactor
+
+	(computers were totally slow when they started, but those
+	designers knew that computers would be fast, so they started
+	building the thing people want and worried later about
+	performance)
+

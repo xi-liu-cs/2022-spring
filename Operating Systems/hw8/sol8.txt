@@ -1,0 +1,21 @@
+HW8 Solutions
+CS202, fall 2021
+
+1.1
+
+3 entries. The page size is 4096, so map1 consumes 2 entries, and map2
+consumes one entry.
+
+1.2
+
+2 pages. The 3 virtual pages map to two physical pages in the OS buffer
+cache.
+
+
+2. 
+
+Lay out the allocated memory so that the last legitimately allocated
+byte is on the last byte of the allocated page (this "wastes" the first
+part of a page).  Mark the next virtual page (past the array) as "not in
+use" (this does not cost physical memory), aka PTE_P=0. At that point,
+memory references past the end of the array will generate page faults.

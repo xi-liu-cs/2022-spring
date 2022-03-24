@@ -1,0 +1,18 @@
+110 minute exam
+2 two-sided sheets
+
+context switch
+yield()
+swtch(t1, t2)
+
+know value of stack pointer
+can determine back trace 
+
+t1 -> stack = %rsp
+%rsp = t2 -> stack
+
+int * q = (int *)&f
+*q = 2
+
+commit point after 
+records are fully logged

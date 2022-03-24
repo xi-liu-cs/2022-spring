@@ -1,0 +1,3 @@
+scheduling policies, disciplines
+
+processes running in the system = workload

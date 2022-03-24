@@ -1,0 +1,19 @@
+HW1 Solutions
+
+1.  
+    a = 1, b = 1, c = 2, d = 1
+
+    (Note that op1 modifies only the *local* copies of a,b.)
+
+2.
+    COMMENT1: a[0] = 0, a[1] = 10, a[2] = 100, a[3] = UNKOWN, a[4] = UNKOWN
+    COMMENT2: a[0] = 0, a[1] = 10, a[2] = 100, a[3] = 2, a[4] = 100 
+
+
+
+3. 
+   (1) Prevent user level processes from manipulating hardware
+   (2) Program will have good portability across machines
+   (3) Processes do not have to have redundant code
+
+	

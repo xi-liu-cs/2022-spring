@@ -1,0 +1,61 @@
+logging changes can be compact
+change log first, then change disk struct
+
+undo logging
+1. what would change
+2. where in log we can write it
+3. log changes || apply them to on disk data struct
+(log single entry before modification)
+4. write TxEnd (transaction endpoint)
+
+by applying the undo action
+
+undo operation
+can be idempotent
+
+
+commit point:
+write the transaction(ex: create file) end record
+
+each subaction in transaction is
+a separate entry in a log
+
+rpc Remote procedure call
+procedure call to a remote server
+http request
+
+nfs network file system
+a way for machine to talk to each other
+
+application dont know about nfs
+file read, write go over network
+
+
+buffer cache server can be faster than local disk seeks
+
+
+
+time vertical, space horizontal
+
+stateless of protocol
+
+cursor can be a per client state
+
+request is stateless
+simply failure recovery
+
+server do not need to keep track
+
+write() idempotent
+mkdir() not idempotent
+return error if directory names are the same
+
+
+no open() no close()
+because they maintain state 
+
+
+
+transparency
+FH = [FS ID |i# | g#]
+

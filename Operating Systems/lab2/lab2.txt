@@ -1,0 +1,58 @@
+location of folders in local:
+
+/cygdrive/c/users/DELL/documents/github/labs-21fa-XiLiu13
+which is also
+C:\Users\DELL\Documents\GitHub\labs-21fa-XiLiu13
+
+
+
+
+
+
+
+https://cs.nyu.edu/~mwalfish/classes/21fa/labs/lab2.html
+
+print one file per line
+ls -l
+
+Note the difference between ls and ./ls. 
+The first one is the “system-supplied” 
+ls (type $ which ls to see where this ls lives). 
+The second one is your ls. 
+The shell knows the difference because . means 
+the current directory
+
+
+
+
+deduce points for compile time warnings
+
+
+
+function_name (num) refers to a function (or syscall)
+documented at section num in the man pages
+
+readdir (3)
+
+
+ls
+	-lR
+	-a
+	-l
+	-R
+	-la
+	-al
+	--help
+
+
+
+
+
+https://www.redhat.com/sysadmin/ls-command-options
+
+
+
+
+
+
+gdb --args executablename arg1 arg2 ...

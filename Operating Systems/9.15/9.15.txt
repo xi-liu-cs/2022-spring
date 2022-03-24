@@ -1,0 +1,25 @@
+addq %rax, %rbx
+no intermediate process
+
+process
+os 
+cpu
+
+frame pointer: call preserved registers
+pointer : always address of memo, where the variable
+lives at
+
+example.c
+q = &x
+stack frame not used anymore, may be override anymore
+q refers to the address of dead stack
+
+with pointers, to provide illusion of returning multiple
+things
+
+kernel = os
+syscalls are api exposed to kernel
+not a function call
+program asking os to do sth
+
+$ man 2 open

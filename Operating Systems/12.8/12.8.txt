@@ -1,0 +1,85 @@
+last class to introduce new material
+
+110 minutes exam
+apply power to computer
+to type stuff on screen
+
+argc argv environment variable
+exec a command in child
+argv is 2d array
+
+blast away memory image
+
+binary has a file format
+start with magic number
+
+table that specify the memory layout
+
+mem protection for text segment
+readable, !writable, executable
+permission bits in page table
+mmap call
+
+wrapping file format
+specifying memory layout
+entry point:
+1st instruction to be executed
+
+loader sets instruction pointer
+start call
+
+https://www.geeksforgeeks.org/executing-main-in-c-behind-the-scene/
+
+
+get rid of previous mem with unmap
+
+
+rdi argc //1st arg
+rsi argv //2nd arg
+envp
+
+real mode 8086
+no paging, no address translation
+
+processor hard-wired
+copy from ROM -> RAM
+jump to known offset
+
+intel:
+if wrote software before, can be run in future
+backward compatibility commitment
+boot process on modern chip is ridiculous
+recapitulate history
+
+
+bios 
+uefi Unified Extensible Firmware Interface
+
+firmware is mini os
+configure hardware, set up service
+
+bootloader
+
+root is user id 0
+bypass checks
+init start running as root 
+pid is an id in process table
+
+
+2 os
+1. firmware 固件是一种嵌入在硬件设备中的软件
+2. kernel 内核
+
+qemu quick emulator
+
+
+
+monolithic vs microkernel
+
+monolithic
+1 address space
+
+microkernel
+several modules
+switch addr space is expensive
+every function call context switch

@@ -1,0 +1,56 @@
+linear accelerator
+bending magnets
+scanning magnet
+
+x-rays deeper, destroy tumor
+1. eletrons or photons
+field light mode
+
+
+			beam energy   beam current  beam modifier
+electron therapy		5-25MeV	       low                   scanning magnet
+x-ray, photon mode 	25MeV	       high		flattener
+field light mode		0	       none		mirror/none
+
+row 1 and row 2 with mirror/none beam modifier
+row 2 with scanning magnet beam modifier
+
+what can do wrong?
+1. operator typed too fast
+2. reuse code from old machine
+3. train operator to ignore
+4. lack of procedure to respond to procedures
+5. find some mistake and fix it
+	10^-9 probabilities number
+6. when machine detect issue, let people continue, in wrong mode
+7. no clear explanation of malfunction 54 message //10
+8. software dont have audit trial
+9. doctor's order does not match with operator's order
+
+only indication of problem is patient injury
+
+implement a interlock in hardware, when modes do not match
+
+therac-25
+cheaper, get rid of a component
+
+is the program invariant maintained?
+
+
+
+their pseudo code get extra stuff
+issue is high current not high energy
+
+threatening illness
+1/1000 chance machine leads to gruesome death
+
+
+inverse correlation of programmer's quality
+google:
+better programmer (better pay), 
+little consequence when error
+
+linear accelerator company:
+worse programmer, 
+big consequence when error
+

@@ -1,0 +1,138 @@
+Class 23
+CS 202
+29 November 2021
+
+On the board
+------------
+
+1. Last time 
+2. Stack smashing
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    Crash recovery
+    
+    NFS
+
+2. Stack smashing
+
+    --history
+
+      ETHICS. 
+
+    --('buffer overflow' is one way to conduct a stack smashing attack.)
+
+    --demo
+
+	[NOTE: fork/exec separation is what allows us to write tcpserve:
+	after the fork() but before exec() of buggy-server, child
+	rearranges its file descriptors to be the socket itself. Also,
+	this sample code gives you a chance to see sockets in action.]
+
+        --remote host runs server. as user "cs202 TA"
+
+	--my laptop runs honest client
+
+	--my laptop runs dishonest client
+
+
+    --note: if this server had been running as root, we'd have been able
+    to get a root shell
+
+	--or, if the user/syscall interface doesn't check its arguments
+	properly, can buffer overflow that interface to take over the
+	kernel.
+
+    --arms race:
+
+        --defenders create W ^ X policy (see below) so that memory
+        cannot be both writable and executable.
+
+            response: return-oriented programming (ROP)
+
+            [DRAW PICTURE]
+
+            smash the stack with a bunch of return addresses. each
+            return address points to the needed instruction followed by
+            "ret" (requires the attacker to have previously identified
+            these instructions in the code, so the assumption is that
+            the attacker has access to the source code or binary). not
+            too hard in CISC code like on x86, where there are lots of
+            sequences of code embedded in the binary, even sequences
+            that the programmer didn't mean (because instructions are
+            not fixed length). result: the control flow bounces around
+            all of these byte sequences in memory, executing exactly
+            what the attacker wanted, but not executing off of the
+            stack.
+
+	    defending against ROP is hard (though if people use only
+	    safe languages, that is, languages that do bounds checking
+	    and other pointer checks, such attacks will be much, much
+	    harder)
+
+
+        --ROP requires access to the source or binary, so maybe we can
+        just make sure that binaries don't fall into the hands of
+        attackers?
+
+            --Well, no that doesn't work either. The technique of
+            *Blind* Return-Oriented Programming (BROP), shows how to
+            conduct attacks even when the binary isn't available and
+            even on 64-bit machines. References:
+
+                http://www.scs.stanford.edu/brop/
+                http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=6956567
+                http://www.scs.stanford.edu/~sorbo/brop/bittau-brop.pdf
+
+
+        --other attacks:
+
+	    --overwriting function pointers
+
+	    --smashing the heap
+
+    --what is W ^ X? map the stack pages as non-executable, if the
+    hardware allows it. 
+
+	--Hardware these days allows it. We didn't use this bit in lab
+	4, but there's an NX bit in the page table entries. You
+	generally want to set that bit.
+	
+	--The bummer with W ^ X used to be this: some languages not only
+	don't need it but also are actively harmed by W ^ X. The core of
+	the issue is that a program written in a safe language (Perl,
+	Python, Java, etc.) does not need W ^ X whereas lots of C
+	programs do.  Meanwhile some machines *always* enforce W ^ X,
+	even for programs that do not need it. Such enforcement
+	constrains certain languages, namely those that need to do
+	runtime code generation.
+
+    --what about the defense of address space layout randomization
+    (ASLR)? This provides some help but obviously doesn't help our
+    vulnerable server because our server tells the client where the
+    buffer is.
+
+        --And on 32-bit systems, the randomness can be defeated
+        through brute force. There's only 20 bits of randomness
+        conceivable (the VPN bits), and ASLR implementations left
+        the top four alone, to avoid fragmenting VM.
+
+        --On 64-bit systems, this defense can be defeated, if the server
+        simply reforks children instead of restarting. See the BROP
+        paper (referenced above)
+
+    --what about the defense of canary values near the return address?
+    StackGuard (in gcc), PaX, etc.
+
+        --This can also be defeated; see again the BRP references.
+
+    --Another defense: don't use C! CPUs are so fast that a language
+    with bounds checking probably isn't going to pay a huge performance
+    penalty relative to one without bounds checks
+
+    --Question: can we instead confine processes and users so that when
+    they're broken into, the damage is limited?
+
+

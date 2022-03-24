@@ -1,0 +1,287 @@
+Class 19
+CS 202
+15 November 2021
+
+On the board
+------------
+
+1. Last time
+2. Intro to file systems
+3. Files
+4. Implementing files
+        preface
+        contiguous
+        linked
+        indexed
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    - Disks
+
+
+2. Intro to file systems
+
+    --what does a FS do?
+
+	--provide persistence (don't go away ... ever)
+
+	--give a way to "name" a set of bytes on the disk (files)
+
+	--give a way to map from human-friendly-names to "names" (directories)
+
+    --where are FSes implemented?
+
+	--can implement them on disk, over network, in memory, in NVRAM
+	(non-volatile RAM), on tape, with paper (!!!!)
+
+	--we are going to focus on the disk and generalize later. we'll
+	see what it means to implement a FS over the network
+ 
+    --a few quick notes about disks in the context of FS design
+
+	--disk is the first thing we've seen that (a) doesn't go away;
+	and (b) we can modify (BIOS ROM, hardware configuration, etc.
+	don't go away, but we weren't able to modify these things). two
+	implications here:
+
+	    (i) we're going to have to put all of our important state on
+	    the disk
+
+	    (ii) we have to live with what we put on the disk! scribble
+	    randomly on memory --> reboot and hope it doesn't happen
+	    again. scribbe randomly on the disk --> now what? (answer:
+	    in many cases, we're hosed.)
+
+
+3. Files
+
+	--what is a file?
+	    --answer from user's view: a bunch of named bytes on the disk
+	    --answer from FS's view: collection of disk blocks
+	
+	--big job of a FS: map name and offset to disk blocks
+	   
+                                 FS
+                   {file,offset} --> disk address
+	    
+	    --operations are create(file), delete(file), read(), write()
+
+	    --(***) goal: operations have as few disk accesses as possible
+	    and minimal space overhead
+	    
+		--wait, why do we want minimal space overhead, given that
+		the disk is huge?
+
+		--answer: cache space never enough; the amount of data
+		that can be retrieved in one fetch is never enough.
+		hence, really don't want to waste.
+
+	[[--note that we have seen translation/indirection before:
+
+	    page table:
+
+		                    page table 
+		    virtual address ----------> physical address
+
+    
+	    per-file metadata:
+
+			    inode
+		    offset ------>  disk block address
+
+
+	    how'd we get the inode?
+
+			       directory
+		    file name ----------> file # 
+		    
+		(file # *is* an inode in Unix)
+		    		
+	    ]]
+
+
+4. Implementing files
+
+	--our task: meet the goal marked (***) above. 
+
+	--NOTE: for now we're going to assume that the file's metadata
+	is known to the system
+	    
+	    --> when we look at directories in a bit, we'll see where
+	    the metadata comes from; the above picture should also give
+	    a hint
+    
+	access patterns we could imagine supporting:
+
+	(i) Sequential:
+	    --File data processed in sequential order
+	    --By far the most common mode
+	    --Example: editor writes out new file, compiler reads in file, etc
+
+	(ii) Random access:
+	    --Address any block in file directly without passing through
+	    --Examples: large data set, demand paging, databases
+
+	(iii) Keyed access
+	    --Search for block with particular values
+	    --Examples: associative database, index
+	    --This thing is everywhere in the field of databases,
+	    search engines, but....
+	    --...usually not provided by a FS in OS
+
+	helpful observations:
+
+	* All blocks in file tend to be used together, sequentially 
+
+	* All files in directory tend to be used together
+
+	* All *names* in directory tend to be used together
+
+	further design parameters:
+
+	* Most files are small 
+	
+	* Much of the disk is allocated to large files
+
+	* Many of the I/O operations are made to large files
+
+	* Want good sequential and good random access 
+
+	candidate designs........
+
+        A. contiguous
+        B. linked files
+        C. indexed files
+
+	A. contiguous allocation 
+
+	  "extent based"
+	  --when creating a file, make user pre-specify its length, and
+	  allocate the space at once
+	  --file metadata contains location and size
+
+	  --example: IBM OS/360
+
+		[<free> a1 a2 a3 <5 free> b1 b2 <free> ]
+
+		what if a file c needs 7 sectors?!
+	  
+	  +: simple
+	  +: fast access, both sequential and random
+	  -: fragmentation
+	  
+	B. linked files
+	    
+	    --keep a linked list of free blocks
+	    --metadata: pointer to file's first block
+	    --each block holds pointer to next one
+
+	  +: no more fragmentation
+	  +: sequential access easy (and probably mostly fast, assuming
+	     decent free space management, since the pointers will point
+	     close by)
+	  -: random access is a disaster
+	  -: pointers take up room in blocks; messes up alignment of
+	  data
+
+	C. indexed files
+
+	    [DRAW PICTURE]
+
+	    --Each file has an array holding all of its block pointers
+		--like a page table, so similar issues crop up
+
+	    --Allocate this array on file creation
+
+	    --Allocate blocks on demand (using free list)
+	   
+	    +: sequential and random access are both easy
+	    -: need to somehow store the array
+
+	    --large possible file size --> lots of unused entries in the
+	    block array
+
+	    --large actual block size --> huge contiguous disk chunk
+	    needed
+
+	    --solve the problem the same way we did for page tables:
+
+			[............]
+
+		[..........]	    [.........]
+
+	    [ block     block                         block]
+
+            --[above is a drawing of a balanced tree, like the 4-level
+            page tables we saw for x86-64.]
+
+	    --okay, so now we're not wasting disk blocks, but what's the
+	    problem? (answer: equivalent issues as for page table
+	    walking: here, it's extra disk accesses to look up the blocks)
+
+	    --this motivates the classic Unix file system 
+
+	    --inode contains:
+
+		permisssions
+		times for file access, file modification, and inode-change
+		link count (# directories containing file)
+		ptr 1  --> data block
+		ptr 2  --> data block
+		ptr 3  --> data block
+		.....
+		ptr 11  --> indirect block 
+				      ptr --> 
+				      ptr --> 
+				      ptr --> 
+				      ptr -->
+				      ptr -->
+		ptr 12 --> indirect block
+		ptr 13 --> double indirect block
+		ptr 14 --> triple indirect block
+
+    This is just a tree.
+
+    Question: why is this tree intentionally imbalanced?
+
+        (Answer: optimize for short files. each level of this tree
+        requires a disk seek...)
+
+    Pluses/minuses:
+
+    +: Simple, easy to build, fast access to small files
+
+    +: Maximum file length can be enormous, with
+       multiple levels of indirection 
+
+    -: worst case # of accesses pretty bad
+
+    -: worst case overhead (such as 11 block file) pretty bad
+
+    -: Because you allocate blocks by taking them off unordered
+       freelist, metadata and data get strewn across disk
+
+
+    Notes about inodes:
+
+    --stored in a fixed-size array
+
+    --Size of array fixed when disk is initialized; can't be changed
+
+    --Multiple inodes in a disk block
+
+    --Lives in known location, originally at one side of disk,
+    now lives in pieces across disk (helps keep metadata close
+    to data)
+
+    --The index of an inode in the inode array is called an
+    ***i-number***
+
+    --Internally, the OS refers to files by i-number
+
+    --When a file is opened, the inode brought in memory
+
+    --Written back when modified and file closed or time elapses
+

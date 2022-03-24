@@ -1,0 +1,94 @@
+page faults
+- does not imply illegal mem reference
+- hardware cannot figure out mapping
+or mapping not permitted
+
+after fault
+redo the instruction
+
+illegal in the sense that hardware cannot execute it
+
+processor constructs trap frame
+
+%rip is code to handle the trap
+%cr2 holds faulting virtual address
+
+virtual mem invented when ram is scarce
+overcommitting physical mem (allocate more (resources) to a purpose than can be provided)
+
+process is using more memory than that is 
+physically in ram
+(use disk to store)
+
+
+
+
+
+copy on write
+process has 8GB mem
+call fork(),
+2 page table point to same physical mem, 
+if write to it, then a page fault
+
+copy,
+mark all mem read-only
+
+ 
+
+
+
+
+accounting
+
+
+store mem across network
+i dont have virt page in this machine
+but have virt page
+(when network is faster than fetching from disk)
+
+
+
+
+
+paging in day to day use
+
+demand paging
+
+growing stack
+
+bss (block starting symbol) page allocation
+
+
+randy pausch
+time manage
+
+
+1 sheet of paper front & back
+
+
+
+
+page faults are expensive
+p: prob of generate page fault
+
+
+
+
+dont feel u need to get all points for a
+if dont study, near 0
+
+
+
+fifo: eject oldest, terrible?
+min (optimal): eject entry that wont be referenced longest time, 
+is this possible? (sys do not know future, halting problem)
+LRU: longest that is has been referenced (to simulate optimal
+using the past to simulate future)
+LRU works bad when no locality
+
+belady's anomaly
+
+all pages in a circle
+a hand go around clock
+used bit set to 1
+if used bit is 0, evict it

@@ -1,0 +1,56 @@
+void EStore::
+buyManyItems(vector<int>* item_ids, double budget)
+{
+    assert(fineModeEnabled());
+
+    // TODO: Your code here.
+    for(long unsigned int i = 0; i < item_ids->size(); i++)
+    {//lock all the items in the entire order
+        smutex_lock(&mutex_array[item_ids->at(i)]);
+    }
+
+    int entire_cost = 0;
+    bool buyable = true;
+
+    for(long unsigned int i = 0; i < item_ids->size(); i++)
+    {
+        Item * item_p = inventory + item_ids->at(i);
+        entire_cost += Overallcost(item_p);
+        if((!item_p->valid) || (item_p->quantity == 0) || (entire_cost > budget))
+        {
+            buyable = false;
+            break; //order cannot be bought
+        }
+    }
+
+
+    if(buyable)
+    {//buy everything
+        for(long unsigned int i = 0; i < item_ids->size(); i++)
+        {
+            Item * item_p = inventory + item_ids->at(i);
+            item_p->valid = false;
+            item_p->quantity--;
+        }
+    }
+
+    for(long unsigned int i = 0; i < item_ids->size(); i++)
+    {//unlock all the items in the entire order
+        smutex_unlock(&mutex_array[item_ids->at(i)]);
+    }
+}
+
+
+
+
+
+--
+EXPLANATION:
+
+if the 2 threads attempt to access the same item
+then because the instruction smutex_lock(&mutex_array[item_ids->at(i)]);
+same item means same item_id, means that mutex_array[item_ids->at(i)]
+will have a entry that is a mutex that is already locked,
+then the other customer will unable acquire that mutex since that
+mutex is currently locked,
+so the other customer will just wait

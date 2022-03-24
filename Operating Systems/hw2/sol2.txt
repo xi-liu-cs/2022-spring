@@ -1,0 +1,171 @@
+HW2 Solutions
+
+1.1
+    |  return address from main   |
+    |  address for right after L7 |
+    |     rbp for main's frame    | <- %rbp
+    |             0 (e)           |
+    |             0 (f)           | <- %rsp
+
+Note that the position of e and f can be the opposite of what we show,
+either is correct and the order depends on the compiler.
+
+1.2 This is for the mul call in L4.
+
+    |  return address from main   |
+    |  address for right after L7 |
+    |     rbp for main's frame    | <- %rbp
+    |             0 (e)           |
+    |             0 (f)           | <- %rsp
+
+The stack looks the same, because nothing has changed.
+%rip points to the mov instruction generated as a part of line L4.
+This mov instruction is responsible for writing
+the return value in %rax to the stack location corresponding to `e`
+above.
+
+1.3
+
+    |  return address from main   |
+    |  address for right after L7 |
+    |     rbp for main's frame    | <- comp's rbp
+    |             0 (e)           |
+    |             0 (f)           | 
+    | address for the mov from L4 | 
+    |   address for comp's rbp    | <- %rbp
+    |       unknown value (e)     | <- %rsp
+
+1.4 
+    |  return address from main   |
+    |  address for right after L7 |
+    |     rbp for main's frame    |  <- %rbp
+    |             0 (e)           |
+    |             0 (f)           | 
+    | address for the mov from L4 | <- %rsp 
+
+%rip points to a part of the text segment after the `mul` function. We cannot
+know what line of C code this corresponds to since it depends on the compiler.
+
+
+2.1.
+    node_t *
+    find_insert_pos(node_t *head, node_t *node)
+    {
+        if (head == NULL) return NULL;
+
+        node_t *ret = NULL;
+
+        // 2.1 your code here
+        while (head != NULL) {
+            if (head->id >= node->id) break;
+            else {
+                ret = head;
+                head = head->next;
+            }
+        }
+
+        return ret;
+    }
+
+2.2.
+    node_t *
+    insert(node_t *head, node_t *node)
+    {
+        if (head == NULL) return node;
+
+        // find the proper position to insert
+        // this node pair.
+        node_t *pos = find_insert_pos(head, node);
+
+        // 2.2 your code here
+        if (pos == NULL) { // insert before head
+            node->next = head;
+            head = node;
+        } else { // insert after pos
+            node->next = pos->next;
+            pos->next = node;
+        }
+
+        return head;
+    }
+
+3.1.
+    i.      echo  echo hello $world
+            echo hello
+            Explanation: The command is the first 'echo', and $world is a variable
+            whose name is 'world'. Since we have not set the value for $world yet,
+            $world will be expanded to an empty string. So 'echo' will print out:
+            echo hello
+
+    ii.     echo 'echo hello $world'
+            echo hello $world
+            Explanation: Within single quotes, $world is not treated as
+            a variable but rather as part of the string.
+
+    iii.    echo "echo hello $world"
+            echo hello
+            Explanation: The command is the first 'echo'. Double quotes will
+            expand the variables inside, and we have not set $world yet
+
+    iv.     echo `echo hello $world`
+            hello
+            Explanation: The symbol ` will evaluate the command inside, and the output
+            of `echo hello $world` is "hello". Then the command becomes:
+            echo hello. So the output is hello
+
+    v.      echo (echo hello $world)
+            syntax error
+            Explain: Cannot use subshell as part of another command
+
+3.2.
+    i.      echo 'hello world' | cat
+            hello world
+            Explanation: First echo prints out "hello world", and it's passed to
+            cat as the input. cat will print its input to screen
+
+    ii.     echo 'hello world' > cat
+            No output; create a file called 'cat', and the content is "hello
+            world"
+            Explanation: echo prints "hello world", and got redirected into a file
+            called cat
+
+    iii.    echo 'hello world' 2> cat
+            hello world (printed on the screen); and create an empty file
+            called cat
+            Explanation: echo prints "hello world" to the standard output, which is
+            the screen by default. Standard error wasredirected to a file
+            called cat. Since nothing was printed to stderr, the file is
+            empty
+
+3.3.
+    i.      echo a && echo b
+            a
+            b
+            Explanation: && means first run the command prior to it, and if the
+            exit status is 0, run the command after it; if the exit status is
+            not 0, stop.
+
+    ii.     echo a ; echo b
+            a
+            b
+            Explanation: ; means run the command prior to it, and no matter what
+            is the exit status, always run the command after it.
+
+    iii.    echo a & echo b
+            a
+            b
+            or 
+            b
+            a
+            Explanation: & will put 'echo a' in background and run 'echo b' in
+            foreground. So the output may come out in any order
+
+3.4.
+    To output the first 100 names in this file:
+        $ cat members.txt | grep "^Name:[a-zA-Z']\+$" | head -n100 | cut -d':' -f2
+    To identify the first 100 names by alphabetical order, and then output
+    them and write them to a file called 'names.txt'
+        $ cat members.txt | grep "^Name:[a-zA-Z']\+$" | head -n100 | cut -d':' -f2 | sort | tee names.txt
+
+
+

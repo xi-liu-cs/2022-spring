@@ -1,0 +1,105 @@
+how to find data needed on disk?
+sys has metadata
+
+directories
+give a way to organize
+
+attach human friendly name to files
+
+go from human friendly name to a number
+that represent metadata of a file
+
+fixed location of directory on sys
+
+
+
+approach 1: single dir for whole sys
+
+map: <name, inumber>
+
+mike - todo.txt, 64  //look at 64th inode or data block
+pat - todo.txt, 121
+
+
+
+approach 2: single dir for each user
+/mike
+/pat
+/jo
+
+map name to number
+
+
+
+
+
+approach 3: hierarchical name space
+directory map from names to files OR directories 
+
+
+
+naming
+
+
+www.cs.nyu.edu.
+. -> edu. -> nyu.edu.
+
+hierarchical name - scalability
+
+large name spaces tend to be hierarchical
+cloud computing infastratures has changed
+
+domain name system 域名系统
+
+
+directory is a special kind of file
+struct dirent
+
+bootstrapping 自助抽样法
+/ root
+. current dir
+.. parent dir
+
+
+
+create another name for that file
+ln = link
+
+to create a hardlink
+add an entry
+<essay.txt, 7>
+<hello.txt, 7>
+
+
+link count:
+number of link
+
+hard: 
+$ln x y
+
+remove file
+unlink()
+lower link count
+
+
+soft:
+$ln -s x y
+create new inode, new file named "y",
+its contents are "x"
+
+
+
+ffs
+fast file system
+
+cluster files in same dir
+- make data blocks bigger (4, 8, 16 KB)
+- free block: store separately (bitmap)
+
+
+
+cylinder group
+all data equidistant
+only paying rotational delay
+
+not move disk head to seek

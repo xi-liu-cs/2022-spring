@@ -1,0 +1,540 @@
+LAB5
+int alloc_block(void)
+{
+	for(u_int32_t i = 1; i < super->s_nblocks; i++)
+	{
+		if(block_is_free(i))
+		{
+			bitmap[i / 32] &= ~(1 << (i % 32)); //allocate
+			flush_block(diskaddr(i));
+			return i;
+		}
+	}
+	return -ENOSPC;
+}
+memset(diskaddr(r), 0, BLKSIZE);
+
+int inode_block_walk(struct inode *ino, uint32_t filebno, uint32_t **ppdiskbno, bool alloc)
+{
+	if(filebno < 0 || filebno >= N_DIRECT + N_INDIRECT + N_DOUBLE) ret
+
+	if(filebno < N_DIRECT){ *ppdiskbno = ino->i_direct + filebno; }
+
+	else if(filebno < N_DIRECT + N_INDIRECT)
+	{
+		if(ino->i_indirect == 0)
+		{//need to allocate i_indirect
+			int ret = alloc_block();
+			ino->i_indirect = ret;
+			memset(diskaddr(ret), 0, BLKSIZE);
+		}
+		uint32_t * ptr = (uint32_t *)diskaddr(ino->i_indirect);
+		int remain = filebno - N_DIRECT;
+		*ppdiskbno = ptr + remain;
+	}
+
+	else if(filebno < N_DIRECT + N_INDIRECT + N_DOUBLE)
+	{
+		int remain = filebno - N_DIRECT - N_INDIRECT;
+		if(ino->i_double == 0)
+		{//need to allocate i_double
+			int ret2 = alloc_block();
+			ino->i_double = ret2;
+			memset(diskaddr(ret2), 0, BLKSIZE);
+			int ret3 = alloc_block();
+			uint32_t * ptr = (uint32_t *)diskaddr(ino->i_double);
+			ptr[remain / N_INDIRECT] = ret3;
+			memset(diskaddr(ret3), 0, BLKSIZE);
+		}
+		else if(find_slot_double(ino, filebno) == 0)
+		{//need to allocate i_indirect
+			int ret4 = alloc_block();
+			uint32_t * ptr = (uint32_t *)diskaddr(ino->i_double);
+			ptr[remain / N_INDIRECT] = ret4;
+			memset(diskaddr(ret4), 0, BLKSIZE);
+		}
+		uint32_t * ptr = (uint32_t *)diskaddr(find_slot_double(ino, filebno));
+		*ppdiskbno = ptr + (remain % N_INDIRECT);
+	}
+	return 0;
+}
+
+uint32_t find_slot_double(struct inode * ino, u_int32_t filebno)
+{
+	int remain = filebno - N_DIRECT - N_INDIRECT;
+	uint32_t * ptr = (uint32_t *)diskaddr(ino->i_double);
+	return ptr[remain / N_INDIRECT];
+}
+
+static void
+inode_truncate_blocks(struct inode *ino, uint32_t newsize)
+{
+	uint32_t bno, old_nblocks, new_nblocks;
+	old_nblocks = ROUNDUP(ino->i_size, BLKSIZE) / BLKSIZE;
+	new_nblocks = ROUNDUP(newsize, BLKSIZE) / BLKSIZE;
+
+	for(bno = new_nblocks; bno < old_nblocks; bno++)
+	{//free data block
+		inode_free_block(ino, bno);
+	}
+
+	if((N_DIRECT + N_INDIRECT < old_nblocks) && 
+	(old_nblocks <= N_DIRECT + N_INDIRECT + N_DOUBLE) && ino->i_double)
+	{
+		int double_indirect_in_old = ROUNDUP(old_nblocks - N_DIRECT - N_INDIRECT, N_INDIRECT) / N_INDIRECT;
+		int double_indirect_in_new;
+		if(new_nblocks <= N_DIRECT + N_INDIRECT){ double_indirect_in_new = 0; }
+		else{ double_indirect_in_new = ROUNDUP(new_nblocks - N_DIRECT - N_INDIRECT, N_INDIRECT) / N_INDIRECT; }
+
+		uint32_t * ptr = (uint32_t *)diskaddr(ino->i_double);
+		for(int i = 0; i < double_indirect_in_old - double_indirect_in_new; i++)
+		{
+			uint32_t * addr = ptr + double_indirect_in_new + i;
+			free_block(*addr);
+			*addr = 0;
+		}	
+	}
+
+	if(new_nblocks <= N_DIRECT || old_nblocks <= N_DIRECT)
+	{
+		free_block(ino->i_double); ino->i_double = 0;
+		free_block(ino->i_indirect); ino->i_indirect = 0;
+	}
+	if(new_nblocks <= N_DIRECT + N_INDIRECT || old_nblocks <= N_DIRECT + N_INDIRECT)
+	{	free_block(ino->i_double); ino->i_double = 0;	}
+}
+
+int inode_unlink(const char *path)
+{
+	char name[NAME_MAX]; 
+	struct inode * pino; //inode pointer
+	struct inode * pdir; //directory pointer
+	struct dirent * pdent; //directory entry pointer
+	int r = walk_path(path, &pdir, &pino, &pdent, name);
+	if(r != 0 || r == -ENOENT){ return -ENOENT; }
+	if(!pino) { return -ENOENT; }
+	pino->i_nlink--;
+	if(pino->i_nlink == 0){ inode_free(pdent->d_inum); }
+	memset((void *)pdent, 0, sizeof(struct dirent));
+	return 0;
+}
+
+int inode_link(const char *oldpath, const char *newpath)
+{
+	char old_name[NAME_MAX]; struct inode * old_pino;  struct inode * old_pdir;  struct dirent * old_pdent; 
+	int r1 = walk_path(oldpath, &old_pdir, &old_pino, &old_pdent, old_name);
+	if(r1 != 0)	return r1;
+	char new_name[NAME_MAX]; struct inode * new_pino; struct inode * new_pdir; struct dirent * new_pdent; 
+	int r2 = walk_path(newpath, &new_pdir, &new_pino, &new_pdent, new_name);
+	if(r2 == -ENOENT) //no such file or directory, silently proceeds
+	else if(r2 == 0 && r2 != -ENOENT) {//a file exists already at newpath
+		return -EEXIST; }
+
+	int r3 = dir_alloc_dirent(new_pdir, &new_pdent);
+	if(r3 != 0) return r3;
+
+	old_pino->i_nlink++;
+	new_pdent->d_inum = old_pdent->d_inum;
+	strcpy(new_pdent->d_name, new_name);
+	return 0;
+}
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+LAB4
+void kernel(const char * command)
+{
+    virtual_memory_map(kernel_pagetable,
+        0,
+        virtual_memory_lookup(kernel_pagetable, 0).pa,
+        (uintptr_t)console,
+        PTE_P|PTE_W,
+        NULL);
+
+    virtual_memory_map(kernel_pagetable,
+        (uintptr_t)console + PAGESIZE,
+        virtual_memory_lookup(kernel_pagetable, (uintptr_t)console + PAGESIZE).pa,
+        PROC_START_ADDR - (uintptr_t)console - PAGESIZE,
+        PTE_P|PTE_W,
+        NULL);
+}
+
+
+void process_setup(pid_t pid, int program_number) {
+    process_init(&processes[pid], 0);
+    cur_owner = pid;
+    processes[pid].p_pagetable = copy_pagetable(kernel_pagetable, pid); //to do
+    int r = program_load(&processes[pid], program_number, NULL);
+    assert(r >= 0);
+    //processes[pid].p_registers.reg_rsp = PROC_START_ADDR + PROC_SIZE * pid;
+    processes[pid].p_registers.reg_rsp = (uintptr_t)MEMSIZE_VIRTUAL;
+    uintptr_t stack_page = processes[pid].p_registers.reg_rsp - PAGESIZE;
+    uintptr_t pa = allocate_helper((int8_t)pid);
+    assign_physical_page(pa, (int8_t)pid); 
+    if (pa){ 	virtual_memory_map(processes[pid].p_pagetable, stack_page, pa,
+            PAGESIZE, PTE_P | PTE_W | PTE_U, allocator); }
+    processes[pid].p_state = P_RUNNABLE;
+}
+
+//allocates and returns a new page table
+x86_64_pagetable * copy_pagetable(x86_64_pagetable * pagetable, int8_t owner)
+{//to do
+    cur_owner = owner;
+    x86_64_pagetable * p = allocator();
+
+    for(uintptr_t i = 0; i < PROC_START_ADDR; i += PAGESIZE)
+    {
+        vamapping vm = virtual_memory_lookup(pagetable, i);
+        if(vm.pn != -1){  virtual_memory_map(p, i, vm.pa, PAGESIZE, vm.perm, allocator); }
+    }
+    return p;
+}
+
+//find a free page, allocated for the current process, and return new page
+x86_64_pagetable * allocator()
+{//to do
+    for(int i = 0; i < NPAGES; i++)
+    {
+        if(pageinfo[i].refcount == 0)
+        {
+            if(assign_physical_page(PAGEADDRESS(i), cur_owner) == 0)
+            {
+                memset((void *)PAGEADDRESS(i), 0, PAGESIZE); 
+                return (x86_64_pagetable *)PAGEADDRESS(i);
+            }
+        }
+    }
+    return NULL;
+}
+
+int assign_physical_page(uintptr_t addr, int8_t owner) {
+    if ((addr & 0xFFF) != 0
+        || addr >= MEMSIZE_PHYSICAL
+        || pageinfo[PAGENUMBER(addr)].refcount != 0) {
+        return -1;
+    } else {
+        pageinfo[PAGENUMBER(addr)].refcount = 1;
+        pageinfo[PAGENUMBER(addr)].owner = owner;
+        return 0;
+    }
+}
+
+void exception(x86_64_registers * reg)
+{
+    case INT_SYS_PAGE_ALLOC: {
+        uintptr_t addr = current->p_registers.reg_rdi;
+        //to do
+        cur_owner = current->p_pid;
+        int assign = -1;
+        int found = 0;
+        for(int i = 0; i < NPAGES; i++)
+        {
+            if(pageinfo[i].refcount == 0)
+            {
+                assign = assign_physical_page(PAGEADDRESS(i), cur_owner);
+                if(assign == 0)
+                {
+                    virtual_memory_map(current->p_pagetable, addr, PAGEADDRESS(i),
+                      PAGESIZE, PTE_P | PTE_W | PTE_U, NULL); 
+                    found = 1;
+                    break;
+                }
+            }
+        }
+        current->p_registers.reg_rax = assign;
+        if(assign == -1 || found == 0)
+            current->p_registers.reg_rax = -1; //a free physical page is not found, return -1 to the application
+        break;
+    }
+
+
+    case INT_SYS_FORK: {
+    //to do        
+        pid_t parent_pid = current->p_pid;
+        pid_t child_pid = 0;
+        int found = 0;
+        for (pid_t i = 1; i < NPROC; i++) 
+        {
+            if(processes[i].p_state == P_FREE)
+            {//a free slot is found
+                found = 1;
+                processes[i].p_pid = i;
+                child_pid = processes[i].p_pid;
+                processes[i].p_state = P_RUNNABLE;
+                processes[i].p_pagetable = copy_pagetable(processes[parent_pid].p_pagetable, child_pid);
+                processes[i].p_registers = processes[parent_pid].p_registers;
+                break;
+            }
+        }
+        if(found == 0)
+        {
+            processes[parent_pid].p_registers.reg_rax = -1;
+            break;
+        }
+
+        for(uintptr_t i = PROC_START_ADDR; i < MEMSIZE_VIRTUAL; i += PAGESIZE)
+        {
+            vamapping vm = virtual_memory_lookup(processes[parent_pid].p_pagetable, i);
+
+            if((vm.pn != -1) && (vm.perm & PTE_U) && (vm.pa != (uintptr_t)console))
+            {
+                if(vm.perm & PTE_W)
+                {
+                    uintptr_t p = allocate_helper(child_pid);
+                    memcpy((void *)p, (void *)vm.pa, PAGESIZE);
+                    virtual_memory_map(processes[child_pid].p_pagetable, i, p, PAGESIZE,
+                        vm.perm, allocator);
+                }
+                else{ pageinfo[vm.pn].refcount++; }     
+            }
+        }
+        processes[child_pid].p_registers.reg_rax = 0; //0 is returned to child
+        processes[parent_pid].p_registers.reg_rax = child_pid; //child process's PID is returned in the parent
+        break;
+    }
+}
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+LAB3
+void EStore:: buyManyItems(vector<int>* item_ids, double budget)
+{
+    assert(fineModeEnabled());
+
+    // TODO: Your code here.
+    sort(item_ids->begin(), item_ids->end()); //enforce lock ordering to avoid deadlocks
+
+    for(long unsigned int i = 0; i < item_ids->size(); i++)
+    {//lock all the items in the entire order
+        smutex_lock(&mutex_array[item_ids->at(i)]);
+    }
+
+    int entire_cost = 0;
+    bool buyable = true;
+
+    for(long unsigned int i = 0; i < item_ids->size(); i++)
+    {
+        Item * item_p = inventory + item_ids->at(i);
+        entire_cost += cost_item(item_p);
+        if((item_p->valid == false) || (item_p->quantity == 0) || (entire_cost > budget))
+        {
+            buyable = false;
+            break; //the entire order cannot be bought
+        }
+    }
+
+
+    if(buyable)
+    {//buy everything
+        for(long unsigned int i = 0; i < item_ids->size(); i++)
+        {
+            Item * item_p = inventory + item_ids->at(i);
+            item_p->quantity--;
+        }
+    }
+
+    for(long unsigned int i = 0; i < item_ids->size(); i++)
+    {//unlock all the items in the entire order
+        smutex_unlock(&mutex_array[item_ids->at(i)]);
+    }
+}
+
+void
+buy_many_items_handler(void *args)
+{
+    BuyManyItemsReq * buy_many_items_req = (BuyManyItemsReq *)args;
+
+    printf("Handling BuyManyItemsReq: item_id - ");
+    for(long unsigned int i = 0; i < buy_many_items_req->item_ids.size(); i++)
+    { printf("%d ", buy_many_items_req->item_ids.at(i)); }
+    printf("\n");
+
+    buy_many_items_req->store->buyManyItems(&(buy_many_items_req->item_ids),
+    buy_many_items_req->budget);
+
+    delete buy_many_items_req;
+}
+
+Task TaskQueue:: dequeue()
+{
+    smutex_lock(&mutex);
+    while(empty()){ scond_wait(&nonempty, &mutex); }
+    Task first_task = task_q.front();
+    task_q.pop();
+    smutex_unlock(&mutex);
+    return first_task;
+}
+
+-------------------------------------------------------------------------------------------------------------------------------------
+LAB2
+bool test_file(char* pathandname) {
+    struct stat sb;
+    if (stat(pathandname, &sb)) {
+        handle_error("cannot access", pathandname);
+        return false;
+    }
+    return true;
+}
+
+bool is_dir(char* pathandname) {
+    struct stat status;
+    if(stat(pathandname, &status) == -1) {
+        return false;
+    }
+    return S_ISDIR(status.st_mode);
+}
+
+void list_dir(char* dirname, bool list_long, bool list_all, bool recursive) {
+
+    DIR * p_dir = opendir(dirname);
+    struct dirent * p_dirent;
+    if(p_dir)
+    {
+        while((p_dirent = readdir(p_dir)) != NULL)
+        {
+            char path[BUFF_SIZE];
+            snprintf(path, BUFF_SIZE, "%s/%s", dirname, p_dirent -> d_name);
+            
+            test_file(path);
+            if(is_dir(path))
+            {
+                if(list_all)
+                {
+                    if(!list_long)
+                    {
+                        if(strcmp(p_dirent -> d_name, ".") == 0 || strcmp(p_dirent -> d_name, "..") == 0)
+                        {
+                            printf("%s\n", p_dirent -> d_name); //no slash for "." and ".."
+                        }
+                        else
+                        {
+                            printf("%s/\n", p_dirent -> d_name);
+                        }
+                    }
+                }
+                else if(!list_all)
+                {
+                    if((p_dirent -> d_name)[0] == '.')
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        if(!list_long)
+                        {
+                            printf("%s/\n", p_dirent -> d_name);
+                        }
+                    }
+                }
+            }
+            if(is_dir(path) && list_long)
+            {
+                if(!list_all && (p_dirent -> d_name)[0] != '.')
+                {
+                    list_file(path, p_dirent -> d_name, list_long);
+                }
+                else if(list_all)
+                {
+                    list_file(path, p_dirent -> d_name, list_long);
+                }
+            }
+
+            if(!is_dir(path))
+            {
+                if(!list_all)
+                {
+                    if((p_dirent -> d_name)[0] != '.')
+                    {
+                        list_file(path, p_dirent -> d_name, list_long);
+                    }
+                }
+                else
+                {
+                    list_file(path, p_dirent -> d_name, list_long);
+                }  
+            }
+        }
+    }
+    if(p_dir == NULL)
+    {
+        err_code = err_code | (1 << 6) | (1 << 3);
+    }
+    else
+    {
+        closedir(p_dir);
+    }    
+
+    if(recursive)
+    {
+        DIR * p_dir2 = opendir(dirname);
+        struct dirent * p_dirent2;
+        if(p_dir2)
+        {
+            while((p_dirent2 = readdir(p_dir2)) != NULL)
+            {
+                recursive = true;
+                if(!is_dir(dirname))
+                {
+                    recursive = false;
+                    continue;
+                }
+
+                char path[BUFF_SIZE];
+                snprintf(path, BUFF_SIZE, "%s/%s", dirname, p_dirent2 -> d_name);
+
+                if(recursive)
+                {
+                    if((!list_all 
+                    && is_dir(path) 
+                    && (p_dirent2 -> d_name)[0] != '.')
+                    || (list_all && is_dir(path)) )
+                    {//is a directory
+
+                        if(list_all && (p_dirent2 -> d_name)[0] == '.')
+                        {
+                            recursive = false;
+                            if(strcmp(p_dirent2 -> d_name, ".") != 0
+                            && strcmp(p_dirent2 -> d_name, "..") != 0)
+                            {
+                                //print hidden dir
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+
+                        char main_buf[BUF_SIZE];
+                        strcpy(main_buf, dir_rec);
+                        char * ret = strstr(path, main_buf);
+
+                        //remove current dir substring from ret string:
+	                    int len = strlen(main_buf);
+                        if (len > 0) 
+                        {
+                            char *p = ret;
+                            while ((p = strstr(p, main_buf)) != NULL) 
+                            {
+                                memmove(p, p + len, strlen(p + len) + 1);
+                            }
+                        }
+
+                        if(ret && (globl_argc == 2)) // ./ls -R without additional args
+                        {
+                            printf("\n.%s:\n", ret);
+                        }
+                        else if(ret)
+                        {
+                            ret = ret + 1;
+                            printf("\n%s:\n", ret);
+                        }
+
+                        char path2[BUFF_SIZE];
+                        snprintf(path2, BUFF_SIZE, "%s/%s", dirname, p_dirent2 -> d_name);
+                        list_dir(path2, list_long, list_all, recursive); //recursion            
+                    }
+                }
+            }
+        }
+        closedir(p_dir2);
+    }
+}

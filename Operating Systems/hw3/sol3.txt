@@ -1,0 +1,108 @@
+HW3 Solutions
+CS202, fall2021
+
+1.1. The differences between thread_create(func) and fork() include:
+    D1: thread_create doesn't need to make a copy of the invoking thread's memory.
+        It will make both the original thread and created thread share the invoking
+        thread's memory. By contrast, fork will make a copy of the parent process's
+        memory, and the child will run using this copy.
+    D2: Both thread_create and fork will give the created thread/process a new
+        stack. fork creates this stack from the parent process's stack, while
+        thread_create creates a brand new stack. In other words, fork will set
+        %esp to a copy of the current bottom of the stack, thread_create will set %esp
+        to the top of a new stack within the same address space.
+    D3: As indicated in the interface, thread_create takes a function pointer
+        as the parameter. thread_create will set the created thread's %eip to
+        func, while fork will not touch %eip, since parent and child are running
+        the "same" code located at the "same" address.
+
+1.2. There aren't many essential differences between these data
+structures. Each "process" has its own view of memory (we will later
+study how this works), and multiple "threads" share a view of memory.
+But the actual OS data structures used for each can be essentially the
+same.
+
+2. Sometimes. Let's take the single-CPU case first. The multithreaded
+code is not going to give substantially better performance since only
+one thread can execute at any given time. Moreover, the overhead of
+synchronization may slow the program down. On a multi-CPU machine, it
+also depends. If the threads are spending most of their time doing
+synchronization, then the multithreaded program may, again, have worse
+turn-around time. If, however, synchronization is rare and the threads
+can be run on different hardware cores (i.e., the threads are working
+simultaneously and in parallel), then a multithreaded process can indeed
+turn around a job more quickly than a single-threaded one (because
+parallelism is being exploited).
+
+3. 
+    A. stack
+    C. registers
+
+4. The semantics of add(a,b) are that when the function returns, the "new" a should be the sum of 
+  the "old" a and b.
+   If we have initially, Point a = {1,1}; Point b = {1,1};
+   Thread 1 calls add(&a,&b), Thread 2 calls add(&b,&a);
+          Event Sequence                                  Memory
+   Thread 1 executes first statement of add;      a = {2,1}; b = {1,1};
+   Thread 2 executes first statement;             a = {2,1}; b = {3,1};
+   Thread 2 executes second statement;            a = {2,1}; b = {3,2};
+   Thread 1 executes second statement;            a = {2,3}; b = {3,2};
+
+  So in the end, a = {2,3}; b = {3,2};
+  The semantics of the add function is broken. This is a race condition.
+
+5.1.
+    foo: 1                  foo: 0
+    boo: 0          or      boo: 1
+    main: 2                 main: 2
+
+    foo: 0                  foo: 0
+    boo: 0          or      boo: 0
+    main: 1                 main: 2
+
+    Note that the first two lines may come out in any order (boo before foo)
+
+    Note that even if we don't have sequential consistency, we can't get
+    more outcomes than this. The reason is that we assume join_thread()
+    (which is a synchronization call) is implemented correctly. As
+    mentioned in the lecture notes, a
+    correct implementation of a synchronization call includes an
+    internal memory barrier. Concretely, in order for the main thread to
+    "see" the threads as complete, the main thread also has to see all
+    of the updates to memory by those threads.
+    
+
+5.2. Use a mutex to protect the shared state (integer i in this case), in both foo and boo
+
+5.3. If we modify our foo and boo to be:
+    mutex_t m;
+    void
+    foo(void *)
+    {
+        lock(&m);
+        int n = i;
+        i = i + 1;
+        printf("foo: %d\n", n);
+        unlock(&m);
+    }
+
+    void
+    boo(void *)
+    {
+        lock(&m);
+        int n = i;
+        i = i + 1;
+        printf("boo: %d\n", n);
+        unlock(&m);
+    }
+
+    Then the output should be:
+    foo: 0              boo: 0
+    boo: 1      or      foo: 1
+    main: 2             main: 2
+
+    Note: you can also put 'unlock' before 'printf', then the possible outputs
+    will be the above two, and also the first two lines come in a different order:
+    boo: 1              foo: 1
+    foo: 0      or      boo: 0
+    main: 2             main: 2

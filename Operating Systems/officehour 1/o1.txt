@@ -1,0 +1,4 @@
+use grep to find syscall implementations
+
+or use 
+: tag funct_name

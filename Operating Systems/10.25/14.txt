@@ -1,0 +1,143 @@
+Class 14
+CS 202
+25 October 2021
+
+On the board
+------------
+
+1. Last time
+2. Logistics
+3. Midterm review, class overview
+4. Your questions
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    --mostly finished virtual memory unit
+      (we will revisit when we cover lab 4)
+
+    --discussed uses of page faults, costs of page faults
+
+    --discussed cache eviction policies, regarding RAM as a cache of the
+    disk
+
+2. Midterm review, logistics
+
+    --75 minute closed-book exam
+
+        - This means no books, no IDEs, etc.
+
+        - Bring id
+
+    --You can use ONE two-sided sheet of notes; formatting requirements listed
+    on Web page. 
+
+3. Midterm review, class overview
+
+    Material
+
+    --Readings (see course Web page, the column called "Reading assignment")
+
+    --Labs
+
+    --Homeworks
+
+    --Lectures
+
+        --Operating systems: what are they?
+
+            --goals, purpose
+
+        -- Processes:
+            
+            -- process's view of memory and registers
+
+            -- stack frames
+
+            -- OS's view of processes
+
+        -- system calls
+
+        -- Process/OS control transfers
+
+        -- Processes birth: fork()/exec()
+
+        -- Shell 
+
+        -- File descriptors 
+
+        -- Redirection, pipelines
+
+        --threads
+
+        --concurrency
+
+            --hard to deal with; abstractions help us, but not completely
+                --critical sections
+                --mutexes
+                --spinlocks
+                --condition variables
+                --monitors
+
+	    --lots of things can go wrong: safety problems, liveness
+	    problems, etc.
+
+                --> lack of sequential consistency makes the problem worse.
+
+	    --What's the plan for dealing with these problems?
+
+	        --safety problems: build concurrency primitives that get
+	        help from hardware (atomic instructions, turning off
+	        interrupts, etc.) and move up to higher level abstractions
+	        that are easy to program with
+
+	        --liveness problems: most common is deadlock, and we
+	        discussed strategies for avoiding it. other problems too:
+	        starvation, priority inversion, etc.
+
+	    --lots of trade-offs and design decisions
+	        --performance v. complexity
+
+	    --lots of "advice". some is literally advice; some is actually
+	    required practice in this class.
+
+        --software safety (Therac-25)
+
+        --scheduling
+
+            --intro: when scheduling happens, which metrics, what costs
+
+            --specific disciplines
+            
+            --lessons and conclusions
+
+        --virtual memory
+
+            paging
+
+            virtual memory on the x86-64
+
+	        virtual address: [0000 36bits 12bits]
+
+	        --entry in L1...L4 page tables:
+
+	            [40 bits  more bits   bottom 3 bits]
+
+	        --protection (user/kernel | read/write |  present/not)
+
+	        what's a TLB?
+
+            page faults
+
+                mechanics
+
+                costs
+
+                uses
+
+            page replacement policies (FIFO, LRU, CLOCK, OPT)
+
+
+4. Now questions from you all......
+

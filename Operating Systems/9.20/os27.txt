@@ -1,0 +1,14 @@
+1
+int
+pthread_create(pthread_t *thread,
+const pthread_attr_t *attr,
+void *(*start_routine)(void*),
+void *arg);
+
+2
+attr specify thread attributes,
+stack size, scheduling priority
+
+3rd argument: function pointer
+which function should this
+thread starting running in?

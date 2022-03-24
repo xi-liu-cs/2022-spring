@@ -1,0 +1,326 @@
+Class 9
+CS 202
+6 October 2021
+
+On the board
+------------
+
+1. Last time
+2. Therac-25
+    --Background
+    --Mechanics
+    --What went wrong?
+    --Discussion
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    discussed the problems brought on by locking
+
+    coarse-grained vs. fine-grained locking. each has disadvantages, as
+    discussed. ADVICE: when you code on your own, start with
+    coarse-grained locking (safety and deadlock bugs less likely.) then,
+    if performance is problematic, you can iterate on your design
+    and introduce more locks.
+
+2. Software safety and the Therac-25
+
+    * Background
+
+    --Draw linear accelerator
+
+    --Magnets 
+	--bending magnets
+
+    --Bombard tungsten (flattener) to get photons for X-ray mode
+
+    --Field light mode: light across from angled mirror. simulates beam.
+
+    * Mechanics
+
+	[draw picture of this thing]
+
+	dual-mode machine (actually, triple mode, given the disasters)
+
+			    beam               beam                beam
+			    energy            current            modifier
+			                                        (given by TT
+								position)
+intended settings:      ---------------------------------------------------
+   for electron therapy |    5-25 MeV          low                magnets
+			| 
+			|
+   for X-ray therapy    |   25 MeV            high (100 x)       flattener
+	photon mode     |  
+			|  
+   for field light mode |      0                 0                 none
+
+
+       What can go wrong?
+
+	(a) if beam has high current, but turntable has 'magnets', not
+	the flattener, it is a disaster: patient gets hit with high
+	current electron beam
+
+	(b) another way to kill a patient is to turn the beam on with
+	the turntable in the field-light position
+
+	So what's going on? (Multiple modes, and mixing them up is very,
+	    very bad)
+
+
+    * What actually went wrong?
+
+        [ask for input.]
+
+	--two software problems
+
+	--a bunch of non-technical problems
+
+	(i) software problem #1:
+
+[this is our best guess; actually hard to know for sure, given
+	the way that the paper is written.]
+
+	--three threads
+	    --keyboard
+	    --turntable
+	    --general parameter setting
+
+	--see handout for the pseudocode
+
+	--now, if the operator sets a consistent set of parameters for x
+	(X-ray (photon) mode), realizes that the doctor ordered something
+	different, and then edits very quickly to e (electron) mode,
+	then what happens?
+
+	    --if the re-editing takes less than 8 seconds, the general
+	    parameter setting thread never sees that the editing
+	    happened because it's busy doing something else. when it
+	    returns, it misses the setup signal (probably every single
+	    concurrency commandment was violated here....)
+
+	    --now the turntable is in 'e' position (magnets)
+
+	    --but the beam is a high intensity beam because the 'Treat'
+	    never saw the request to go to electron mode
+
+	    --each thread and the operator thinks everything is okay
+
+	    --operator presses BEAM ON --> patient mortally injured
+
+	 --so why doesn't the computer check the set-up for consistency before turning on the beam? [all it does it check that there's
+	 no more input processing.] 
+	    alternatives:
+		--double-check with operator
+		--end-to-end consistency check in software
+		--hardware interlocks
+		[probably want all of the above] 
+
+        (ii) software problem #2
+
+	how it's supposed to work:
+
+	    --operator sets up parameters on the screen
+
+	    --operator moves turntable to field-light mode, and visually
+	    checks that patient is properly positioned
+
+	    --operator hits "set" to store the parameters
+
+	    --at this point, the class3 "interlock" (in quotation marks
+	    for a reason) is supposed to tell the software to check and
+	    perhaps modify the turntable position
+
+	    --operator presses "beam on"
+
+	how they implemented this:
+
+	    --see pseudocode on handout
+
+	but it doesn't always work out that way. why?
+	    
+	    --because this boolean flag is implemented as a counter.
+
+	    --(why implemented as a counter? PDP-11 had an Increment
+	    Byte instruction that added 1 ("inc A"). This increment
+	    thing presumably took less code space than materializing the
+	    constant 1 in an instruction like "A = 1".)
+
+	    --so what goes wrong?
+		
+		--every 256 times that code runs, class3 is set to 0,
+		operator presses 'set', and no repositioning
+
+		--operator presses "beam on", and a beam is delivered in
+		field light position, with no scanning magnets or
+		flattener --> patient injured or killed
+
+	(iii) Lots of larger issues here too
+
+	    --***No end-to-end consistency checks***. What you actually
+	    want is:
+		--right before turning the beam on, the software checks
+		that parameters line up
+		--hardware that won't turn beam on if the parameters are
+		inconsistent
+		--then double-check that by using a radiation "phantom"
+
+	    --too easy to say 'go', errors reported by number, no
+	    documentation
+
+            --garbage left on the screen
+
+	    --false alarms (operators learn the following response:
+	    "it'll probably work the next time") 
+		(put differently, people became "insensitive to machine
+		malfunctions")
+
+	    --unnecessarily complex and poor code
+
+	    --ill-fitting software reuse: wrote own OS ... but used code
+	    from a different machine
+	    
+	    --measuring devices that report _underdoses_ when they are
+	    ridiculously saturated
+
+	    --no real quality control, unit tests, etc.
+
+	    --no error documentation, no documentation on software
+	    design
+
+	    --no follow-through on Therac-20's blown fuses
+
+            --ignored initial problem reports
+
+	    --company lied; didn't tell users about each other's
+	    failures
+
+	    --users weren't required to report failures to a central
+	    clearinghouse
+
+            --wishful thinking: they made some changes, and just hoped
+            that the changes addressed the bug. "The letter goes on to
+            support this opinion by listing two pages of technical
+            reasons why an overdose by the Therac-25 was impossible."
+            (My code can't have bugs!!!)
+
+	    --no investigation when other problems arose
+
+	    --company assumed software wasn't the problem; in fact, they
+	    assumed that software could make the machine safe.
+
+	    --risk analyses were totally bogus: parameters chosen from
+	    thin air. 10^{-11}, 4*10^{-9}, etc. Obviously those parameters
+	    were wrong!!
+		(they were supposedly estimating things like "computer
+		selects wrong energy" as having 10^{-11} probability)
+
+	    --bogus changes that didn't solve the problems
+
+	    --covering the cursor "UP" key, as if that was the problem
+	    (or the only problem)
+
+	    --process
+		--no unit tests
+		--no quality control
+
+
+    * What could/should they have done?
+
+    --Addressing the stuff above
+
+    --You might be thinking, "So many things went wrong. There was no
+    single cause of failure. Does that mean no single design change
+    could have contributed to success?"
+
+    --Answer: no! do end-to-end consistency checks! that single
+    change would have prevented these errors!
+
+    [--why no hardware interlocks?
+	--decided not worth the expense
+	--people (wrongly) trusted software]
+
+   * why is it so hard to figure out what is going on?
+
+   --because the writing isn't good
+
+        --irrelevant details
+
+        --repetition
+
+        --inconsistent descriptions
+
+        --sentences in passive voice
+
+        --pseudo-code doesn't tell us what's actually going on
+
+        --confusing energy and current (the problem is a beam with high
+        _current_, leading to high energy striking the patient, but they
+        never say that).
+ 
+    * What happened in disasters reported by NYT?
+
+	--Hard to know for sure
+
+	--Looks like: software lost the treatment plan, and it defaulted 
+	to "all leaves open". Analog of field light position.
+
+	What could/should have been done?
+
+	    --a good rule is: "software should have sensible defaults".
+	    looks like this rule is violated here.
+
+	    --in a system like this, there should be hardware interlocks
+	    (for example: no turning on the beam unless the leaves are
+	    closed)
+
+
+
+    * Discussion
+
+    Theme in building systems: be tolerant of inputs / be strict about
+    outputs (they were the other way around)
+    
+    Authors say: "There is always another software bug." Why? (Because
+    there usually is.)
+
+    "Patient reactions were the only real indications of the seriousness
+    of the problems with the Therac-25." (Ouch.)
+
+    Where do the best programmers go?
+
+	--web app startups...search engines...social networks....where
+	nothing really needs to work (or, at least, if there are bugs,
+	people don't die)
+
+	--There **may** be an inverse correlation between programmer
+	quality and how safety critical the code that they are writing
+	is (I have no proof of this, but if I look at where the 
+	"hotshot" developers are going, it's not usually to write the
+	software to drive linear accelerators.)
+    
+    Lessons:
+
+        --complex systems fail for complex reasons
+
+	--be tolerant of inputs (they weren't); be strict on outputs
+	(they weren't)
+
+    Amateur ethics/philosophy
+
+	(i). Philosophical/ethical question: you have a 999/1000 chance of being
+	cured by this machine. 1/1000 times it will cause you to die a gruesome
+	death. do you pick it? most people would.
+
+	--> then, what *should* the FDA do?
+
+	(ii). should people have to be licensed to write software?
+	(food for thought)
+
+	(iii). Would you say something if you were working at such a
+	company? What if you were a new hire? What if it weren't safety
+	critical?
+
+

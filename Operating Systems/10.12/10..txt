@@ -1,0 +1,165 @@
+https://afteracademy.com/blog/what-is-the-difference-between-preemptive-and-non-preemptive-scheduling
+
+preemptive scheduling 抢占式调度
+CPU will execute a process 
+but for a limited period of time and after that,
+the process has to wait for its next turn
+
+nonpreemptive 非抢占式调度
+if some resource is allocated to a process
+then that resource will not be taken back
+until the completion of the process
+
+
+TURNAROUND TIME 周转时间 (c7->2) of a job:
+time at which the job completes minus the time at which the job arrived in the system
+T_{turnaround} = T_{completion} - T_{arrival}
+if assume all jobs arrive at the same time, and 
+T_{arrival} = 0,
+then T_{turnaround} = T_{completion}
+
+waiting/response/output time: time spent waiting for something to happen
+waiting or response time : time between when job enters system and starts executing
+output time: time from request to first response
+
+fairness: freedom from starvation
+
+starvation 饿死
+high priority processes keep executing
+and low priority processes get blocked for indefinite time
+
+context switching 上下文交换:
+human: the process of stopping work in one project
+and picking it back up after performing a different task on a different project
+cs: storing the state of a process or thread, 
+so that it can be restored and resume execution at a later point
+
+context switching cost:
+	- cpu time in kernel (save and restore registers, switch address spaces)
+	- indirect cost (translation lookaside buffer 转译后备缓冲器 TLB, processor cache, os cache)
+
+
+average turnaround time = total turnaround time / # processes
+
+FIFO, first in first out; FCFS, first come first served:
+runing a long process first increase the average tt
+
+SJF, shortest job first
+
+
+STCF, shortest time to-completion first
+(assume that jobs can arrive at any time instead of all at once)
+preemptive version of SJF: if job arrives that has a shorter
+time to completion than the remaining time on the current job,
+immediately preempt(acquire) cpu to give to new job
+
+
+RR, round robin 轮询调度
+instead of running jobs to completion, RR runs a job for a
+time slice 时间切片 (=scheduling quantum)
+after time slice, job go to back of the ready queue
+advantages:
+	- fair allocation of cpu across jobs
+	- low average response time when job lengths vary
+	- good for output time if small number of jobs
+
+disadvantage:
+	- what if jobs same length?
+	- ex: 2 jobs of 50 time units each, quantum of 1
+	- average turnaround time = (99 + 100)/2 = 99.5
+	(vs. 75 for first come first serve (50 + 100)/2 = 75)
+
+how to choose quantum size?
+	- quantum size much larger than context switch cost
+	- majority of cpu bursts 处理器突发时间 should be less than quantum 
+	- if quantum size too small, too much context switching
+	- if quantum size too large, response time suffers, (extreme case, reverts to FCFS)
+
+
+EWMA
+exponentially weighted moving average
+t_n: length of process's nth cpu burst (突发时间 amount of time
+the process uses the processor before it is no longer ready)
+burst time = total time taken by process for its execution on cpu
+tao_{n+1}: estimate for the (n+1)th burst
+0 <= alpha <= 1
+tao_{n+1} = alpha t_n + (1 - alpha) tao_n
+tao_{n+1} = alpha t_n + (1 - alpha)(alpha t_{n-1} + (1 - alpha) tao_{n-1})
+tao_{n+1} =  alpha t_n + (1 - alpha) alpha t_{n-1} 
++ (1 - alpha)^2 alpha tao_{n-2} + ... + (1 - alpha)^n alpha t_0
+each older term given expoentially less weight
+
+
+
+
+
+
+MLFQ
+multi-level feedback queue 多级反馈队列
+- distinct queues each assigned a diff priority level
+- if more than 1 job with same priority, use round-robin scheduling 
+rule 1: if priority(A) > priority(B): A runs, B does not
+rule 2: if priority(A) = priority(B): A & B run in round-robin
+- MLFQ varies the priority of a job based on its observed behavior:
+	- a job repeatedly relinquishes 放弃 cpu (waiting for input
+	from keyboard),  = keep high priority
+	- a job uses cpu intensively 集中密集地, 
+	= reduce to low priority
+rule 3: when job enters system, highest priority (in topmost queue)
+rule 4a: if a job uses up an entire time slice while running,
+its priority is reduced (moves down 1 queue)
+rule 4b: if a job gives up the cpu before the time slice is up, 
+it stays at the same priority level
+
+/* cpu bound(cpu 密集型, 受限型) 
+time to complete a task is determined mostly by
+the speed of the central processor:
+processor utilization is high
+它完成一项任务的时间取决于中央处理器的速度。
+其处理器占用率高 */
+interactive: users sitting and staring at the screen,
+waiting for a process to finish (short running,
+frequently relinquish the cpu)
+
+to avoid starvation (long-running jobs will never receive any CPU time)
+periodically boost the priority of all jobs in system
+rule 5: after some time period S, move all jobs in the system
+to the topmost queue
+
+
+
+
+
+
+
+proportional share (比例份额)/ fair share (公平份额) scheduler 调度程序 
+lottery 彩票 scheduling:
+hold a lottery to determine which process should get
+to run next
+ticket 彩票数: share of a resource that a process should receive
+processes A, B;
+A->ticket = 75;
+B->ticket = 25;
+A should receive 75% of the cpu
+and B the remaining 25%
+scheduler picks a winning ticket, number from 0 to 99
+A holds tickets 0 through 74
+B holds tickets 75 through 99
+winning ticket determines whether A or B runs
+
+
+
+
+stride scheduling 步幅调度
+a deterministic 确定性的 fair-share scheduler
+Each job in the system has a stride,
+which is inverse in proportion to the number of tickets it has
+A->ticket = 100
+B->ticket = 50
+C->ticket = 250
+compute the stride 步长 of each by dividing some large
+number by the number of tickets each process has been assigned
+if large_number = 10000
+A->stride = 10000/100 = 100
+B->stride= 10000/50 = 200
+C->stride = 10000/250 = 40

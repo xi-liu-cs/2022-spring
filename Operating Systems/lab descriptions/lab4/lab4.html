@@ -1,0 +1,959 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<p><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-beta1/katex.min.css" integrity="sha384-VEnyslhHLHiYPca9KFkBB3CMeslnM9CzwjxsEbZTeA21JBm7tdLwKoZmCt3cZTYD" crossorigin="anonymous"> 
+</p>
+<div class="container">
+  <title>CS202: Lab 4: WeensyOS</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <style type=text/css>
+  @import url("https://use.typekit.net/jlb5olz.css");
+  
+  /* heavily borrowed from Harvard's cs61, which calls it cs161.css */
+  
+  ol > li > ol {
+  	list-style-type: lower-alpha;
+  }
+  ol.upper-alpha {
+  	list-style-type: upper-alpha;
+  }
+  p + ol, p + ul {
+  	margin-bottom: 1rem;
+  }
+  p:last-child {
+  	margin-bottom: 0.5rem;
+  }
+  
+  /* cs202 additions */
+  .required, .challenge, .question {
+    padding: .5em .5em .5em .5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #f0f0ff;
+  }
+  
+  .highlight {
+      border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+      background: #fffff0;
+      padding-left: 0.25rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-right: 1rem;
+  }
+  
+  .honors {
+    padding: .5em .5em .5em .5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fffff0;
+  }
+  
+  
+  .callout {
+      border-left: 0.25rem solid #5bc0de;
+      background: #5bc0de;
+      padding-left: 0.25rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-right: 1rem;
+  }
+  
+  div.required .header {
+      font-weight: bold;
+  }
+  div.honors .header {
+      font-weight: bold;
+  }
+  
+  div.callout .header {
+      font-weight: bold;
+  }
+  
+  
+  div.challenge .header {
+      font-style: italic;
+  }
+  
+  
+  div.challenge {
+      background-color: #ffe0e0;
+  }
+  
+  
+  
+  div.highlight .header {
+      font-weight: bold;
+  }
+  
+  pre {
+      background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4
+  }
+  
+  #topnavbar ul {
+   width: 100%;
+   float: left;
+  
+   margin: 0;
+   padding: 0;
+  
+   text-align: center;
+   white-space: nowrap;
+   color: #000;
+   font-family: Arial, Helvetica, sans-serif;
+   background-color: white;
+   border-top: solid 2px maroon;
+   border-bottom: solid 2px maroon;
+   clear: right;
+   margin-top: .5em;
+   margin-bottom: .5em;
+  }
+  
+  #topnavbar ul li {
+   display: inline;
+   padding-left: 0;
+   padding-right: 0;
+  }
+  
+  #topnavbar ul li a {
+   padding: 3px 10px;
+   text-decoration: none;
+   color: #000;
+   background-color: white;
+   float: left;
+   border-right: 1px solid black;
+  }
+  
+  #topnavbar ul li a:hover {
+   background-color: maroon;
+   color: white;
+  }
+  
+  #topnavbar div { 
+   clear: both;
+  }
+  
+  div#news {
+    width: 30%;
+    float: right;
+    margin-left: 2em;
+    padding-left: 1em;
+    background-color: #fffff0;
+    margin-bottom: 0.5em;
+    border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+  /*  border: 1px solid maroon;*/
+  }
+  
+  dl.idealist dt { 
+    font-weight: bold;
+  }
+  
+  dl.idealist dt { 
+    margin-top: 0.5em;
+  }
+  
+  
+  dl.newslist { 
+   margin: 0;
+   padding: 0;
+  }
+  
+  dl.newslist dt { 
+   padding-left: 0;
+   color: #000055;
+   font-weight: bold;
+   margin-bottom: 0.2em;
+  }
+  
+  dl.newslist dd {
+    padding-bottom: 1em;
+    margin-bottom: 0;
+    margin-left: 1em;
+    padding-left: 0;
+    margin-right: 1em;
+  }
+  
+  div#news p { 
+  margin-top: 0; 
+  padding-top: 0;
+  }
+  
+  #announcements p { 
+    color: maroon;
+  }
+  
+  #announcements h1 { 
+    color: #ffffff;
+    text-align: center;
+    font-size: 110%;
+    text-decoration: underline;
+  }
+  
+  /* The alternating announcement colors */
+  #announcements p.one { color: #ff0000; }
+  #announcements p.two { color: #00ff00; }
+  #announcements p.three { color: #3333ff; }
+  
+  .announce_date { font-weight: bold; }
+  table.people {
+    margin-left: 10px;
+    padding: 2px;
+    border-collapse: collapse;
+    border: none;
+  }
+  
+  table.people th { 
+    font-weight: bold;
+    text-align: left;
+    border: 0;
+  /*  border-bottom: solid 2px; */
+  }
+  
+  table.people td { 
+    padding-right: 1em;
+  /*
+    border: none;
+    border-bottom: 1px solid #888;
+    padding-right: 1em;
+    padding-left: 1em;
+  */
+  }
+  
+  table.books {
+    margin-left: 2%;
+  /*  margin-bottom: 8px; */
+  }
+  
+  table.books tr,td {
+    vertical-align: top;
+  }
+  
+  table.assignments { 
+  /*  width: 98%; */
+    margin-left: 1%;
+    margin-right: 1%;
+    border-collapse: collapse;
+  }
+  
+  table.assignments th { 
+  /*  background: #E0FFFF;*/
+    color: black;
+    border: none;
+    text-align: left;
+    width: 29%;
+  }
+  
+  table.assignments tr,td { 
+  /*  padding: 50px;
+    border-width: 50px;
+    border-style: solid;
+    border-color: black;
+    border-spacing: 0px;*/
+    border: none;
+  }
+  
+  table.schedule {
+    width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+    border-collapse:  collapse;
+  }
+  
+  table.schedule th { 
+  /*  background: maroon;*/
+    color: black;
+    border-width: 0px;
+    text-align: left;
+  }
+  
+  table.Schedule tr { 
+    padding: 3px;  
+    border-width: 1px; 
+    border-spacing: 0px; 
+    border-style: solid;  
+    border-color: black;
+  }
+  
+  table.Schedule th,td { 
+    padding: 5px;  
+    border-width: 1px; 
+    border-spacing: 0px; 
+    border: none;  
+    border-color: black;
+  }
+  /* Presentation:  No underlines on links in schedule unless you're
+   * moving the mouse over it. */
+  
+  table.schedule tr.lecture { background: white; border-bottom: 1px solid #736F6E; }
+  table.schedule tr.alt { background: #E0FFFF; }
+  /*table.schedule tr.lecture.alt { background: white; }*/
+  /*table.schedule tr.noclass { background: #d3d3d3; }
+  table.schedule tr.makeupclass { background: #FAAFBE; }*/
+  table.schedule tr.noclass { color: #736F6E; }
+  table.schedule tr.makeupclass { color: #FF0000; border-bottom: 1px solid #736F6E;}
+  table.schedule td.readings { color: black; }
+  table.schedule td.altreadings { color: black; }
+  table.schedule tr.due { color: #FF0000; }
+  table.schedule td.due { color: #FF0000; }
+  table.schedule tr.exam    { color: #FF0000; background: #ccf; }
+  table.schedule tr.recitation { background: #ccf; }
+  table.schedule tr.recitation.alt { background: #ccf; }
+  table.schedule tr.lechead { font-weight: bold; text-align: left; height:20px}
+  
+  
+  
+  /* end cs202 additions */
+  
+  blockquote {
+  	margin-left: 2rem;
+  	padding-left: 1rem;
+  }
+  blockquote > h3:first-child {
+  	margin-top: 0.5rem;
+  }
+  blockquote, blockquote.solution.note {
+  	border-left: 0.25rem solid rgba(0, 0, 80, 0.25);
+  }
+  .solution.shown, .solution-collapsed.shown {
+  	animation: slide-down .3s ease-out;
+  }
+  .solution, blockquote.highlight {
+  	border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+  	background: #fffff0;
+  	padding-top: 0.25rem;
+  	padding-bottom: 0.25rem;
+  	padding-right: 1rem;
+  }
+  .solution-collapsed, blockquote.note {
+  	background: #f0f0ff;
+  	padding-top: 0.25rem;
+  	padding-bottom: 0.25rem;
+  	padding-right: 1rem;
+  }
+  .solution-collapsed {
+  	display: table;
+  	border-left: 0rem none;
+  	margin-left: 0rem;
+  	font-size: smaller;
+  }
+  .larger {
+  	font-size: larger;
+  }
+  a.js-solution.hide {
+  	font-size: smaller;
+  }
+  a.js-solution.hide.all {
+  	font-size: inherit;
+  }
+  .githubref {
+  	text-align: right;
+  	margin-top: -0.5rem;
+  	font-style: italic;
+  	font-size: 0.75rem;
+  }
+  .float-left {
+  	float: left;
+  }
+  .float-right {
+  	float: right;
+  }
+  @keyframes slide-down {
+  	0% { opacity: 0; }
+  	100% { opacity: 1; }
+  }
+  .post {
+  	margin-bottom: 3rem;
+  }
+  .post img {
+  	max-width: 100%;
+  }
+  .tall > img {
+  	max-height: 50vh;
+  }
+  h1, h2, h3, h4 {
+  	font-family: "brix-slab", sans-serif;
+  }
+  h1 {
+  	font-weight: 900;
+  }
+  h2 {
+  	margin-top: 3rem;
+  	font-weight: 700;
+  }
+  h2:first-child {
+  	margin-top: 0;
+  }
+  .h3, h3 {
+  	font-size: 1.5rem;
+  }
+  .h4, h4 {
+  	font-size: 1.25rem;
+  	font-style: italic;
+  }
+  h3 {
+  	margin-top: 1.5rem;
+  }
+  h3 > code {
+  	color: inherit;
+  }
+  .container th, .container td {
+  	padding: 0.15rem 1.5rem 0.15rem 0;
+  }
+  .container table {
+  	margin: 0.85rem 0;
+  	border-spacing: 0;
+  }
+  tr.even > td,
+  table.alternate > tbody > tr:nth-child(even) > td {
+  	background: #f0f0ff;
+  }
+  tr.separator > td, tr.separator > th {
+  	background: #d8d8f8;
+  }
+  td > p:first-child, th > p:first-child {
+  	margin-top: 0.25rem;
+  }
+  td > p:last-child, th > p:last-child {
+  	margin-bottom: 0.25rem;
+  }
+  table.padleft > thead > tr > th:first-child,
+  table.padleft > tbody > tr > td:first-child,
+  table.padleft > tbody > tr > th:first-child {
+  	padding-left: 0.35rem;
+  }
+  th.r {
+  	font-weight: normal;
+  }
+  tr.row-wide-padding > td {
+  	padding-left: 3em;
+  	padding-right: 3em;
+  }
+  tr.row-wide-padding > td:first-child {
+  	padding-left: 0;
+  }
+  tr.row-wide-padding > td:last-child {
+  	padding-right: 0;
+  }
+  tr.row-space-above > td {
+  	padding-top: 3em;
+  }
+  div.sp {
+  	margin-top: 3em;
+  }
+  
+  blockquote.float-left {
+  	margin-left: 0;
+  	padding-left: 0;
+  	border-left: 0 none;
+  	margin-right: 3rem;
+  }
+  blockquote.float-left.half-width {
+  	min-width: 25rem;
+  	max-width: 100%;
+  }
+  
+  /* prettier table types */
+  table.wikitable > tr > th,
+  table.wikitable > tr > td,
+  table.wikitable > * > tr > th,
+  table.wikitable > * > tr > td {
+  	border: 1px solid #a2a9b1;
+  	padding: 0.2em 0.4em;
+  }
+  table.wikitable th {
+  	text-align: center;
+  	background-color: #eaecf0;
+  }
+  td.hgray, tr.hgray {
+  	background-color: #888888;
+  }
+  td.hpink, tr.hpink {
+  	background: #ff80bb;
+  }
+  
+  table.truthtable > * > tr > th,
+  table.truthtable > * > tr > td {
+  	border: 2px solid #a2a9b1;
+  	padding: 0.6em;
+  	text-align: center;
+  }
+  
+  table.nowrap1 > * > tr > th:first-child,
+  table.nowrap1 > * > tr > td:first-child {
+  	white-space: nowrap;
+  }
+  table.text-right-1 > * > tr > th:first-child,
+  table.text-right-1 > * > tr > td:first-child {
+  	text-align: right;
+  }
+  table.text-right-2 > * > tr > th:nth-child(2),
+  table.text-right-2 > * > tr > td:nth-child(2) {
+  	text-align: right;
+  }
+  .text-left {
+  	text-align: left;
+  }
+  .text-center {
+  	text-align: center;
+  }
+  .text-right {
+  	text-align: right;
+  }
+  
+  hr.c {
+  	clear: both;
+  	margin: 0;
+  	border: 0 none;
+  	height: 0;
+  }
+  
+  .hellobackground {
+  	position: fixed;
+  	transform: rotate(-15deg);
+  	opacity: 0.15;
+  	z-index: -1;
+  	top: -3rem;
+  	left: -2.5rem;
+  }
+  .float-left.rotate-img-m5 {
+  	margin-right: 1.5em;
+  }
+  .float-right.rotate-img-5 {
+  	margin-left: 1.5em;
+  }
+  img.rotate-img-5, .rotate-img-5 img {
+  	transform: rotate(5deg);
+  }
+  img.rotate-img-m5, .rotate-img-m5 img {
+  	transform: rotate(-5deg);
+  }
+  
+  figure > img {
+  	max-width: 100%;
+  	object-fit: scale-down;
+  }
+  
+  .navbar-has-drafts {
+  	background: yellow;
+  }
+  
+  .hidden {
+  	display: none;
+  }
+  hr.prbr {
+  	border: 0 none;
+  }
+  hr.twoem {
+  	border: 0 none;
+  	margin-top: 2em;
+  }
+  hr.fourem {
+  	border: 0 none;
+  	margin-top: 4em;
+  }
+  hr.eightem {
+  	border: 0 none;
+  	margin-top: 8em;
+  }
+  hr.sixteenem {
+  	border: 0 none;
+  	margin-top: 16em;
+  }
+  
+  @media print {
+  html {
+  	font-size: 125%;
+  }
+  h1 {
+  	font-size: 2rem;
+  }
+  h2 {
+  	font-size: 1.5rem;
+  	margin-top: 2rem;
+  }
+  .prbr {
+  	page-break-before: always;
+  	margin-top: 0;
+  }
+  @page {
+  	margin-top: 0.75in;
+  	margin-bottom: 0.75in;
+  }
+  .hellobackground {
+  	display: none;
+  }
+  .print-hide-solutions .solution, .print-hide-solutions .solution-collapsed {
+  	display: none;
+  }
+  a, a:not(.btn) {
+  	color: inherit;
+  	text-decoration: none;
+  }
+  }
+  
+  @media not print {
+  .pronly {
+  	display: none;
+  }
+  }
+  
+  .navbar .gsc-control-cse {
+  	padding: 0;
+  	padding-top: .5rem;
+  	padding-left: 1rem;
+  	background: inherit;
+  	border: 0 none;
+  }
+  </style>
+</head>
+<body>
+<nav>
+<a href="../index.html">Home</a> |
+<a href="../syllabus.html">Schedule</a> |
+<a href="../policies.html">Policies and grading</a> |
+<a href="../labs.html">Labs</a> |
+<a href="../setup.html">Infrastructure</a> |
+<a href="../exams.html">Exams</a></li> |
+<!--<a href="../tools.html">Tools</a></li>-->
+<a href="../reference.html">Reference materials</a> |
+<a href="../announcements.html">Announcements</a>
+</nav>
+<p></p>
+<header id="title-block-header">
+<h1 class="title">CS202: Lab 4: WeensyOS</h1>
+</header>
+<p></p>
+<div class="post">
+<h2 id="introduction">Introduction</h2>
+<p>In this lab, you will implement process memory isolation, virtual memory, and a system call (<code>fork()</code>) in a tiny (but real!) operating system, called WeensyOS.</p>
+<p>This will introduce you to virtual memory and reinforce some of the concepts that we have covered this semester.</p>
+<p>The WeensyOS kernel runs on x86-64 CPUs. Because the OS kernel runs on the “bare” hardware, debugging kernel code can be tough: if a bug causes misconfiguration of the hardware, the usual result is a crash of the entire kernel (and all the applications running on top of it). And because the kernel itself provides the most basic system services (for example, causing the display hardware to display error messages), deducing what led to a kernel crash can be particularly challenging. In the old days, the usual way to develop code for an OS (whether as part of a class, in a research lab, or in industry) was to boot it on a physical CPU. The lives of kernel developers have gotten much better since. You will run WeensyOS in QEMU.</p>
+<p>QEMU is a software-based x86-64 emulator: it “looks” to WeensyOS just like a physical x86-64 CPU, but if your WeensyOS code-in-progress wedges the (virtual) hardware, QEMU itself and the whole OS that is running on the “real” hardware (that is, the Linux OS you booted and that QEMU is running on) survive unscathed (“real” is in quotation marks because your Linux OS devbox is itself running on emulated hardware). So, for example, your last few debugging <code>printf()</code>s before a kernel crash will still get logged to disk (by QEMU running on Linux), and “rebooting” the kernel you’re developing amounts to re-running the QEMU emulator application.</p>
+<div class="highlight">
+<p><span class="header">Heads up.</span> As always, it’s important to start <em>on time</em>. In this case, <em>on time</em> means 3 weeks before the assignment is due, as you will almost certainly need all of the allotted time to complete the lab. Kernel development is less forgiving than developing user-level applications; tiny deviations in the configuration of hardware (such as the MMU) by the OS tend to bring the whole (emulated) machine to a halt.</p>
+<p>To save yourself headaches later, read this lab writeup in its entirety before you begin.</p>
+</div>
+<div class="highlight">
+<p><span class="header">Resources.</span></p>
+<ul>
+<li><p>You may want to look at Chapter 9 of CS:APP3e (from which our <a href="https://cs.nyu.edu/~mwalfish/classes/20sp/lectures/handout08.pdf">x86-64 virtual memory handout</a> is borrowed). The book is on reserve at the <a href="https://cims.nyu.edu/library/about.html">Courant library</a>. Section 9.7 in particular describes the 64-bit virtual memory architecture of the x86-64 CPU. Figure 9.23 and Section 9.7.1 show and discuss the <code>PTE_P</code>, <code>PTE_W</code>, and <code>PTE_U</code> bits; these are flags in the x86-64 hardware’s page table entries that play a central role in this lab.</p></li>
+<li><p>You may find yourself during the lab wanting to understand particular assembly instructions. Here are two guides to x86-64 instructions, from <a href="https://cs.brown.edu/courses/cs033/docs/guides/x64_cheatsheet.pdf">Brown</a> and <a href="https://www.cs.cmu.edu/~fp/courses/15213-s07/misc/asm64-handout.pdf">CMU</a>. The former is more digestible; the latter is more comprehensive. The supplied code also uses certain assembly instructions like <code>iret</code>; see <a href="https://www.felixcloutier.com/x86/">here</a> for a reference.</p></li>
+</ul>
+</div>
+<h2 id="getting-started">Getting Started</h2>
+<p>You’ll be working on the devbox as usual. From within the devbox, obtain the lab files as follows:</p>
+<pre><code>$ cd ~/cs202
+$ git fetch upstream
+$ git merge upstream/main</code></pre>
+<p>This lab’s files are located in the <code>lab4</code> subdirectory.</p>
+<p>If you have any “conflicts” from lab 3, <a href="https://cs61.seas.harvard.edu/site/ref/git/#conflicts">resolve them</a> before continuing further. Run <code>git push</code> to save your work back to your personal repository.</p>
+<div class="highlight">
+<p><span class="header">Another heads up.</span> Given the complexity of this lab, and the possibility of breaking the functionality of the kernel if you code in some errors, make sure to commit and push your code often! It's very important that your commits have working versions of the code, so if something goes wrong, you can always go back to a previous commit and get back a working copy! At the very least, for this lab, you should be committing once per step (and probably more often), so you can go back to the last step if necessary.</p>
+</div>
+<h2 id="goal">Goal</h2>
+<p>You will implement complete and correct memory isolation for WeensyOS processes. Then you'll implement full virtual memory, which will improve utilization. You'll implement <code>fork()</code> (creating new processes at runtime) and for extra credit, you’ll implement <code>exit()</code> (destroying processes at runtime).</p>
+<p>We’ve provided you with a lot of support code for this assignment; the code you will need to write is in fact limited in extent. Our complete solution (for all 5 stages) consists of well under 300 lines of code beyond what we initially hand out to you. All the code you write will go in <code>kernel.c</code> (except for part of step 6).</p>
+<h2 id="testing-checking-and-validation">Testing, checking, and validation</h2>
+<p>For this assignment, your primary checking method will be to run your instance of Weensy OS and visually compare it to the images you see below in the assignment.</p>
+<p>Studying these <em>graphical memory maps</em> carefully is the best way to determine whether your WeensyOS code for each stage is working correctly. Therefore, you will definitely want to <strong>make sure you understand how to read these maps before you start to code</strong>.</p>
+<p>We supply some grading scripts, outlined at the end of the lab, but those will not be your principal source of feedback. For the most part, they indicate only whether a given step is passing or failing; look to the memory maps to understand why.</p>
+<h2 id="initial-state">Initial state</h2>
+<p>Run <code>make run</code> in your <code>lab4</code> directory. You should see something like the below, which shows four processes running in parallel, each running a version of the program in <code>p-allocator</code>:</p>
+<p><a href="fig-memos-initial.gif" class="image"><img src="fig-memos-initial.gif" width="720" height="400" alt="fig-memos-initial.gif" /></a></p>
+<p>This image loops forever; in an actual run, the bars will move to the right and stay there. Don't worry if your image has different numbers of K's or otherwise has different details.</p>
+<p>If your bars run painfully slowly, edit the <code>p-allocator.c</code> file and reduce the <code>ALLOC_SLOWDOWN</code> constant.</p>
+<div class="highlight">
+<p><em>Stop now to read and understand <code>p-allocator.c</code>.</em></p>
+<p>Here’s how to interpret the memory map display:</p>
+<ul>
+<li><p>WeensyOS displays the current state of physical and virtual memory. Each character represents 4 KB of memory: a single page. There are 2 MB of physical memory in total. (Ask yourself: how many pages is this?)</p></li>
+<li><p>WeensyOS runs four processes, 1 through 4. Each process is compiled from the same source code (<code>p-allocator.c</code>), but linked to use a different region of memory.</p></li>
+<li><p>Each process asks the kernel for more heap memory, one page at a time, until it runs out of room. As usual, each process's heap begins just above its code and global data, and ends just below its stack. The processes allocate heap memory at different rates: compared to Process 1, Process 2 allocates twice as quickly, Process 3 goes three times faster, and Process 4 goes four times faster. (A random number generator is used, so the exact rates may vary.) The marching rows of numbers show how quickly the heap spaces for processes 1, 2, 3, and 4 are allocated.</p></li>
+</ul>
+<p>Here are two labeled memory diagrams, showing what the characters mean and how memory is arranged.</p>
+<p><a href="fig-memos-physmap.gif" class="image"><img src="fig-memos-physmap.gif" width="693" height="211" alt="fig-memos-physmap.gif" /></a></p>
+<p><a href="fig-memos-physmap2.gif" class="image"><img src="fig-memos-physmap2.gif" width="693" height="222" alt="fig-memos-physmap2.gif" /></a></p>
+<p>The virtual memory display is similar.</p>
+<ul>
+<li><p>The virtual memory display cycles successively among the four processes’ address spaces. In the base version of the WeensyOS code we give you to start from, all four processes’ address spaces are the same (your job will be to change that!).</p></li>
+<li><p>Blank spaces in the virtual memory display correspond to unmapped addresses. If a process (or the kernel) tries to access such an address, the processor will page fault.</p></li>
+<li><p>The character shown at address X in the virtual memory display identifies the owner of the corresponding physical page.</p></li>
+<li><p>In the virtual memory display, a character is <strong><span style="color: black;background-color: red">reverse video</span></strong> if an application process is allowed to access the corresponding address. Initially, <em>any</em> process can modify <em>all</em> of physical memory, including the kernel. Memory is not properly isolated.</p></li>
+</ul>
+</div>
+<h2 id="running-weensyos">Running WeensyOS</h2>
+<p>Read the <code>README.md</code> file for information on how to run WeensyOS. If QEMU’s default display causes accessibility problems, you will want to run <code>make run-console</code>. To make <code>run-console</code> the default, run <code>export QEMUCONSOLE=1</code> in your shell.</p>
+<p>There are several ways to debug WeensyOS. We recommend adding <code>log_printf</code> statements to your code. The output of <code>log_printf</code> is written to the file <code>log.txt</code> <em>outside</em> QEMU, into your <code>lab4</code> working directory. We also recommend that you use assertions (of which we saw a few in lab 1) to catch problems early. For example, call the helper functions we’ve provided, <code>check_page_table_mappings</code> and <code>check_page_table_ownership</code> to test a page table for obvious errors.</p>
+<h3 id="memory-system-layout">Memory system layout</h3>
+<p>The WeensyOS memory system layout is defined by several constants:</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 81%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>KERNEL_START_ADDR</code></td>
+<td>Start of kernel code.</td>
+</tr>
+<tr class="even">
+<td><code>KERNEL_STACK_TOP</code></td>
+<td>Top of kernel stack. The kernel stack is one page long.</td>
+</tr>
+<tr class="odd">
+<td><code>console</code></td>
+<td>Address of CGA console memory.</td>
+</tr>
+<tr class="even">
+<td><code>PROC_START_ADDR</code></td>
+<td>Start of application code. Applications should not be able to access memory below this address, except for the single page at <code>console</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>MEMSIZE_PHYSICAL</code></td>
+<td>Size of physical memory in bytes. WeensyOS does not support physical addresses ≥ this value. Defined as <code>0x200000</code> (2MB).</td>
+</tr>
+<tr class="even">
+<td><code>MEMSIZE_VIRTUAL</code></td>
+<td>Size of virtual memory. WeensyOS does not support virtual addresses ≥ this value. Defined as <code>0x300000</code> (3MB).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="writing-expressions-for-addresses">Writing expressions for addresses</h3>
+<p>WeensyOS uses several C macros to handle addresses. They are defined at the top of <code>x86-64.h</code>. The most important include:</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Macro</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>PAGESIZE</code></td>
+<td>Size of a memory page. Equals 4096 (or, equivalently, <code>1 &lt;&lt; 12</code>).</td>
+</tr>
+<tr class="even">
+<td><code>PAGENUMBER(addr)</code></td>
+<td>Page number for the page containing <code>addr</code>. Expands to an expression analogous to <code>addr / PAGESIZE</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>PAGEADDRESS(pn)</code></td>
+<td>The initial address (zeroth byte) in page number <code>pn</code>. Expands to an expression analogous to <code>pn * PAGESIZE</code>.</td>
+</tr>
+<tr class="even">
+<td><code>PAGEINDEX(addr, level)</code></td>
+<td>The index in the <code>level</code>th page table for <code>addr</code>. <code>level</code> must be between 0 and 3; 0 returns the level-1 page table index (address bits 39–47), 1 returns the level-2 index (bits 30–38), 2 returns the level-3 index (bits 21–29), and 3 returns the level-4 index (bits 12–20).</td>
+</tr>
+<tr class="odd">
+<td><code>PTE_ADDR(pe)</code></td>
+<td>The physical address contained in page table entry <code>pe</code>. Obtained by masking off the flag bits (setting the low-order 12 bits to zero).</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight">
+<p>Before you begin coding, you should both understand what these macros represent and be able to derive values for them if you were given a different page size.</p>
+</div>
+<h3 id="kernel-and-process-address-spaces">Kernel and process address spaces</h3>
+<p>The version of WeensyOS you receive at the start of lab4 places the kernel and all processes in a single, shared address space. This address space is defined by the <code>kernel_pagetable</code> page table. <code>kernel_pagetable</code> is initialized to the <em>identity mapping</em>: virtual address X maps to physical address X.</p>
+<p>As you work through the lab, you will shift processes to using their own independent address spaces, where each process can access only a subset of physical memory.</p>
+<p>The kernel, though, must remain able to access <em>any</em> location in physical memory. Therefore, all kernel functions run using the <code>kernel_pagetable</code> page table. Thus, in kernel functions, each virtual address maps to the physical address with the same number. The <code>exception()</code> function explicitly installs <code>kernel_pagetable</code> when it begins.</p>
+<p>WeensyOS system calls are more expensive than they need to be, since every system call switches address spaces twice (once to <code>kernel_pagetable</code> and once back to the process’s page table). Real-world operating systems avoid this overhead. To do so, real-world kernels access memory using <em>process</em> page tables, rather than a kernel-specific <code>kernel_pagetable</code>. This makes a kernel’s code more complicated, since kernels can’t always access all of physical memory directly under that design.</p>
+<h2 id="step-1-kernel-isolation">Step 1: Kernel isolation</h2>
+<p>In the starting code we’ve given you, WeensyOS processes could stomp all over the kernel’s memory if they wanted to. Better prevent that. Change <code>kernel()</code>, the kernel initialization function, so that kernel memory is inaccessible to applications, except for the memory holding the CGA console (the single page at <code>(uintptr_t) console == 0xB8000</code>).<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>When you are done, WeensyOS should look like the below. In the virtual map, kernel memory is no longer reverse-video, since the user can’t access it. Note the lonely CGA console memory block in reverse video in the virtual address space.</p>
+<p><a href="fig-memos-kernelprot.gif" class="image"><img src="fig-memos-kernelprot.gif" width="726" height="426" alt="fig-memos-kernelprot.gif" /></a></p>
+<p>Hints:</p>
+<ul>
+<li><p>Use <code>virtual_memory_map</code>. A description of this function is in <code>kernel.h</code>. You will benefit from reading all the function descriptions in <code>kernel.h</code>. You can supply <code>NULL</code> for the <code>allocator</code> argument for now.</p></li>
+<li><p>If you really want to look at the code for <code>virtual_memory_map</code>, it is in <code>k-hardware.c</code>, along with many other hardware-related functions.</p></li>
+<li><p>The <code>perm</code> argument to <code>virtual_memory_map</code> is a bitwise-or of zero or more <code>PTE</code> flags, <code>PTE_P</code>, <code>PTE_W</code>, and <code>PTE_U</code>. <code>PTE_P</code> marks <strong>P</strong>resent pages (pages that are mapped). <code>PTE_W</code> marks <strong>W</strong>ritable pages. <code>PTE_U</code> marks <strong>U</strong>ser-accessible pages—pages accessible to applications. You want kernel memory to be mapped with permissions <code>PTE_P|PTE_W</code>, which will prevent applications from reading or writing the memory, while allowing the kernel to both read and write.</p></li>
+<li><p>Make sure that your <code>sys_page_alloc</code> system call preserves kernel isolation: Applications shouldn’t be able to use <code>sys_page_alloc</code> to screw up the kernel.</p></li>
+</ul>
+<p>When you're done with this step, make sure to commit and push your code!</p>
+<h2 id="step-2-isolated-address-spaces">Step 2: Isolated address spaces</h2>
+<p>Implement process isolation by giving each process its own independent page table. Your OS memory map should look something like this when you’re done:</p>
+<p><a href="fig-memos-perprocess.gif" class="image"><img src="fig-memos-perprocess.gif" width="722" height="429" alt="fig-memos-perprocess.gif" /></a></p>
+<p>(Yours won’t look exactly like that; in the first line of physical and virtual memory, instead of having the pattern <code>R11223344</code>, yours will probably have the pattern <code>R1111222233334444</code>. This is because the gif is from a 32-bit architecture; recall that on a 64-bit architecture, there are <em>four</em> levels of page table required.)</p>
+<p>That is, each process only has permission to access its own pages. You can tell this because only its own pages are shown in reverse video.</p>
+<p>What goes in per-process page tables:</p>
+<ul>
+<li><p>The initial mappings for addresses less than <code>PROC_START_ADDR</code> should be copied from those in <code>kernel_pagetable</code>. You can use a loop with <code>virtual_memory_lookup</code> and <code>virtual_memory_map</code> to copy them. Alternately, you can copy the mappings from the kernel’s page table into the new page tables; this is faster, but make sure you copy the right data!</p></li>
+<li><p>The initial mappings for the user area—addresses greater than or equal to <code>PROC_START_ADDR</code>—should be inaccessible to user processes (that is, <code>PTE_U</code> should not be set for these PTEs). In our solution (shown above), these addresses are <em>totally</em> inaccessible (so they show as blank), but you can also change this so that the mappings are still there, but accessible only to the kernel, as in this diagram:</p></li>
+</ul>
+<p><a href="fig-memos-isolated2.gif" class="image"><img src="fig-memos-isolated2.gif" width="722" height="429" alt="fig-memos-isolated2.gif" /></a></p>
+<p>The reverse video shows that this OS also implements process isolation correctly.</p>
+<p>[<strong>Note</strong>: This second approach will pass the automated tests for step 2 but not for steps 3 and beyond. Thus, we recommend taking the first approach, namely total inaccessibility.]</p>
+<p>How to implement per-process page tables:</p>
+<ul>
+<li><p>Change <code>process_setup</code> to create per-process page tables.</p></li>
+<li><p>We suggest you write a <code>copy_pagetable(x86_64_pagetable* pagetable, int8_t owner)</code> function that allocates and returns a new page table, initialized as a <strong>full copy</strong> of <code>pagetable</code> (including <strong>all</strong> mappings from <code>pagetable</code>). This function will be useful in Step 5. In <code>process_setup</code> you can modify the page table returned by <code>copy_pagetable</code> according to the requirements above. Your function can use <code>pageinfo</code> to find free pages to use for page tables. Read about <code>pageinfo</code> at the top of <code>kernel.c</code>.</p></li>
+<li><p>Remember that the x86-64 architecture uses <em>four-level</em> page tables.</p></li>
+<li><p>The easiest way to copy page tables involves an <em>allocator</em> function suitable for passing to <code>virtual_memory_map</code>.</p></li>
+<li><p>You’ll need at least to allocate a level-1 page table and initialize it to zero. You can also set up the whole four-level page table skeleton (for addresses <code>0…MEMSIZE_VIRTUAL - 1</code>) yourself; then you don’t need an allocator function.</p></li>
+<li><p>A physical page is free if <code>pageinfo[PAGENUMBER].refcount == 0</code>. Look at the other code in <code>kernel.c</code> for some hints on how to examine the <code>pageinfo[]</code> array.</p></li>
+<li><p>All of process <code>P</code>’s page table pages must have <code>pageinfo[...].owner == P</code> or WeensyOS’s consistency-checking functions will fail. This will affect your allocator function. (Hint: Don’t forget that global variables are allowed in your code!)</p></li>
+</ul>
+<p>If you create an incorrect page table, WeensyOS might crazily reboot. Don’t panic! Add <code>log_printf</code> statements. Another useful technique that may at first seem counterintuitive: <strong>add infinite loops to your kernel</strong> to track down exactly where a fault occurs. (If the OS hangs without crashing once you’ve added an infinite loop, then the crash you’re debugging must occur after the infinite loop.)</p>
+<p>Again, once finished with step 2, commit and push!</p>
+<h2 id="step-3-virtual-page-allocation">Step 3: Virtual page allocation</h2>
+<p>Up to this point in the lab, WeensyOS processes have used <em>physical page allocation</em>: the page with <em>physical</em> address X is used to satisfy the <code>sys_page_alloc(X)</code> allocation request for <em>virtual</em> address X. This strategy is inflexible and limits utilization. Change the implementation of the <code>INT_SYS_PAGE_ALLOC</code> system call so that it can use <em>any free physical page</em> to satisfy a <code>sys_page_alloc(X)</code> request.</p>
+<p>Your new <code>INT_SYS_PAGE_ALLOC</code> code must perform the following tasks.</p>
+<ul>
+<li><p>Find a free physical page using the <code>pageinfo[]</code> array. Return <code>-1</code> to the application if you can’t find one. Use any algorithm you like to find a free physical page; our solution just returns the first one we find.</p></li>
+<li><p>Record the physical page’s allocation in <code>pageinfo[]</code>.</p></li>
+<li><p>Map that physical page at the requested virtual address.</p></li>
+</ul>
+<p>Don’t modify the <code>assign_physical_page</code> helper function, which is also used by the program loader. You can write a new function if you need to.</p>
+<p>Here’s how our OS looks after this step.</p>
+<p><a href="fig-memos-isolated.gif" class="image"><img src="fig-memos-isolated.gif" width="726" height="426" alt="fig-memos-isolated.gif" /></a></p>
+<p>Now commit and push your code before moving on to step 4!</p>
+<h2 id="step-4-overlapping-address-spaces">Step 4: Overlapping address spaces</h2>
+<p>Now the processes are isolated, which is awesome. But they’re still not taking full advantage of virtual memory. Isolated address spaces can use <em>the same</em> virtual addresses for <em>different</em> physical memory. There’s no need to keep the four process address spaces disjoint.</p>
+<p>In this step, change each process’s stack to start from address <code>0x300000 == MEMSIZE_VIRTUAL</code>. Now the processes have enough heap room to use up all of physical memory! Here’s how the memory map will look after you’ve done it successfully:</p>
+<p><a href="fig-memos-overlapping.gif" class="image"><img src="fig-memos-overlapping.gif" width="726" height="426" alt="fig-memos-overlapping.gif" /></a></p>
+<p>Notice the single reverse video page in the bottom right, for all processes. This is their stack page: each process has the <em>same</em> virtual address for its stack page, but (if you’ve implemented it correctly) <em>different</em> physical pages.</p>
+<p>If there’s no physical memory available, <code>sys_page_alloc</code> should return an error to the caller (by returning -1). Our solution additionally prints “<code>Out of physical memory!</code>” to the console when this happens; you don’t need to.</p>
+<p>As always, make sure to commit and push after finishing this step!</p>
+<h2 id="step-5-fork">Step 5: Fork</h2>
+<p>The <code>fork()</code> system call is one of Unix’s great ideas. It starts a new process as a <em>copy</em> of an existing one. The <code>fork()</code> system call appears to return twice, once to each process. To the child process, it returns 0. To the parent process, it returns the child’s process ID.</p>
+<p>Run WeensyOS with <code>make run</code> or <code>make run-console</code>. At any time, press the ‘<code>f</code>’ key. This will soft-reboot WeensyOS and ask it to run a single process from the <code>p-fork</code> application, rather than the gang of <code>allocator</code> processes. You should see something like this in the memory map:</p>
+<p><a href="fig-memos-forkinitial.gif" class="image"><img src="fig-memos-forkinitial.gif" width="726" height="426" alt="fig-memos-forkinitial.gif" /></a></p>
+<p>That’s because you haven’t implemented <code>fork()</code> yet.</p>
+<p>How to implement <code>fork()</code>:</p>
+<ul>
+<li><p>When a process calls <code>fork()</code>, look for a free process slot in the <code>processes[]</code> array. Don’t use slot 0. If no free slot exists, return <code>-1</code> to the caller.</p></li>
+<li><p>If a free slot is found, make a copy of <code>current-&gt;p_pagetable</code>, the forking process’s page table, using your function from earlier.</p></li>
+<li><p>But you must also copy the <em>process data</em> in every application page shared by the two processes. The processes should not share any writable memory except the console (otherwise they wouldn’t be isolated). So <code>fork()</code> must examine every virtual address in the old page table. Whenever the parent process has an application-writable page at virtual address <code>V</code>, then <code>fork()</code> must allocate a new physical page <code>P</code>; copy the data from the parent’s page into <code>P</code>, using <code>memcpy()</code>; and finally map page <code>P</code> at address <code>V</code> in the child process’s page table. (<code>memcpy()</code> works like the one installed on your Linux dev box; use the man pages for reference.)</p></li>
+<li><p>The child process’s registers are initialized as a copy of the parent process’s registers, except for <code>reg_rax</code>.</p></li>
+<li><p>Use <code>virtual_memory_lookup</code> to query the mapping between virtual and physical addresses in a page table.</p></li>
+</ul>
+<p>When you’re done, you should see something like the below after pressing ‘<code>f</code>’.</p>
+<p><a href="fig-memos-fork.gif" class="image"><img src="fig-memos-fork.gif" width="726" height="426" alt="fig-memos-fork.gif" /></a></p>
+<p>An image like the below, however, means that you forgot to copy the data for some pages, so the processes are actually <em>sharing</em> stack and/or data pages when they should not:</p>
+<p><a href="fig-memos-badfork.gif" class="image"><img src="fig-memos-badfork.gif" width="726" height="426" alt="fig-memos-badfork.gif" /></a></p>
+<div class="highlight">
+<p><span class="header">Other hints.</span></p>
+<ul>
+<li><p>Make sure you’re setting the owner correctly when allocating new page tables.</p></li>
+<li><p>Failing this step of the lab does not mean that the bug is actually in this step. It’s very common that a student’s step 5 code fails because of errors made in any of the earlier steps.</p></li>
+</ul>
+</div>
+<p>Don't forget to commit and push after finishing fork!</p>
+<h2 id="extra-credit-step-6-shared-read-only-memory">(Extra credit) Step 6: Shared read-only memory</h2>
+<p>This extra credit and the next are challenging—and the point values will <em>not</em> be commensurate to the extra effort. We supply these for completeness, and for those who want to go deeper into the material.</p>
+<p>It’s wasteful for <code>fork()</code> to copy <em>all</em> of a process’s memory. For example, most processes, including <code>p-fork</code>, never change their code. So what if we shared the memory containing the code? That’d be fine for process isolation, as long as neither process could write the code.</p>
+<p>Step A: change the process loader in <code>k-loader.c</code> to detect <em>read-only</em> program segments and map them as read-only for applications (<code>PTE_P|PTE_U</code>). A program segment <code>ph</code> is read-only iff <code>(ph-&gt;p_flags &amp; ELF_PFLAG_WRITE) == 0</code>.</p>
+<p>Step B: From step 5, your <code>fork()</code> code already shouldn’t copy shareable pages. But make sure in this step that your code keeps track accurately of the number of active references to each user page. Specifically, if <code>pageinfo[pn].refcount &gt; 0</code> and <code>pageinfo[pn].owner &gt; 0</code>, then <code>pageinfo[pn].refcount</code> should equal the number of times <code>pn</code> is mapped in process page tables.</p>
+<p>When you’re done, running <code>p-fork</code> should look like this:</p>
+<p><a href="fig-memos-sharedreadonly.gif" class="image"><img src="fig-memos-sharedreadonly.gif" width="726" height="426" alt="fig-memos-sharedreadonly.gif" /></a></p>
+<p>Each process’s virtual address space begins with a darker-colored “1”. The dark color indicates that the corresponding physical page has reference count (<code>refcount</code>) greater than 1. (The color difference is only visible on graphical QEMU; the console version doesn’t distinguish between light reverse-video and dark reverse-video.)</p>
+<p>Hint:</p>
+<ul>
+<li>Mark a program segment read-only <em>after</em> the <code>memcpy</code> and <code>memset</code> operations that add data to the segment. Otherwise you’ll get a fault.</li>
+</ul>
+<p>Again, commit and push!</p>
+<h2 id="extra-credit-step-7-freeing-memory">(Extra credit) Step 7: Freeing memory</h2>
+<p>So far none of your test programs have ever freed memory or exited. Memory allocation’s pretty easy until you add free! So let’s do that, by allowing applications to exit. In this exercise you’ll implement the <code>sys_exit()</code> system call, which exits the current process.</p>
+<p>This exercise is challenging: freeing memory will tend to expose weaknesses and problems in your other code.</p>
+<p>To test your work, use <code>make run</code> and then type ‘<code>e</code>’. This reboots WeensyOS to run the <code>p-forkexit</code> program. (Initially it’ll crash because <code>sys_exit()</code> isn’t implemented yet.) <code>p-forkexit</code> combines two types of behavior:</p>
+<ul>
+<li>Process 1 forks children indefinitely.</li>
+<li>The child processes, #2 and up, are memory allocators, as in the previous parts of the lab. But with small probability at each step, each child process either exits or attempts to fork a new child.</li>
+</ul>
+<p>The result is that once your code is correct, <code>p-forkexit</code> makes crazy patterns forever. An example:</p>
+<p><a href="fig-memos-forkexit.gif" class="image"><img src="fig-memos-forkexit.gif" width="726" height="426" alt="fig-memos-forkexit.gif" /></a></p>
+<p>Your picture might look a little different; for example, thanks to Step 6, your processes should share a code page, which would appear as a darker-colored “1”.</p>
+<p>Here’s your task.</p>
+<ul>
+<li><code>sys_exit()</code> should mark a process as free and free all of its memory. This includes the process’s code, data, heap, and stack pages, as well as the pages used for its paging structures.</li>
+<li>In <code>p-forkexit</code>, unlike in previous parts of the lab, <code>sys_fork()</code> can run when there isn’t quite enough memory to create a new process. Your code should handle this case. If there isn’t enough free memory to allocate a process, <code>fork()</code> should clean up after itself (i.e., free any memory that was allocated for the new process before memory ran out), and then return <code>-1</code> to the caller. There should be no memory leaks.</li>
+</ul>
+<p>The <code>check_virtual_memory</code> function, which runs periodically, should help catch some errors. Feel free to add checks of your own.</p>
+<h2 id="further-study-extra-extra-credit">Further study (extra-extra credit)</h2>
+<p>If you are finished and can't wait to do more of this type of work, try the following. These will receive only token points, and are for you to explore, if you’re interested:</p>
+<ul>
+<li>Copy-on-write page allocation!</li>
+<li>Faster system calls, for instance using the <code>syscall</code> and <code>sysexit</code> instructions!</li>
+</ul>
+<h2 id="running-the-grading-tests">Running the grading tests</h2>
+<p>As stated at the start of this lab, the visual memory map displayed by QEMU as your WeensyOS kernel runs is the best way to determine how your code is behaving.</p>
+<p>However, we provide automated tests, to help us grade, and for you to confirm that you’ve completed a step. The tests are not dispositive: there will be cases where your code passes the tests but is not ultimately correct (and will lose points on manual inspection during grading). We have not seen the reverse, however: cases where your code fails the tests but is correct. Thus, if the tests are failing, you almost certainly have a bug.</p>
+<p>The bottom line: run with <code>make run</code> or <code>make run-console</code> to visualize how memory is being used while you are coding and validating your design. Then, switch to the automated tests described below when you think you’ve completed a step and want to double-check.</p>
+<p>There are five tests, one for each step. You can run each of them with the shell commands <code>make grade-one</code> through <code>grade-five</code>. Note that the step numbers are written out in text and not using digits. Each step’s result is all-or-nothing.</p>
+<p>There are three invariants in <em>all</em> five steps’ tests that your code must satisfy. These invariants are:</p>
+<ul>
+<li><p>The CGA console must be accessible by all processes (this requirement is discussed in the text above on step 1).</p></li>
+<li><p>If we consider process <span class="math inline"><em>P</em></span>, there should be no virtual page in <span class="math inline"><em>P</em></span>’s page table at a user-space address (that is, whose address is above the kernel/user virtual address split point) that is owned by <span class="math inline"><em>P</em></span> but not accessible by <span class="math inline"><em>P</em></span>.</p></li>
+<li><p>When we run our tests, we configure the WeensyOS kernel to exit after 10 seconds of execution (1000 WeensyOS kernel “ticks”).<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> If a bug in your code makes the kernel crash before 1000 WeensyOS kernel ticks, you’ll fail the test on which that happens. Alternatively, if your kernel enters an infinite loop, and thus never reaches our exit at 1000 ticks, the VM will get stuck in the infinite loop and never exit, so the tests will hang and you’ll need to terminate your hung kernel. Do so by opening another terminal window and issuing the command <code>make kill</code>, which will kill all QEMU processes you have running.</p></li>
+</ul>
+<p>These invariants are reasonable: regardless of what your memory map display looks like, a good solution should neither crash nor enter an infinite loop.</p>
+<p>Our tests are cumulative: each step’s test runs all prior steps’ tests. If any of the prior steps’ tests fail, the “current” step’s test is deemed to have failed. As a consequence, if you have a regression bug—for example, code in a current step re-introduces a bug in an earlier step—you can lose points not only for the current step you are working on, but also for prior steps. If you need to submit and find this has happened, don’t despair: simply revert your code to the last good version before your regression (using the history provided by GitHub—so, once again, make sure you commit and push often!).</p>
+<h3 id="miscellaneous-tips">Miscellaneous tips</h3>
+<p>The kernel defines a constant, <code>HZ</code>, which determines how many times per second the kernel’s clock ticks. Don’t change this value—there is absolutely no need to do so while solving the lab, and doing so will likely cause your code to fail our tests!</p>
+<p>After you run any of our per-stage <code>make grade-N</code> tests, if you happen to examine the <code>log.txt</code> file, you’ll see a vast amount of output therein that we generate for use in the automated tests. You can ignore it (and it will be absent when you run with <code>make run</code> while you are developing, so it won’t clutter your own debugging <code>logprintf()</code>s in those runs).</p>
+<h2 id="submission">Submission</h2>
+<p>Handing in consists of three steps:</p>
+<ol type="1">
+<li><p><strong>Executing this checklist</strong>:</p>
+<ul>
+<li>Make sure your code builds, with <strong>no compiler warnings</strong>.</li>
+<li>Make sure you’ve used <code>git add</code> to add any files that you’ve created.</li>
+<li>Fill out the top of the <code>answers.txt</code> file, including your name and NYU Id</li>
+<li>Make sure you’ve answered every question in <code>answers.txt</code></li>
+<li>Make sure you have answered all code exercises in the files.</li>
+<li>Create a file called <code>slack.txt</code> noting how many slack days you have used for this assignment. (This is to help us agree on the number that you have used.) Include this file even if you didn’t use any slack days.</li>
+<li><code>git add</code> and commit the slack.txt file</li>
+</ul></li>
+<li><p><strong>Push your code to GitHub, so we have it</strong>:</p>
+<pre><code>$ cd ~/cs202/lab4  
+$ make clean
+$ git commit -am &quot;hand in lab4&quot;
+$ git push origin 
+
+Counting objects: ...
+....
+To  git@github.com:nyu-cs202/labs-21fa-&lt;YourGithubUsername&gt;.git
+  7337116..ceed758  main -&gt; main</code></pre></li>
+<li><p><strong>Actually submit, by timestamping and identifying your pushed code</strong>:</p>
+<ul>
+<li>Decide which git commit you want us to grade, and copy its id (you will paste it in the next sub-step). A <a href="http://cs61.seas.harvard.edu/wiki/2014/Git#Repositories">commit id is a 40-character hexadecimal string</a>. Usually the commit id that you want will be the one that you created last. The easiest way to obtain the commit id for the last commit is by running the command <code>git log -1 --format=oneline</code>. This prints both the commit id and the initial line of the commit message. If you want to submit a previous commit, there are multiple ways to get the commit id for an earlier commit. One way is to use the tool <code>gitk</code>. Another is <code>git log -p</code>, as explained <a href="http://cs61.seas.harvard.edu/wiki/2014/Git#Logging">here</a>, or <code>git show</code>.</li>
+<li>Now go to NYU Brightspace; there will be an entry for this lab. Paste <em>only</em> the commit id that you just copied.</li>
+<li>You can submit as many times as you want; we will grade the last commit id submitted to Brightspace.</li>
+</ul></li>
+</ol>
+<p><strong>NOTE:</strong> <em>Ground truth is what and when you submitted to Brightspace. Thus, a non-existent commit id in Brightspace means that you have not submitted the lab, <strong>regardless</strong> of what you have pushed to GitHub. And, the time of your submission for the purposes of tracking lateness is the time when you upload the id to Brightspace, not the time when you executed <code>git commit</code>.</em></p>
+<p><strong>This completes the lab.</strong></p>
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>This lab is due to Eddie Kohler, with modifications and some infrastructure due to Brad Karp and Nikola Gvozdiev.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p>Making the console accessible in this way, by making the range of RAM where the contents of the display are held directly accessible to applications, is a throwback to the days of DOS, whose applications typically generated console output in precisely this way. DOS couldn’t run more than one application at once, so there wasn’t any risk of multiple concurrent applications clobbering one another’s display writes to the same screen locations. We borrow this primitive console design to keep WeensyOS simple and compact.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2" role="doc-endnote"><p>We also disable <code>ALLOC SLOWDOWN</code> in <code>p-allocator.c</code> and <code>p-fork.c</code> during our tests, so that memory allocation proceeds much more quickly, at machine speed rather than human-vision speed. Thus 1000 ticks are plenty of time for the workload to run and exhibit how your kernel’s virtual memory system behaves.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>

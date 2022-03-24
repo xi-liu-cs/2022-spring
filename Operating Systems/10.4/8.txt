@@ -1,0 +1,392 @@
+Class 8
+CS 202
+04 October 2021 
+
+On the board
+------------
+1. Last time
+2. Deadlock
+3. Other progress issues
+4. Performance issues
+5. Programmability issues
+6. Mutexes and interleavings
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+2. Deadlock 
+
+    --see handout: simple example based on two locks
+        [last time]
+
+    --see handout: more complex example
+
+	    --M calls N 
+	    --N waits
+	    --but let's say condition can only become true if N is invoked
+	    through M
+	    --now the lock inside N is unlocked, but M remains locked; that
+	    is, no one is going to be able to enter M and hence N.
+
+    --can also get deadlocks with condition variables
+
+    --lesson: dangerous to hold locks (M's mutex in the case on the
+    handout) when crossing abstraction barriers
+
+    --deadlocks without mutexes:
+
+        real issue is resources and how/when they are required/acquired
+
+        (a) [draw bridge example]
+
+	    --bridge only allows traffic in one direction 
+
+	    --Each section of a bridge can be viewed as a resource. 
+
+	    --If a deadlock occurs, it can be resolved if one car
+	    backs up (preempt resources and rollback). 
+
+	    --Several cars may have to be backed up if a deadlock occurs. 
+
+	    --Starvation is possible. 
+
+	(b) another example:
+		
+	    --one thread/process grabs disk and then tries to grab
+	    scanner
+
+	    --another thread/process grabs scanner and then tries to
+	    grab disk
+
+    --when does deadlock happen? under four conditions. all of them must
+    hold for deadlock to happen:
+
+	1. mutual exclusion
+	2. hold-and-wait
+	3. no preemption
+	4. circular wait
+
+
+    --what can we do about deadlock?
+
+        (a) ignore it: worry about it when it happens. the so-called
+        "ostrich solution"
+
+        (b) detect and recover: not great
+
+	    --could imagine attaching debugger
+
+		--not really viable for production software, but
+		works well in development
+
+	    --threads package can keep track of resource-allocation graph
+
+	    --see one of the recommended texts:
+
+		--For each lock acquired, order with other locks held 
+		
+		--If cycle occurs, abort with error 
+	    
+		--Detects potential deadlocks even if they do not occur 
+
+
+        (c) avoid algorithmically
+
+            [not covering]
+
+	    --banker's algorithm (see Tanenbaum text for an desription)
+
+		--very elegant but impractical
+
+		--if you're using banker's algorithm, the gameboard
+		looks like this:
+
+		    ResourceMgr::Request(ResourceID resc,
+					 RequestorID thrd) {
+			acquire(&mutex);
+			assert(system in a safe state);
+			while (state that would result from giving 
+			       resource to thread is not safe) {
+			    wait(&cv, &mutex);	
+			}
+			update state by giving resource to thread
+			assert(system in a safe state);
+			release(&mutex);
+		    }
+
+		    Now we need to determine if a state is safe....
+
+		    To do so, see book
+
+	    --disadvantage to banker's algorithm:
+
+		--requires every single resource request to go
+		through a single broker
+
+		--requires every thread to state its maximum
+		resource needs up front. unfortunately, if threads
+		are conservative and claim they need huge quantities
+		of resources, the algorithm will reduce concurrency
+
+        (d) negate one of the four conditions using careful coding:
+
+	    --can sort of negate 1
+		--put a queue in front of resources, like the printer
+		--virtualize memory
+
+	    --not much hope of negating 2
+
+	    --can sort of negate 3:
+		--consider physical memory: virtualized with VM, can
+		take physical page away and give to another process! 
+
+	    --what about negating #4?
+
+		--in practice, this is what people do
+
+		--idea: partial order on locks
+
+		    --Establishing an order on all locks and making
+		    sure that every thread acquires its locks in
+		    that order
+
+		--why this works:
+
+		    --can view deadlock as a cycle in the resource
+		    acquisition graph
+
+		    --partial order implies no cycles and hence no
+		    deadlock
+
+		--two bummers:
+
+		    1. hard to represent CVs inside this framework.
+		    works best only for locks.
+
+		    2. Picking and obeying the order on *all* locks
+		    requires that modules make public their locking
+		    behavior, and requires them to know about other
+		    modules' locking.  This can be painful and
+		    error-prone. 
+
+			--see Linux's filemap.c example on the handout;
+			this is complexity that arises by the need for a
+			locking order
+
+	(e) Static and dynamic detection tools
+
+	    --See, for example, these citations, citations
+	    therein, and papers that cite them:
+
+		Engler, D. and K. Ashcraft. RacerX: effective,
+		static detection of race conditions and deadlocks.
+		Proc. ACM Symposium on Operating Systems Principles
+		(SOSP), October, 2003, pp237-252.
+		http://portal.acm.org/citation.cfm?id=945468
+
+		Savage, S., M. Burrows, G. Nelson, P. Sobalvarro,
+		and T. Anderson. Eraser: a dynamic data race
+		detector for multithreaded programs. ACM
+		Transactions on Computer Systems (TOCS), Volume 15,
+		No 4., Nov., 1997, pp391-411.
+		http://portal.acm.org/citation.cfm?id=265927
+
+		a long literature on this stuff
+
+	    --Disadvantage to dynamic checking: slows program down
+
+	    --Disadvantage to static checking: many false alarms
+	    (tools says "there is deadlock", but in fact there is
+	    none) or else missed problems
+
+	    --Note that these tools get better every year. I believe
+	    that Valgrind has a race and deadlock detection tool
+
+3. Other progress issues
+
+    Deadlock was one kind of progress (or liveness) issue. Here are two
+    others...
+
+    Starvation
+
+	--thread waiting indefinitely (if low priority and/or if
+	resource is contended)
+
+    Priority inversion
+
+	--T1, T2, T3: (highest, middle, lowest priority)
+
+	--T1 wants to get lock, T2 runnable, T3 runnable and holding lock
+
+	--System will preempt T3 and run highest-priority runnable thread, namely T2
+
+	--Solutions:
+
+	    --Temporarily bump T3 to highest priority of any thread that is
+	    ever waiting on the lock
+
+	    --Disable interrupts, so no preemption (T3 finishes)
+		... not great because OS sometimes needs control
+		(not for scheduling, under this assumption, but for
+		handling memory [page faults], etc.)
+
+	    --Don't handle it; structure app so only adjacent priority
+	    processes/threads share locks
+
+	--Happens in real life. For a real-life example, see:
+	https://www.microsoft.com/en-us/research/people/mbj/just-for-fun/
+        (search for Pathfinder)
+
+---------------------------------------------------------------------------
+
+- Therac-25 announcement
+
+- read the paper, you'll be tested
+
+---------------------------------------------------------------------------
+
+4. Performance issues and tradeoffs
+
+    (a) Implementation of spinlocks/mutexes can be expensive. Reasons:
+
+        --mutex costs: 
+            --the raw instructions required to execute "mutex_acquire"
+            --going to sleep and waking up implies context switch, which
+            brings a resource cost
+
+        --spinlock costs:
+            --cross-talk among CPUs 
+            --cache line bounces
+            --fairness issues
+        
+            --> this can be mitigated; we may study how later (if you're
+            curious now, search the Web for "MCS locks").
+
+    (b) Coarse locks limit available parallelism  ....
+
+        [(still, you should design this way at first!!!)]
+
+	    the fundamental issue with coarse-grained locking is that
+	    only one CPU can execute anywhere in the part of your code
+	    protected by a lock. If your critical section code is called
+	    a lot, this may reduce the performance of an expensive
+	    multiprocessor to that of a single CPU.
+
+	    if this happens inside the kernel, it means that
+	    applications will inherit the performance problems from the
+	    kernel
+
+
+    (c) ... but fine-grained locking leads to complexity and hence bugs
+    (like deadlock)
+
+        --> although finer-grained locking can often lead to better
+        performance, it also leads to increased complexity and hence
+        risk of bugs (including deadlock).
+
+        --> see handout
+
+5. Programmability issues
+
+    Loss of modularity
+
+	--examples above: avoiding deadlock requires understanding
+	how programs call each other.
+
+	--also, need to know, when calling a library, whether it's
+	thread-safe: printf, malloc, etc. If not, surround call with
+	mutex. (Can always surround calls with mutexes conservatively.)
+
+        --basically locks bubble out of the interface
+
+    What's the fundamental problem? The fundamental problem is that the
+    shared memory programming model is hard to use correctly (although
+    mutexes help a great deal). 
+
+6. Mutexes and interleavings 
+
+    Recap the environment:
+
+        --sequential consistency means arbitrary interleavings in
+        program order: this is hard enough, but ...
+        
+        --... modern multi-CPU hardware doesn't give sequential
+        consistency, so the possible interleavings are even worse.
+        
+        [see today's handout and also panel 4 on handout03.]
+
+    YET!!! if you use mutexes correctly
+
+        (i) you don't have to worry about arbitrary interleavings
+        (critical sections execute atomically, and interleavings in
+        non-critical sections are okay), and 
+
+        (ii) your program will appear to be running on sequentially
+        consistent hardware (even if it isn't). That is, IF you use
+        mutexes correctly, you don't have to worry about what the
+        hardware is truly doing. 
+
+            --> this is arranged by the threading library
+            (synchronization primitives) and the compiler.
+
+            --> in the spinlock implementation that we studied, the
+            "xchg" does a lot of the required work.
+       
+    BUT! If you are writing low-level code (or *implementing* a
+    synchronization primitive), then:
+
+        --you MUST ensure that the compiler is not reordering key
+        instructions.
+
+        --you MUST know the memory model (of the hardware)
+
+        --you MAY need to compensate for it, by inserting memory
+        barriers (see below).
+      
+        (moral of the story: if you're writing systems software, you
+        need to "read the manual", for both compiler and hardware.)
+
+    What's a memory barrier?
+
+        --instruction like MFENCE on the x86. example:
+
+             move $1, 0x10000   # write 1 to memory address 10000
+             move $2, 0x20000   # write 2 to memory address 20000
+             MFENCE
+             move $3, 0x10000   # write 3 to memory address 10000
+             move $4, 0x30000   # write 4 to memory address 30000
+
+        --the MFENCE here ensures that 
+            
+            the first two store instructions will both appear to other
+            CPUs to be happening before the last two (though the first
+            two may appear out of order to other CPUs, and likewise the
+            last two).
+       
+            a more technical way to put it is: The MFENCE ensures
+            that, if any memory write after the MFENCE (in program
+            order) is visible to another CPU, then that other CPU
+            also sees all memory writes before the MFENCE.
+            
+
+        --the "acquire" and "release" in mutexes need memory barriers.
+        This ensures that from the perspective of the other CPUs, all
+        memory accesses in the critical section happened AFTER acquiring
+        the lock and BEFORE releasing it.
+        
+            Exercise: convince yourself that a memory barrier in
+            acquire() and release() indeed has this effect, and that,
+            without the memory barrier, the effect is not in place.
+
+        --NOTE: on the x86, the "xchg" instruction includes an
+        implicit memory barrier. This is the reason that we use
+        xchg in the release() function of the spinlock
+        If we implemented release() as 
+            locked = 0,
+        then this operation could be reordered with respect to the
+        critical section, thereby violating mutual exclusion.
+
+
+[thanks to David Mazieres and Mike Dahlin for content in portions of
+this lecture.]

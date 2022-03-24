@@ -1,0 +1,60 @@
+ask
+2020 12, 13
+
+12
+A 	B 	C
+10 	5	1
+		disk
+		5
+cycle = 16
+A: 10/16 = 5/8
+B: 5/16
+C: 1/16
+
+
+ask 
+2019 12
+
+preemption 
+vs 
+no preemption
+10.txt
+
+
+https://techdifferences.com/difference-between-preemptive-and-non-preemptive-scheduling-in-os.html#:~:text=The%20basic%20difference%20between%20preemptive%20and%20non%2Dpreemptive%20scheduling%20is,or%20switches%20to%20waiting%20state.
+
+preemptive scheduling the CPU is 
+allocated to the processes 
+for the limited time. 
+While in non-preemptive scheduling,
+the CPU is allocated to the process till it 
+terminates or switches to waiting state
+
+
+tlb misses, pg faults
+0x500 movq 0x200000, %rax
+0x504 incq %rax, 1
+0x508 movq %rax, 0x300000
+
+
+
+
+
+page fault occurs
+when
+3 bits of protection is inconsistent
+ex, present bit is not set
+generally, illegal operation terminate
+process
+
+
+
+pushcli disable interrupts
+
+
+
+ask
+hw4 q3
+banker algo, deadlock
+
+2020 final 5

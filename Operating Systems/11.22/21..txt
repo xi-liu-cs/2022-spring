@@ -1,0 +1,34 @@
+ad hoc 特设的, 特定目的的, 即席的, 临时的, 将就的, 专案的
+ 特殊的, 不能用于其它方面的, 
+为一个特定的问题, 任务而专门设定的解决方案
+a solution for a specific purpose, problem, 
+or task rather than a generalized solution
+
+os42 p5
+ad hoc: fsck
+metadata consistency, not data consiste
+a tool for finding inconsistencies 
+and repairing them
+if a crash, fsck clean up inconsistencies
+ex: for file create:
+	write data to file
+	update/write inode
+	mark inode "allocated" in bitmap
+	mark data blocks "allocated" in bitmap
+	update directory
+slow: fsck must scan entire disk
+
+
+
+copy on write 写入时复制
+直到某个调用者试图修改资源的内容时，
+系统才会真正复制一份专用副本给该调用者
+implement a "duplicate" or "copy" operation
+on modifiable resources
+copy operation is deferred until the first write
+approch:
+	never modify a block,
+	always make a new copy
+
+
+

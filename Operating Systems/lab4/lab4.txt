@@ -1,0 +1,221 @@
+whenever there is the cs202 dir, go into ur labs- dir
+
+QEMU(quick emulator) is a hypervisor(虚拟机监控器, 
+virtual machine monitor), QEMU emulates the machine's
+processor 
+
+CSAPP 9.7 describes the 64-bit virtual memory
+architecture of the x86-64 CPU
+csapp 864: 
+PTE_P:  Child page table present
+ in physical memory (1) or not (0)
+PTE_W: Read-only or read-write access 
+permission for all reachable pages
+PTE_U: User or supervisor (kernel) mode
+access permission for all reachable pages
+
+iret: interrupt return
+Returns program control from an exception
+or interrupt handler to a program or procedure
+that was interrupted by an exception
+
+complete solution
+under 300 lines of code 
+
+If your bars run painfully slowly,
+edit the p-allocator.c file
+and reduce the ALLOC_SLOWDOWN constant
+
+each char represents 4KB memory, 1 page
+2MB physical memory in total
+# pages = 2MB / 4KB 
+= 2^20B / (2^2 * 2^10)B = 2^8 pages
+
+process 1 through 4 compiled from same
+source code (p-allocator.c)
+each process asks kernel for more heap memory
+1 page at a time, until runs out of room
+processes allocate heap mem at diff rates:
+compared to process 1,
+process2_speed = process1_speed * 2
+process3_speed = process1_speed * 3
+process4_speed = process1_speed * 4
+
+virtual memory display cycles successively
+blank spaces in virt mem display = unmapped addresses
+if a process tries to access such addr, processor page fault
+character shown at addr X in virt mem display
+identifies the owner of the corresponding physical page
+
+a character is reverse video 
+if an application process is allowed to 
+access the corresponding address
+
+Initially, any process can modify all of physical memory
+
+add log_printf statements
+
+use assertions to catch problems early
+
+
+CGA Color Graphics Adapter 彩色图形适配器
+
+
+
+step 1
+in starting code, weensyos could 
+stomp 跺脚 all over the kernel's memory
+
+change kernel()
+so that kernel mem is inaccessible to applications
+
+
+console at 0xB8000
+(on virt addr, it is 000C0000 - 8(page size)) //R character in reverse video
+
+64 pages per level (64 chars)
+262144 / (2^12) = 64
+
+
+--
+p-allocator.c
+#define ALLOC_SLOWDOWN 100
+
+
+
+
+
+
+问：
+step1
+Make sure that your sys_page_alloc
+system call preserves kernel isolation:
+Applications shouldn't be able to use 
+sys_page_alloc to screw up the kernel
+
+
+
+
+
+
+
+to see log_printf:
+vim log.txt
+
+
+
+
+
+
+
+    //to do
+    virtual_memory_map(kernel_pagetable,
+        0,
+        virtual_memory_lookup(kernel_pagetable, 0).pa,
+        (uintptr_t) console,
+        PTE_P|PTE_W,
+        NULL);
+
+    virtual_memory_map(kernel_pagetable,
+        (uintptr_t) console + PAGESIZE,
+        virtual_memory_lookup(kernel_pagetable, console + PAGESIZE).pa,
+        PROC_START_ADDR - (uintptr_t) console - PAGESIZE,
+        PTE_P|PTE_W,
+        NULL);
+
+
+
+
+
+//allocates and returns a new page table
+// x86_64_pagetable * copy_pagetable(x86_64_pagetable * pagetable, int8_t owner)
+// {//to do
+//     allocator();
+//     virtual_memory_map(pagetable, 
+//         0,
+//         virtual_memory_lookup(pagetable, 0).pa,
+//         (uintptr_t) PROC_START_ADDR,
+//         PTE_P|PTE_W, 
+//         allocator);
+// }
+
+
+
+
+
+
+
+
+
+for part 1 
+kernel()
+log_printf("test: %d\n", (uintptr_t) console + PAGESIZE); 
+//test: 757760
+log_printf("mapped: %d\n", (uintptr_t) virtual_memory_lookup(kernel_pagetable, console + PAGESIZE).pa);
+//mapped: 761856
+
+
+log_printf("test: %d\n", console + PAGESIZE);
+//test: 761856
+log_printf("mapped: %d\n", virtual_memory_lookup(kernel_pagetable, console + PAGESIZE).pa);
+//mapped: 761856
+
+
+
+
+
+
+
+
+
+part 2
+    // for(int i = PROC_START_ADDR; i < MEMSIZE_VIRTUAL; i+=PAGESIZE)
+    // {
+    //     virtual_memory_map(pagetable,
+    //     PROC_START_ADDR,
+
+    //     );
+    // }
+
+
+
+
+
+
+
+
+    //
+    // virtual_memory_map(processes[pid].p_pagetable,
+    //     (uintptr_t)MEMSIZE_VIRTUAL - PAGESIZE, 
+    //     (uintptr_t)allocator(),
+    //         PAGESIZE,
+    //         PTE_P | PTE_W | PTE_U,
+    //         allocator);
+
+
+
+
+
+
+
+
+update refcount in fork()?
+
+
+                processes[i].p_pagetable = copy_pagetable(processes[parent_pid].p_pagetable, child_pid);
+                // for(uintptr_t j = PROC_START_ADDR; j < MEMSIZE_VIRTUAL; j += PAGESIZE)
+                // {
+                //     vamapping vm = virtual_memory_lookup(processes[parent_pid].p_pagetable, j);
+                //     if(vm.pn != -1)
+                //     {
+                //         pageinfo[j].refcount++;
+                //     }
+                // }    
+
+
+
+
+
+1. check PTE_P in fork? no
+2. pageinfo[PAGENUMBER(vm.pa)]
+3. context switch

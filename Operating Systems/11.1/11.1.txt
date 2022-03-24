@@ -1,0 +1,122 @@
+optimal:
+look into future, not referenced in future
+
+LRU
+most stale thing
+requires a queue
+hash table
+mem manipulation
+
+clock hand
+giant cycle
+evict page that has not been used in a while
+
+if encounter access = 1
+clear bit to 0
+find another page that has access bit 0
+evict that one
+
+access bit, dirty bit
+
+hardware writes these bits
+os read these bits
+
+
+
+
+
+thrashing
+thrashing occurs when a computer's virtual memory 
+resources are overused,
+leading to a constant state of paging and page faults
+
+https://en.wikipedia.org/wiki/Thrashing_(computer_science)
+
+a program touch 50 pages with equal probability
+only 40 pages available in ram
+
+100ns / mem reference
+10ms / page fault that reads from disk
+
+(4(100ns) + 1(10ms))/5 = 2ms / reference
+
+even page fault not often ((50 - 40)/50 = 1/5)
+it is slow enough to penalize
+
+cache replacement policy does not affect
+
+
+collection of processes do not fit
+
+
+
+if not enough space for a process
+1. buy larger machine, redistribute task to each machine
+2. restructure computation
+
+
+shed load:
+working set size 
+(how much memory an application needs to keep working)
+page fault frequency
+
+use up disk bandwidth
+
+hardware (mmu)
+if junky mmu do not set set dirty & access bits,
+how can os set dirty & access bits
+
+mmap()
+system call that maps files or devices into memory
+
+
+map some piece of that file
+
+1 TB file
+1 TB disk
+dont want entire file
+can do seek & read syscall
+instead use mmap
+
+
+inside os mem
+use buffer cache
+pieces of page sized of disk
+
+buffer cache lives in mem
+
+page table for process
+that mapped file "foo"
+
+<mmped ptr, ppn of relevant buffer cache entry>
+if the dirty bit is set
+
+protection bits in page table entry
+
+meltdown
+spectre
+
+
+green arrow : process
+
+a level is just a process
+for level the below
+
+
+
+processes p-
+kernel k-
+
+
+exam:
+median: 74
+avg: 72
+standard deviation: 18.2
+high 98
+80s is a range
+lab 4 and 5 and final 
+upward
+
+somebody get
+15/100 on midterm
+and get B for the class

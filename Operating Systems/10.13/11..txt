@@ -1,0 +1,27 @@
+             0x500     movq 0x200000, %rax    
+             0x508     incq 1, %rax
+             0x510     movq %rax, 0x300000   
+how many virtual memory translations?
+3 for instructions
+1 for load
+1 for store
+
+memory management unit do the translation 
+from physical to virtual memory
+
+--in the traditional x86 (and in our labs), the PAGE SIZE
+   will be 
+   4096 B = 4KB = 2^{12}
+
+--page 0:   [0,4095]
+--page 1:   [4096, 8191]
+...
+--page 2^{20}-1 [ ..., 2^{32} - 1]
+
+
+mapping between
+"number of bits required to represent something" and "size of the
+space". The latter is two-raised-to-the-power-of-the-former
+
+
+

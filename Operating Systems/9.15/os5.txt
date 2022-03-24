@@ -1,0 +1,75 @@
+1
+fork() create a new process
+
+2
+process created an almost exact copy
+of the calling process
+looks like 2 copies of program p1 runnning
+both about to return from fork() syscall
+newly-created process (child) does not
+start running at main(); rather, it just
+comes into life as if it had called fork() itself
+
+3
+child has its own copy of the addr space 
+(its own registers)
+the value it ret to caller of fork() is diff
+parent receives PID of newly-created child
+child receives ret code of zero
+
+not deterministic:
+either the child or the parent might run at that point
+
+4
+wait():
+parent wait for a child process to finish
+
+add a wait() call makes the output deterministic
+
+child will always print first
+
+if the parent does happen to run
+first, it will immediately call wait();
+this system call would not return until
+the child has run and exited
+
+even when parent runs first,
+it politely waits for the child to finish running,
+then wait() returns, 
+and then the parent prints its message
+
+exec() syscall run a program
+that is different from the calling program
+
+
+5, 6
+given the name of an executable (wc (word count)),
+and some arguments (p3.c),
+it loads code, static data from that executable
+and overwrites its current code segment
+heap, stack, other memory space of the program re-initialized
+
+the exec() in the child, it is almost as if p3.c never ran;
+a successful call to exec() never returns
+
+shell = user program, shows a prompt 提示符
+(a message or symbol on a screen to 
+show that the system is waiting for input.)
+after type a command (ex: name of an exe),
+shell figures out location of exe, 
+calls fork() to create a new child process
+call exec() to run command
+waits for the command to complete by calling wait()
+
+separation of fork() and exec() allows shell do many useful things
+prompt > wc p3.c > newfile.txt
+
+
+7
+output of program wc is redirected into 
+output file newfile.txt
+before calling exec(), shell closes std out and opens newfile.txt
+
+pipe() 
+
+

@@ -1,0 +1,428 @@
+Class 24
+CS 202
+01 December 2021
+
+On the board
+------------
+
+1. Last time 
+2. Protection and security in Unix
+   --Intro
+   --Setuid
+   --TOCTTOU
+   --Thoughts/editorial
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    arms race:
+    
+    defenders create W ^ X. 
+    response: ROP
+    also: W ^ X is a bummer (see notes from last time for why.)
+
+    maybe hide the binary?
+    response: BROP (blind ROP); see notes from last time for citation.
+
+    defenders use ASLR?
+    response: BROP
+
+    defenders use canary values?
+    response: BROP
+
+2. Protection and security in Unix
+
+ A. Intro
+
+    UIDs and GIDs
+
+    processes have a user ID and one or more group IDs
+
+    files and directories are access-controlled.
+
+        you saw this in the ls lab
+
+        system stores with each file who owns it.
+
+        where's the info stored? (answer: inode.)
+
+    special user: uid 0, called root, treated specially by the kernel as
+    administrator
+
+        uid 0 has all permissions: can read any file, do anything
+
+        certain ops only root can do: 
+	    --binding to ports less than 1024
+	    --change current process's user or group ID
+	    --mount or unmount file systems
+	    --opening raw sockets (so you can do something like ping remote machines,
+	    for example)
+	    --set clock
+	    --halt or reboot machine
+	
+	    --change UIDs (so login program needs to run as root)
+
+   
+   B. Setuid
+
+	--Some legitimate actions require more privs than UID
+	    --E.g., how should users change their passwords?
+	    --Passwords are stored in root-owned /etc/passwd and /etc/shadow files
+	    (see above)
+
+	--going to go into a bit of detail. why? because setuid/setgid
+	are the sole means on Unix to *raise* a process's privilege level
+	  
+        --Solution:  Setuid/setgid programs
+    
+            idea: a way for root -- or another user -- to delegate its
+            ability to do something.
+
+	    --special "setuid" bit in the permissions of a file
+
+	    --Run with privileges of file's owner or group
+
+	    --Each process has _real_ and _effective_ UID/GID
+
+	    -- _real_ is user who launched the program
+
+	    -- _effective_ is owner/group of file, used in access checks
+
+	    --for a program marked "setuid", on exec() of binary, kernel sets
+	    effective uid = file uid. NOTE: kernel would (for
+	    non-setuid) mark effective uid = real uid.
+	  
+	--Examples:
+
+	    --/usr/bin/passwd : change a user's passwd. User needs to be
+	    able to run this, but only root can modify the password file.
+
+	    --/bin/su: change to new user ID if correct password is typed.
+
+            vagrant@bullseye:~$ ls -l `which passwd`
+            -rwsr-xr-x 1 root root 63960 Feb  7  2020 /usr/bin/passwd
+
+            vagrant@bullseye:~$ ls -l `which su`
+            -rwsr-xr-x 1 root root 71912 Jul 28 19:09 /usr/bin/su
+
+	    [note the 's']
+
+	    --Obviously need to own file to set the setuid bit
+	    --Need to own file and be in group to set setgid bit
+
+
+        --Here's an example for intuition
+
+            Imagine you leave your terminal unattended, and some other
+            user ("attacker") sits down and types:
+
+            % cp /bin/sh /tmp/break-acct
+            % chmod 4755 /tmp/break-acct
+    
+            the leading 4 sets the setuid bit. 
+            the 755 means  "rwxr-xr-x"
+
+            Attacker later runs (from their own account):
+
+            $ /tmp/break-acct -p    
+        
+            result: attacker now has a shell with your privileges and
+            can do anything you can do (read your private files, remove
+            them, overwrite them, etc.). in fact anyone on the system
+            can run break-acct to get the same effect (since it's
+            world-executable).
+   
+            More generally, imagine that you are writing a program on a
+            shared system, you are the owner, and you set the setuid bit
+
+            What you are doing is letting that program run with *your*
+            privileges.
+
+
+        --Of course that was an attack. Sometimes people intentionally
+        install setuid-root binaries. When you do that, as a system
+        administrator or packager, you have to be extremely careful. 
+
+            You're saying in essence that everyone on the system should
+            be able to run the binary with root's privileges.
+
+	    --Fundamental reason you need to be careful: very difficult
+	    to anticipate exactly how and in what environment the code
+	    will be run....yet when it runs, it runs with *your*
+	    privileges (where "your" equals "root" or "whoever set the
+	    setuid bit on some code they wrote")
+
+	    --NOTE: Attackers can run setuid programs any time (no need
+	    to wait for root to run a vulnerable job)
+
+	    --FURTHER NOTE: Attacker controls many aspects of program's
+	    environment
+
+        EXAMPLE ATTACKS that exploit setuid:
+
+	--Close fd 2 before exec()ing program
+	
+	    --now, setuid program opens a file, for example the
+	    password file.... (normally, would be fd=3, but because
+	    fd 2 was closed, the file will be given fd 2).
+	    
+	    --then, the program later encounters an error message
+	    and does fprintf(stderr, "some error msg").
+
+		--result: the error message goes into the password
+		file!
+
+	    --fix: for setuid programs, kernel will open dummy fds
+	    for 0,1,2 if not already open
+
+	--Set maximum file size to zero (if, say, setuid program
+	changes a password and then rebuilds some password
+	database), which means the setuid program is now running in
+	an adverse environment
+
+           
+        --a program called "preserve" installed as setuid root; used by
+        old editors (like the old vi) to make a backup of files in a
+        root-accessible directory.
+
+            --preserve runs 
+                system("/bin/mail").
+
+            [it does this to send email to notify the user that there is
+            a backup, for example after a crash/restart]
+
+            --"system" uses the shell to parse its argument
+
+            --now if IFS (internal field separator) is set to "/" before
+            running vi, then we get the following:
+
+                --vi forks and execs /usr/lib/preserve (IFS is still set
+                to '/', but exec() call doesn't care)
+
+                --preserve invokes system("/bin/mail"), but this causes
+                shell to parse the arguments as:
+                    bin mail
+
+                --which means that if the attacker locally had a
+                malicious binary called 'bin', then that binary could
+                do:
+
+                    cd /homes/mydir/bin 
+                    cp /bin/sh ./sh 
+                    chown root sh  # this succeeds because 'bin' is running as root
+                    chmod 4755 sh  # this succeeds because 'bin' is running as root
+
+                (the leading 4 means "set the setuid bit")
+
+                --result is that there is now a copy of the shell
+                executable that is owned by root and setuid root
+
+                --anyone who runs this shell has a root shell on the
+                machine
+
+
+	    --fix: shell has to ignore IFS if the shell is running as
+	    root or if EUID != UID.
+                (also, "preserve" should not have been setuid root;
+                there should have been a special user/group just for this
+                purpose.)
+
+	    --also, modern shells refuse to run scripts that are setuid.
+	    (the issue there is a bit different, but it is related.)
+
+       More reading about the setuid bit and the classic example above:
+            http://web.deu.edu.tr/doc/oreily/networking/puis/ch05_05.htm
+
+
+        --ptrace() examples
+
+	    Attack 1:
+
+		--attacker ptraces setuid program P
+
+		--P runs with root's privileges
+
+		--now manipulate P's memory, get arbitrary privilege
+		on the machine. this is bad.
+
+		--fix: don't let process ptrace more privileged process or
+		another user's process
+
+		    for example, require sender to match real and
+		    effective UID of target
+
+
+            Attack 2:
+
+                --attacker owns two unprivileged processes A and B.
+                
+                --A ptraces B. so far, so good. no violation of the
+                rule above.
+
+                --Then B execs a setuid program (for example, "su
+                whatever"), which causes B's privilege to be raised.
+
+                    (recall that the "su" program is setuid root.
+                    "su pat" becomes user "pat" if someone types
+                    pat's password.)
+
+                --Now A is connected to a process that is running
+                with root's privileges. A can use B's elevated
+                privileges. This is bad.
+
+                --fix: disable/ignore setuid bit on binary if
+                ptraced target calls exec()
+
+                    --> but let root ptrace anyone
+
+            Attack 3:
+
+                --now, say that A and B are unprivileged processes
+                owned by attacker
+
+	        --say A ptraces B. so far, so good. no violation of
+	        prior two rules.
+
+	        --say A executes "su attacker", i.e., it's su'ing to
+	        its own identity
+
+	        --While su is superuser, B execs "su root" 
+
+	            --remember, the attacker programmed B, and can
+	            arrange for it to exec the command just above.
+
+	            --BUT! remembering the ptrace rules above, the
+	            exec succeeds with the setuid bit NOT
+	            disabled/ignored. the reason is that at this
+	            moment A is the superuser, so no problem with
+	            B's exec() honoring the setuid.
+
+                --attacker types password into A, gets shell, and
+                now this (unprivileged) shell is attached to "su root".
+
+                --the attacker can now manipulate B's memory
+                (disable password checks, etc.) so that the "su
+                root" succeeds, at which point A is connected to a
+                root shell
+
+            See Linux Yama module as a partial defense:
+                https://www.kernel.org/doc/Documentation/security/Yama.txt
+
+            additionally, Linux's capability system (`man 7 capabilities`)
+            also provides a mechanism to limit user's ability to attach to processes
+            using the CAP_SYS_PTRACE capability. A user who has not been granted this
+            capability cannot attach a debugger to an arbitrary process. However,
+            by default, debuggers run by users without this capability are still 
+            allowed to attach to child processes, that is any process that the
+            debugger forks. This means that 
+                "$ gdb <prog_name>" just works.
+   
+
+        Another issue:
+
+	    --consider a setuid process that does a bunch of
+	    privileged things and then drops privileges to
+	    become user again
+
+	    --should be okay, right?
+
+	    *****--NO. once the process has seen something
+	    privileged and then become the user again, it can be
+	    ptraced(), and the confidential things it has seen
+	    (or the privileged resources that it holds) can be
+	    manipulated by an unprivileged user.****
+
+	    --fix? make software much more complicated. separate
+	    a single process into separate ones, for example.
+
+
+    D. TOCTTOU attacks (time-of-check-to-time-of-use)
+
+	--very common attack
+
+	--say there's a setuid program that needs to log events to a
+	file, specified by the caller. The code might look like this,
+	where logfile is from user input
+
+	    fd = open(logfile, O_CREAT|O_WRONLY|O_TRUNC, 0666);
+
+	--what's the problem?
+
+	    --setuid program shouldn't be able to write to file that user
+	    can't. thus:
+	    
+		if (access(logfile, W_OK) < 0)
+		    return ERROR;
+		fd = open(logfile, ....)
+
+	    should fix it, right?
+
+	    NO!
+
+	--here's the attack........
+
+            attacker runs setuid program, passing it "/tmp/X"   
+
+	    setuid program                          attacker
+					      creat("/tmp/X");
+
+	  check access("/tmp/X") --> OK
+				    
+					      unlink("/tmp/X");
+					      symlink("/etc/passwd", "/tmp/X")
+
+	    open("/tmp/X")
+	
+
+	--from the BSD man pages:
+	    "access() is a potential security hole and should never be
+	    used."
+
+	--the issue is that access check and open are non-atomic
+
+	--to fix this, have to jump through hoops: manually traverse
+	paths. check at each point that the dir you're in is the one you
+	expected to be in (i.e., that you didn't accidentally follow a
+	symbolic link). maybe check that path hasn't been modified
+        also need to use APIs that are relative to an opened directory
+        fd:
+
+            -- openat, renameat, unlinkat, symlinkat, faccessat
+            -- fchown, fchownat, fchmod, fchmodat, fstat, fstatat
+
+        Or
+
+            Wrap groups of operations in OS transactions
+
+                --Microsoft supports transactions on Windows Vista and
+                newer
+                https://msdn.microsoft.com/en-us/library/windows/desktop/bb986748%28v=vs.85%29.aspx
+
+                --research papers:
+
+                http://www.fsl.cs.sunysb.edu/docs/valor/valor_fast2009.pdf
+                http://www.sigops.org/sosp/sosp09/papers/porter-sosp09.pdf
+
+    E. Thoughts / editorial
+
+	--at a high level, the real issue is not ptrace. it's not even
+	buggy code. the real issue is that the correct version of the
+	code is way harder to write than the incorrect version:
+	    --correct version has to traverse path manually
+	    --be super-careful when running as setuid
+	
+	--cannot just blame application writers; must also blame the
+	interfaces with which they're presented.
+
+	--rules are incoherent. not clear how permissions compose
+
+	--for all that, Unix security is actually quite inflexible:
+
+	    --can't pass privileges to other processes
+	    --can't have multiple privileges at once
+	    --not a very general mechanism (cannot create a user or group
+	    unless root)
+
+[thanks to David Mazieres, Nickolai Zeldovich, Robert Morris]
+

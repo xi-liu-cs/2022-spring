@@ -1,0 +1,126 @@
+1.1
+thread_create(func) is a thread creation interface. It
+uses a pointer to a structure of type pthread_t,
+an attr pointer to specify attributes,
+a function pointer indicates which function should
+the thread start running in.
+fork() system call create a new process, the child has
+its own copy of the address space.
+but in thread_create(funct), another executing entity
+is created with its own call stack, but shares the 
+same address space as other existent threads in 
+the program.
+
+
+1.2
+for process, OS keeps track of a process list, which
+keeps track of which processes are running, ready,
+and blocked. OS uses a structure called Process Control
+Block to store the process descriptor.
+for thread, OS uses Thread Control Blocks, it contains the
+thread ID and states. the address space remains identical
+when there is a context switch between threads.
+
+
+2.
+sometimes multi-threaded process can have lower
+time-to-completion than the equivalent single-threaded
+process when the work is distributed into multiple
+CPUs separately, using one thread per CPU, then
+parallelism can speed up the process. when one
+thread waits, CPU scheduler can switch to other 
+threads
+
+if multiple threads interfere with each other
+during sharing of hardware resources or collides
+during access of shared data,
+then a multi-threaded process has higher
+time-to-completion than the equivalent
+single-threaded process.
+
+multi-threaded program has multiple points of
+execution. Each thread is similar to an individual 
+process, but they share the same address space 
+and data
+
+
+3.
+a thread within a process has its own
+A. stack
+C. registers
+
+
+4.
+run both functions concurrently: 
+
+add(a, b)
+1. a -> x = a -> x + b -> x
+2. a -> y = a -> y + b -> y
+
+add(b, a)
+3. b -> x = b -> x + a -> x
+4. b -> y = b -> y + a -> y
+
+let
+a -> x = 1
+a -> y = 2
+b -> x = 3
+b -> y = 4
+the output of executing line 1.2.3.4 is different than the 
+output of executing line 3.1.4.2
+
+1. a -> x = a -> x + b -> x = 1 + 3 = 4
+2. a -> y = a -> y + b -> y = 2 + 4 = 6
+3. b -> x = b -> x + a -> x = 3 + 4 = 7
+4. b -> y = b -> y + a -> y = 4 + 6 = 10
+
+3. b -> x = b -> x + a -> x = 3 + 1 = 4
+1. a -> x = a -> x + b -> x = 1 + 4 = 5
+4. b -> y = b -> y + a -> y = 4 + 2 = 6
+2. a -> y = a -> y + b -> y = 2 + 6 = 8
+
+
+
+
+5.1
+foo: 0
+boo:  1
+main: 2
+
+foo: 1
+boo:  0
+main: 2
+
+boo: 0
+foo:  1
+main: 2
+
+boo: 1
+foo:  0
+main: 2
+
+
+
+5.2
+use locks to provide mutual exclusion to
+critical sections
+
+pthread_mutex_t lock;
+pthread_mutex_lock(&lock);
+int n = i;
+i = i + 1;
+printf("foo: %d\n", n);
+pthread_mutex_unlock(&lock);
+
+pthread_mutex_t lock;
+pthread_mutex_lock(&lock);
+int n = i;
+i = i + 1;
+printf("boo: %d\n", n);
+pthread_mutex_unlock(&lock);
+
+
+5.3
+foo: 0
+boo:  1
+main: 2

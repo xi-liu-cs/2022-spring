@@ -1,0 +1,31 @@
+842
+
+virtual memory is organized as an array of 
+N contiguous byte-size cells stored on disk
+contents of the array on disk are cached
+in main memory
+
+data on disk is partitioned into blocks that
+serve as the transfer units between the 
+disk and the main memory
+
+virtual pages = fixed-size blocks
+virtual memory is partitioned into VIRTUAL PAGES
+physical memory is partitioned into PHYSICAL PAGES
+
+
+843
+SRAM(静态随机存取存储器) cache to denote the L1, L2, and L3 cache memories between the
+CPU and main memory, 
+DRAM(动态随机存取存储器) cache to denote the VM system's
+cache that caches virtual pages in main memory
+
+
+844
+page table is an array of page table entries (PTE)
+Each page in the virtual address space has a PTE at
+a fixed offset in the page table
+
+
+845
+a DRAM cache miss is known as a page fault

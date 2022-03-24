@@ -1,0 +1,41 @@
+condition var is not embed info about whether 
+buffer is full
+
+units of concurrency - reader & writer
+shared chunk of state - database
+
+sync constaints & sync obj
+- reader can access the DataBase iff no active writes 
+(OK to read)
+- writer can access DB iff there are no other
+active readers or writers
+(OK to write)
+- shared var should be modified by only one
+thread at a time
+
+
+
+
+
+write methods
+int AR = 0 //active readers
+AW, WR (waiting reader), WW (waiting writer)
+
+mutex:
+- spinlock
+- queue
+- id of current owner
+
+linux, implement of mutex
+mutex_acquire
+
+
+
+
+
+
+
+
+
+
+

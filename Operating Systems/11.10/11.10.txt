@@ -1,0 +1,126 @@
+hard disk drive
+1. i/o
+2. foundation of file sys
+
+platter 盘片
+spindle 主轴
+stack of magnetic platters
+60 - 250 rot/sec
+
+innovation inside ipod (listen music)
+cheap & lightweight hard drive
+
+now solid state drive
+
+cheapest dollars/gigabyte beside tape
+
+cold data (not care about lookup time)
+
+tape does not have random access
+has to read whole thing
+
+amazon, google buy a lot of hard disk drive
+
+reliability: 
+bits delay over time
+least to highest reliability:
+solid state drive < hdd < tape
+
+seek time is slow
+
+
+track 磁道: circle on a platter
+sector: chunk of a track (4KB)
+
+seek 4 phases:
+speedup (accelerate), coast (fix velocity), slowdown, settle
+
+avg seek time
+= time to seek 1/3 of the disk
+manufactures report
+1/3 of the whole disk
+
+amortized
+beneficial seek
+from 0 (center) to 1 (rim)
+ 
+paying overhead
+
+terabyte TB
+10^12 byte < 10^40 byte
+hardware manufacture use left unit (trillion),
+so a bigger number of TB
+
+
+
+Mean time between failures: million hours
+
+
+
+disk 
+= linear array of sectors
+
+ZONING
+more sectors in outer track
+
+SKEWING
+
+SPARING
+certain sector fail, remap
+
+
+
+when write,
+if wrong location of seek, destroy data
+
+longer to settle when write vs read
+so write slow
+
+
+
+
+
+
+spindle speed 12000 rpm
+avg seek time 12ms
+transfer rate 128mb/s
+sector 512byte
+
+a)
+throughput if 500 sectors read randomly in fifo
+
+b)
+same question but reads sequential, faster
+(500 contiguous data)
+
+
+
+
+
+a)
+
+each rotation = 12000 rpm = 200 rps
+200 rps = 200 rotations / 1 second
+1 rotation takes 1 second / 200 = 0.005 second = 5(0.001)second
+= 5ms
+rotation 5 ms
+rotational delay is half a rotation
+
+1s/128 mb * 512B = 2^9 / 2^27 = 2^-18  
+throughput = tot byte / time
+500 * 512 / (500 (rotational delay + seek + transfer))
+= 500 * 512 / (500 (1/2(2.5ms + 12ms + 4 mu s))
+= 512 * 70B / 1s
+
+
+
+paying seek time every read
+transfer rate 128mb/s is best 
+
+
+
+
+
+b)
+500 * 512 / (2.5ms + 12ms + 1s /(128mb) 500(512) )
+= 2^18 bytes * 60 / 1000 ms = 16mb/s

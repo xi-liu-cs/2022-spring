@@ -1,0 +1,61 @@
+skip 20.2
+
+1
+page tables too big, consume too much memory
+
+32 bit address (2^32 bytes)
+with 4KB = 2^12 byte is page size
+4 byte is page-table entry size
+
+address space has (2^32 bytes / (2^12 bytes / page) = 2^20) pages
+(2^20 pages)(4 byte) = 2^22 bytes = 4MB
+
+page table is 4MB in size
+have 1 page table for every process
+
+
+use bigger pages to reduce page table size
+32 bit address 
+with 16KB = 2^14 byte is page size 
+(so offset is 14 bit, VPN = 32 - 14 = 18 bit)
+4 byte is page-table entry size (same as above)
+
+address space has (2^32 bytes / (2^14 bytes / page) = 2^18) pages
+(2^18 pages)(4 byte) = 2^20 bytes = 1MB
+
+page table is 1MB in size
+a factor of 4 reduction in size of the page table 
+
+
+2
+big pages lead to waste within each page, 
+a problem known as internal fragmentation
+
+
+
+5
+multi-level page table: turns the linear page table into a tree
+use page directory to track
+1. whether a page of page table is valid
+2. where it is in memory
+
+
+
+
+6
+multi-level table makes parts of linear page table disappear
+a page directory entry PDE has 
+1. a valid bit
+2. a page frame number
+PDE is similar to a PTE
+(page table entry PTE has a vpn and a offset)
+
+allocates page-table space in proportion to 
+the amount of address space 
+
+
+
+7
+linear page table
+= array of PTEs indexed by VPN
+

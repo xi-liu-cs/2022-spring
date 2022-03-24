@@ -1,0 +1,34 @@
+1
+we have been assuming that 
+every address space of every process fits into memory
+now relax these assumptions
+
+memory hierarchy
+
+need to stash away portions of address spaces
+that currently are not in great demand:
+use hard disk drive
+
+
+2
+swap space 交换分区
+a space on a hard disk that is a substitute for physical memory
+
+swap pages out of memory to it
+and swap pages into memory from it
+
+4 page physical memory
+8 page swap space
+
+
+3
+memory reference:
+process generates virtual memory references
+(instruction fetches, data accesses)
+hardware translates them into physical addresses
+
+1. extracts vpn from virtual address
+2. checks the TLB for a match 
+3.a. if a hit, produce the resulting physical address & fetch from memory
+3.b. 
+

@@ -1,0 +1,8 @@
+monitor:
+1 mutex + some cond (1 mutex per class or object)
+
+not a monitor:
+lab 3 buymanyitems
+(multiple mutex per class or object)
+ 
+see 6.txt, scribble8

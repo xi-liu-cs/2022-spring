@@ -1,0 +1,354 @@
+Class 11
+CS 202
+13 October 2021
+
+On the board
+------------
+
+1. Last time
+2. Intro to Virtual memory
+3. Paging
+    --Intro
+    --key data structure: page table
+    --Multilevel page table
+    --Alternatives/tradeoffs
+
+---------------------------------------------------------------------------
+
+1. Last time
+    
+    --Scheduling
+
+2. Virtual memory intro
+
+    --very important idea in computer systems
+
+    --setup
+
+        draw picture:
+
+            heap, stack, program text.
+
+
+        draw picture:
+
+            * program:
+
+             0x500     movq 0x200000, %rax    
+             0x508     incq 1, %rax
+             0x510     movq %rax, 0x300000    
+
+    	    [CPU ---> translation box --> physical addresses]
+
+            how many virtual memory translations happen when the lines
+            above are executed?  (answer: 5.
+                    3 for the instructions
+                    1 for the load
+                    1 for the store)
+                
+
+    --"to virtualize" means "to lie" or "to fool". we'll say how this is
+    implemented in a few moments. for now, let's look at the benefits of
+    being interposed on memory accesses.
+
+    --benefits:
+
+        --programmability (book calls this "transparency"):
+            
+            --programs use addresses like 0, 0x200000, etc. (see example
+            above)
+
+            --three benefits, at least:
+
+            (a) program *thinks* it has lots of memory, organized in a
+            contiguous space
+
+            (b) programs can use "easy-to-use" addresses like 0,
+            0x20000, whatever. compiler and linker don't have to worry
+            about where the program actually lives in physical memory
+            when it executes.
+
+            (c) multiple instances of same program foo are each loaded,
+            each thinks its using memory addresses like 0x50000,
+            whatever, but of course they're not using the same physical
+            cells in RAM
+
+        --protection:
+
+            --processes cannot read or write each other's memory
+
+            --this protection is at the heart of the isolation among
+            processes that is provided by the OS
+
+                --prevents bug in one process from corrupting another
+                process.
+
+                --don't even want a process to observe another
+                process's memory (like if that process has secret or
+                sensitive data)
+
+            --the idea is that if you cannot name something, you cannot
+            use it. this is a deep idea.
+
+        --effective use of resources:
+
+            --programmers don't have to worry that the sum of the memory
+            consumed by all active processes is larger than physical
+            memory.
+
+        --sharing:
+
+	    --processes share memory under controlled circumstances,
+	    but that physical memory may show up at very different
+	    virtual addresses
+	    --that is, two processes have a different way to refer
+	    to the same physical memory cells
+
+        --other things too (we may study later, depending on time)
+
+    --how is this translation implemented?
+
+        --in modern systems, hardware does it. this hardware is
+        configured by the OS.
+
+        --this hardware is called the MMU, for memory management unit,
+        and is part of the CPU
+
+        --why doesn't OS just translate itself? similar to asking why we
+        don't execute programs by running them on an emulation of a
+        processor (too slow)
+
+    --thing to remember in what follows:
+    
+        --OS is going to be setting up data structures that the hardware
+        sees
+    
+        --these data structures are *per-process* 
+
+-----
+admin notes:
+
+    - HW 6 (due week from today) will stress VM; think of it as exam practice
+
+    - Time management advice from Randy Pausch:
+    https://www.youtube.com/watch?v=oTugjssqOT0
+-----
+
+3. Paging
+
+    A. Intro
+
+    --Basic concept: divide all of memory (physical and virtual)
+    into *fixed-size* chunks.
+
+        --these chunks are called *PAGES*.
+
+        --they have a size called the PAGE SIZE.
+        (different hardware architectures specify different sizes)
+
+        --in the traditional x86 (and in our labs), the PAGE SIZE
+        will be 
+	    4096 B = 4KB = 2^{12}
+
+    --Warm-up:
+
+	--how many pages are there on a 32-bit architecture?
+
+	--2^{32} bytes / (2^{12} bytes/page) = 2^{20} pages
+
+        --what about if there are 48 bits used to address memory?
+
+            2^{48} bytes / (2^{12} bytes/page) = 2^{36} pages = 64 billion pages
+
+        [aside:
+            2^10: kilo ~1000
+            2^20: mega, ~1 million
+            2^30: giga, ~1 billion
+            2^40: tera, ~1 trillion
+
+    --Each process has a separate mapping
+
+        --And each page separately mapped
+
+        --we will allow the OS to gain control on certain operations
+
+            --Read-only pages trap to OS on write (store)
+         
+            --Invalid pages trap to OS on read (load) or write (store)
+         
+            --OS can change mapping and resume application
+
+    --it is proper and fitting to talk about pages having **NUMBERS**. 
+
+	--page 0:   [0,4095]
+	--page 1:   [4096, 8191]
+	--page 2:   [8192, 12277]
+	--page 3:   [12777, 16384]
+	.....
+
+	--page 2^{20}-1 [ ......, 2^{32} - 1]
+
+    --unfortunately, it is also proper and fitting to talk about _both_
+    virtual and physical pages having numbers.
+
+	--sometimes we will try to be clear with terms like:
+	    vpn 
+	    ppn
+
+    [aside:
+        the "math" of virtual memory: get comfortable mapping between
+        "number of bits required to represent something" and "size of the
+        space". The latter is two-raised-to-the-power-of-the-former.
+        Examples: 
+
+            a virtual address is 32 bits, means the virtual address space is
+                2^32 = 4 GB.
+
+            the VPN is 20 bits, means there are 2^{20} virtual pages, and
+                and the offset is 12 bits, which means page size of 2^12,
+                or 4KB.
+ 
+    ]
+
+    B. Key data structure: page table
+
+        page table conceptually implements a map from 
+            VPN --> PPN
+
+            NOTE: VPN and PPN need not (and do not, in our case study) have
+            the same number of bits
+
+         page table is conceptually an index. 
+
+            the address is broken up into bits:
+
+                    [.............|........]
+
+                    [ VPN         | offset ]
+                       |             |
+                       |             +
+                       |             | 
+                       --> TABLE --> PPN 
+                                      =
+                                    address
+
+            top bits index into page table. contents at that index are the
+            PPN.
+
+            bottom bits are the offset. not changed by the mapping
+
+            physical address = PPN + offset
+
+            result is that each page table entry expresses a mapping about a
+            contiguous group of addresses.
+
+
+    --another way to look at it:
+
+        (assume 48-bit addresses and 4KB pages)
+
+	there is in the sky a 2^{36} sized array that maps the
+	virtual address to a *physical* page
+
+	table[36-bit virtual page number] = 20-bit physical page #
+
+        EXAMPLE: 
+
+            if OS wants a program to be able to use address 0x00402000
+            to refer to physical address 0x00003000, then the OS
+            conceptually adds an entry:
+
+                table[0x00402] = 0x00003
+
+            (this is the 1026th virtual page being mapped to the 3rd
+            physical page.). in decimal: table[1026] = 3
+
+            next class, we will see how this is actually implemented
+
+        NOTE: top 36 bits are doing the indirection. bottom 12 bits just
+        figure out where on the page the access should take place.
+
+            --bottom bits sometimes called offset.
+
+    --so now all we have to do is create this mapping
+
+    --why is this hard? why not just create the mapping?
+
+	--answer: then you need, per process, roughly 512GB (2^{36}
+	entries * 8 bytes per entry).
+
+	    [why 8 bytes per entry? in practice, it's convenient to have
+	    the entry size be the same as a data type on the machine]
+
+	--too much! let's deal with this...
+
+    C. multilevel page tables
+
+        --key idea: represent the page table as a tree ...
+ 
+            root node has pointers to other nodes
+               
+            children point to pages
+ 
+            Then, we map addresses by using the root for the uppermost
+            address bits, the next level for the next address bits, etc.
+      
+        --the tree is sparse 
+        
+            that is, many of the child nodes are never filled in
+
+            just like a real tree need not be complete
+ 
+            only fill in the parts that are actually "in use"
+
+            example:
+    
+                Say we want to map 2MB of physical memory at virtual
+                memory 0,...,2^{21}-1
+
+                48 bits:
+                    9 9 9 9
+
+                    bottom one, points to physical pages.
+                
+                NOTICE: enormous address space, but we've used very few
+                physical resources -- just 512 + 4 physical pages (why?) 
+                
+
+        --another way to understand this:
+            
+            look at the bottommost level; that's a page table.
+
+            the rest of the structure is telling the architecture how to
+            find the page table
+       
+        --sometimes you get asked: "what piece of the address space is
+        described by a given page table entry?"
+
+            to answer that, look at how many bits are "left"
+
+
+
+    D. Alternatives and tradeoffs
+
+    --There are some tradeoffs:
+    
+        --between large and small page sizes:
+
+	    --large page sizes means wasting actual memory
+
+	    --small page sizes means lots of page table entries (which
+	    may or may not get consumed)
+
+        --between many levels of mapping and few:
+
+            --more levels of mapping means less space spent on page
+            structures when address space is sparse (which they nearly
+            always are) but more costly for hardware to walk the page
+            tables
+
+            --fewer levels of mapping is the other way around: need to
+            allocate larger page tables (which cost more space), but
+            the hardware has fewer levels of mapping
+      
+

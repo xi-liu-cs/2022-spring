@@ -1,0 +1,92 @@
+1
+by running one process, 
+then stopping it and running another,
+OS can promote the illusion that many virtual 
+CPUs exist when there is only 1 physical CPU (or a few)
+
+
+2
+context switch 上下文切换
+process of storing the state of a process or thread,
+so that it can be restored and resume execution later
+
+to understand process, have to understand machine state
+
+MACHINE STATE: 
+1. what a program can read or update when it is running
+2.  memory, (instructions lie in memory), memory that
+the process can address (address space 定址空间)
+3. read or update registers
+
+
+3
+process API
+create: 调用操作系统来创建新进程
+destroy: when processes do not exit by themselves when
+complete, this interface destroy processes forcefully
+wait: wait for a process to stop running
+miscellaneous control 其他控制: 例如种方法来
+暂停进程(停止运行一段时间), 然后恢复(继续运行)
+
+
+4, 5
+how programs transformed into processes?
+
+a. load 加载 its code & static data (initialized variables) into memory,
+into the address space of the process
+将代码和所有静态数据加载到内存中
+programs initially reside on disk 磁盘 or some 
+flash-based solid state drives (基于闪存的固态硬盘)
+
+b. memory allocated for program's run-time stack 运行时栈
+(for local var, funct para, ret addr)
+
+c. memory allocated for heap 堆
+dynamically-allocated data, request by malloc, free() 来释放
+
+d. other initialization tasks related to I/O
+each process has 3 open file descriptors 文件描述符,
+for standard input, output, and error
+
+e. jump to main(), OS transfers control of CPU to 
+newly-created process 
+
+
+6
+process states 进程状态
+1. 运行 running, executing instructions 
+2. 就绪 ready, process ready to run but OS chosen not to
+3. 阻塞 blocked, not ready to run until other event takes place
+(ex: when a process initiates I/O request to a disk
+. the process becomes blocked so other process 
+can use the processor)
+
+being moved from ready to running means
+the process has been SCHEDULED 被调度
+being moved from running to ready means
+the process has been DESCHEDULED 被取消调度
+
+
+7
+track state of each process,
+OS keep process list 进程列表
+
+register context 寄存器上下文 will hold 
+
+
+9
+Trap Frames are used to store the registers
+of the current thread when an interrupt occurs
+
+process control block 进程控制块：
+structure that stores info about a process
+
+When finished, the parent will make 
+one final call (e.g., wait()) to wait for the
+completion of the child
+
+
+10
+process can be described by its state:
+contents of memory in its address space
+contents of CPU registers 

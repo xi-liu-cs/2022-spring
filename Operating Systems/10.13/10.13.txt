@@ -1,0 +1,122 @@
+3 pieces:
+concurrency
+virtual memory
+file system
+
+code address is virtual
+
+alu interact with virtual address
+virtual addr translated to physical addr 
+by memory management unit 内存管理单元
+
+benefit of virtual memory:
+programmability
+1. program thinks it has a lot of memory
+2. programs can use "easy" addresses:
+complier & linker do not have to worry 
+where program lives in physical memory
+3. multiple instances of a program can be loaded 
+and not collide
+
+a process cannot name memory in another process (no interface)
+ability to name, ability to access
+registers: place to do short term computing 
+
+shared memory between processes:
+an process ask os to create handle, make available to another process
+shmget()
+mmp()
+
+os set the data structures describes the mapping available to 
+the hardware
+data structures: how addr translated
+
+each process has 1 data structure to translate from virtual to physical
+
+cache are indexed by physical memory
+
+page table
+
+all of physical, virtual memory are
+divided into fixed size chunk: page
+page are same size for virt & phys
+
+byte addressed, address name a byte in memory
+
+2^10 Kilo
+2^20 Mega
+2^30 Giga
+2^40 Tera
+2^50 Peta
+
+
+4K page = 2^2 * 2^10
+2^32 possible addr, bytes
+
+2^32 byte/ (2^12 byte / page) = 2^20
+
+page 0:
+[0, page_size - 1]
+
+
+
+
+
+page table 分页表
+successively less abstraction
+map: virt page number (PFN page frame number) -> phys page number
+
+upper virt page number
+name a index (slot) in page table 
+(the phys page number is there)
+
+hardware take offset
+
+
+32 bit
+2^20 个 page
+address - 32 - 20 = 12 
+
+2^12 is page size
+location in page can be named by 12 bits
+
+affected by page size
+
+
+
+
+48 bit used to address memory 
+2^36 entries
+8 bytes (word size)
+
+(2^36 entries) * (2^3 bytes / entry) 
+= 2^39 byte
+
+VA: 0x00402000
+PA: 0x00003000
+table[0x00402000] = 0x00003000
+
+3 hexadecimal digit comprise offset
+4 bit per hexadecimal digit
+
+size of table too big
+
+
+
+
+multi-level page table
+virt page number + offset
+then divide virt page number into 9 bit, 9 bit, ....
+first 9 bit tell which entry used to 
+determine which children of root are used (L0)
+
+why not use dictionary or hash table?
+hardware had to implement these lookup
+need a data structure that hardware can easily walk
+
+2MB of phys mem
+[100*(2MB), ..., 101*(2MB) - 1]  ----> [0, 2^21] in virt mem
+
+why page 2^12 
+if big, more waste, internal fragmentation
+if small, too much page table

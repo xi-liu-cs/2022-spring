@@ -1,0 +1,12 @@
+1
+hard disk drive 磁盘驱动器
+The drive consists of 
+a large number of sectors (512-byte blocks),
+each can be read or written
+
+disk = array of sectors 扇区
+扇区(sector)是磁盘的最小存储单位
+0 to n-1 is the address space of the drive
+
+many file systems will
+read or write 4KB at a time (or more)

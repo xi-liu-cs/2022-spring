@@ -1,0 +1,191 @@
+1.
+gifs on webpage are 32 bit
+now 64 bit
+discrepancies
+
+data structure
+x86_64_pagetable 
+is an array of 512 entries
+each entry 8 bytes
+
+when in part 4, nothing works
+u can blame part 4
+problem can be from part 2
+consider the hypothesis that
+bugs occur in previous parts
+are the root issue
+
+i/o
+is en route(在途中) to disk
+
+cpu logically 
+connected to a bus
+
+devices can 
+write directly to mem
+without going thru cpu
+
+core and cpu interchangeably
+LLC last level cache
+
+Network interface controller
+Peripheral Component Interconnect
+
+to interact (read, write) with devices
+software inside kernel
+
+actual assembly instructions
+outb(addr in i/o space, byte):
+ 	send a byte to a device
+inb(addr in i/o space)
+
+
+1st thing cpu execute when power on,
+run boot loader,
+boot loader turn on kernel
+
+bootstrap(a technique of loading
+a program into a computer by means
+of a few initial instructions which 
+enable the introduction of the rest 
+of the program from an input device)
+
+
+insl(0x1F0, (void*) dst, SECTORSIZE/4); 
+// read 128 words from the disk,
+instruction transfers a string from 
+a port specified in the DX register 
+to the memory byte or word pointed
+to by the ES:destination index
+
+
+
+memory-mapped i/o
+if write/store to this (p.6), write to i/o
+
+virt -> physical
+physical -> device
+
+console_putc
+cp−>cursor++ = c | color; 
+is how a char get to the screen
+
+
+interrupt
+i finish sth u assigned
+
+
+
+
+how hardware know if there is stuff to read
+when is time to consume data
+if really want receive text from somebody
+1. busy waiting (constantly look at phone)
+while status !ready
+2. polling (check phone periodically)
+periodly ask ready
+3. interrupt (notifications, phone to buzz)
+device 
+
+
+analogy
+mutex, interrupt
+spinlock, busywaiting
+
+polling: worse latency, better throughput
+
+
+programmed i/o
+
+Direct memory access
+
+device read or write to mem
+cpu set buffers in mem
+cpu tell device
+dont interrupt me until buffer full
+
+
+
+
+
+4 possible
+{Direct memory access, programmed i/o,}
+x
+{polling, interrupt}
+
+book thinks
+dma with interrupt
+
+
+
+
+
+
+primitive devices force programmed i/o (involve cpu)
+
+
+
+
+device driver
+p.4 of handout9
+solve a software engi problem
+for kernel
+
+nasty hardware
+solve that problem once
+& forget about it
+
+驱动程序
+The main purpose of device drivers
+is to provide abstraction by acting 
+as a translator between a hardware device
+and the applications or operating systems
+that use it
+
+device driver
+create a software engi
+run in same address space
+in kernel
+if error,
+entire kernel crash
+
+apple, hardware company
+microsoft, software company
+
+
+device driver
+wrote by hardware vendor
+
+
+
+stuxnet
+dropped a usb stick with 
+malicious initialization code
+
+
+
+
+read(fd, buf, sz)
+write(fd, buf, sz)
+
+
+whether application block
+immediately ret (asynchronous)
+or
+not ret until request handled (block, synchronous)
+
+
+when kernel interact with devices
+never block
+
+
+when interrupt,
+hardware saves register 
+of cpu in trapframe 
+
+mov rsp, rdi
+call exception 
+
+exception handler
+copied into array of processes
+

@@ -1,0 +1,458 @@
+Class 21
+CS 202
+22 November 2021
+
+On the board
+------------
+
+1. Last time
+2. Crash recovery
+    --intro
+    --ad-hoc
+    --copy on write
+    --journaling
+    --wrap-up, summarize
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    finished directories; neat separation of human names and "name used
+    by the system under the hood"
+
+    described some of the design choices in FFS(Fast File System). all driven by actual 
+    file access patterns + the reality of disk hardware
+
+
+2. Crash recovery
+    --intro
+    --ad-hoc
+    --copy-on-write
+    --journaling
+
+    --There are a lot of data structures used to implement the file
+    system: bitmap of free blocks, directories, inodes, indirect blocks,
+    data blocks, etc.
+
+        --We want these data structures to be *consistent*: we want
+        invariants to hold
+
+        --We also want to ensure that data on the disk remains consistent.
+
+        --Thorny issue: *crashes* or power failures.
+
+    --Making the problem worse is: (a) write-back caching and (b)
+    non-ordered disk writes. (a) means the OS delays writing back
+    modified disk blocks. (b) means that the modified disk blocks can go
+    to the disk in an unspecified order.
+
+    --Example: 
+
+        [DRAW PICTURE]
+            INODE
+            DATA BLOCK ADDED
+            DATA BITMAP UPDATED
+
+        crash.
+
+        restart.
+
+        uh-oh.
+
+    --Solution: the system requires a notion of atomicity
+
+        --How to think about this stuff: imagine that a crash can happen
+        at any time. (The only thing that happens truly atomically is a
+        write of one or a few 512-byte disk sector.) So you want to 
+        arrange for the world to look sane, regardless of where a 
+        crash happens.
+
+            --> A challenge here is that metadata and data is spread across
+            several disk blocks (and hence several sectors), so increasing
+            size of atomic unit is not sufficient.
+
+            --> Your leverage, as file system designer, is that you can
+            arrange for some disk writes to happen *synchronously*
+            (meaning that the system won't do anything until these disk
+            writes complete), and you can impose some ordering on the
+            actual writes to the disk.
+
+        --So we need to arrange for higher-level operations ("add data
+        to file") to _look_ atomic: an update either occurs or it
+        doesn't.
+
+        --Potentially useful analogy: during our concurrency unit, we
+        had to worry about arbitrary interleavings (which we then tamed
+        with concurrency primitives). Here, we have to worry that a
+        crash can happen at any time (and we will tame this with
+        abstractions like transactions). The response in both cases is a
+        notion of atomicity.
+
+    --We will mention three approaches to crash recovery in file
+    systems:
+    
+        A. Ad-hoc (the book calls this "fsck")
+        B. copy-on-write approaches 
+        C. Journaling (also known as write-ahead logging)
+
+
+    A. Ad-hoc
+
+        --Goal: metadata consistency, not data consistency (rationale:
+        too expensive to provide data consistency; cannot live without
+        metadata consistency.)
+
+        --Approach: arrange to send file system updates to the disk in
+        such a way that, if there is a crash, **fsck** can clean up
+        inconsistencies
+        
+    --example: for file create:
+
+        --write data to file
+
+        --then update/write inode
+
+        --then mark inode "allocated" in bitmap
+
+        --then mark data blocks "allocated" in bitmap
+
+        --then update directory
+
+           
+    now, cases:
+
+    inode not marked allocated in bitmap --> only writes were to
+    unallocated, unreachable blocks; the result is that the write
+    "disappears"
+           
+    inode allocated, data blocks not marked allocated in bitmap -->
+    fsck must update bitmap 
+
+    file created, but not yet in any directory --> fsck ultimately
+    deletes file (after all that!)
+
+    Disadvantages to this ad-hoc approach:
+
+        (a) need to get ad-hoc reasoning exactly right 
+
+        (b) poor performance (synchronous writes of metadata) 
+
+        --multiple updates to same block require that they be
+        issued separately. for example, imagine two updates to
+        same directory block. requires first complete before
+        doing the second (otherwise, not synchronous)
+
+        --more generally, cost of crash recoverability is
+        enormous. (a job like "untar" could be 10-20x slower)
+
+        (c) slow recovery: fsck must scan entire disk
+
+        --recovery gets slower as disks get bigger. if fsck
+        takes one minute, what happens when disk gets 10 times
+        bigger?
+    
+                --essentially, fsck has to scan the entire disk
+
+    B. Copy-on-write approaches
+
+        -- Goal: provide both metadata and data consistency, by using
+        more space. Rationale: disks have gotten larger, space is not
+        at a premium.
+
+        -- Used by filesystems like ZFS, btrfs and APFS.
+           [For more details read The Zettabyte File System by
+           Jeff Bonwick, Matt Ahrens, Val Henson, Mark Maybee and
+           Mark Shellenbaum. 
+           https://www.cs.hmc.edu/~rhodes/courses/cs134/sp19/readings/zfs.pdf]
+
+        -- Approach: never modify a block, instead always make a new
+        copy. In detail (see handout) :
+
+            * The filesystem has a root block, which we refer to as the
+            Uberblock (copying terminology from ZFS). The uberblock is
+            the **only** block in the filesystem that is ever _modified_
+            (as opposed to being fully written, which the rest of the
+            blocks are).
+
+            * Start with a basic example: a modification to a file in an
+            existing block
+
+                - remember: _never modify, only copy_. so the file
+                system allocates a new block, and writes the new version
+                of the data to the new block
+
+                - but that in turn necessitates writing a new version of
+                the inode (to point to the new version of the block)
+
+                - and that in turn _changes the inode number_, which
+                means that parents and any directories hard-linking to
+                the file have to change
+                    (for this to work, the inode has to store the
+                    list of hard links.)
+
+                - and that in turn means that _those_ directories'
+                inodes have to change
+
+                - and so on up to the uberblock.
+
+                - the change is _committed_ -- in the crucial sense that
+                after a crash the new version will be visible -- when
+                and only when the uberblock is modified on disk.
+
+            * Note that the same thing happens when a user appends to a
+            file, creating another block (and thus changing the inode,
+            and so on). 
+
+            * And the same thing happens when creating a file (because
+            the directory inode has to change)
+
+       -- Note that to enable this picture, the uberblock is designed to
+       fit in a sector, in order to allow **atomic updates**.
+
+        -- Benefits:
+
+            * Most changes can be committed in **any order**.
+                * The only requirement is that all changes be committed before the
+                uberblock is updated.
+                * The ability to reorder writes in this manner has performance benefits.
+
+            * On disk structure and data is **always** consistent. Do not need to use
+              fsck, or run recovery after crash.
+                * Most of these filesystems also make use of checksums to handle cases
+                where data is corrupted for other reasons.
+
+            * Filesystem incorporates versioning similar to Git and other version control
+              tools you may have used.
+                * This requires not throwing away the old versions of
+                the blocks after writing the new ones.
+
+        -- Disadvantages:
+            * Significant write amplification: any writes require changes to several
+            disk blocks.
+            * Significant space overheads: the filesystem needs enough space to copy
+            metadata blocks in order to make any changes. Consider the problem of deleting
+            files when the disk is nearly full.
+            * Generally necessitates the use of a garbage collection daemon in order to
+            reclaim blocks from old versions of the file-system.
+
+    C. Journaling
+
+        -- Copy on write showed that crash consistency is achievable when
+        modifications **do not** modify (or destroy) the current copy. 
+    
+        Golden rule of atomicity, per Saltzer-Kaashoek:
+        "never modify the only copy"
+
+        -- Problem is that copy-on-write carries significant write and space overheads. Want
+        to do better without violating the golden rule of atomicity.
+
+        -- Going to do so by borrowing ideas from how transactions are implemented in databases.
+
+        -- Core idea: Treat file system operations as transactions. Concretely, this means that
+           after a crash, failure recovery ensures that:
+            * Committed file system operations are reflected in on-disk data structures.
+            * Uncommitted file system operations are not visible after crash recovery.
+
+        -- Core mechanism: Record enough information to finish applying committed operations 
+           (*redo operations*) and/or roll-back uncommitted operations (*undo operations*). 
+           This information is stored in a redo log or undo log. Discuss this in detail next.
+
+	--concept: commit point: the point at which there's no turning back.
+
+	    --actions always look like this:
+		--first step 
+		....            [can back out, leaving no trace]
+		--commit point
+		.....           [completion is inevitable]
+		--last step
+
+	    --what's commit point when buying a house? when buying a
+	    pair of shoes? when getting married?
+
+	    --ask yourself: what's the commit point in the protocols
+	    below (and the copy-on-write protocol above)?
+
+        -- Redo logging
+            * Used by Ext3 and Ext4 on Linux, going to discuss in that context.
+            
+            * Log is a fixed length ring buffer placed at the beginning of the disk
+              (see handout).
+
+            * Basic operations
+                Step 1: filesystem computes what would change due to an operation. For instance,
+                creating a new file involves changes to directory inodes, appending to a file 
+                involves changes to the file's inode and data blocks.
+                
+                Step 2: the file system computes where in the log it can write this transaction,
+                and writes a transaction begin record there (TxnBegin in the handout). This 
+                record contains a transaction ID, which needs to be unique. The file system 
+                **does not** need to wait for this write to finish and can immediately proceed to
+                the next step.
+                
+                Step 3: the file system writes a record or records detailing all the changes it computed in 
+                step 1 to the log. The file system **must** now wait for these log changes and
+                the TxnBegin record (step 2) to finish being written to disk.
+                
+                Step 4: once the TxnBegin record, and all the log records from step 3 have been
+                written, the system writes a transaction end record (TxnEnd in the handout). 
+                This record contains the same transaction ID as was written in Step 2, and the 
+                transaction is considered committed once the TxEnd has been successfully written to disk.
+
+                Step 5: Once the TxnEnd record has been written, the filesystem asynchronously
+                performs the actual file system changes; this process is called **checkpointing**. 
+                While the system is free to perform checkpointing whenever it is convenient, 
+                the checkpoint rate dictates the size of the log that the system must reserve.
+            
+            * Crash recovery: During crash recovery, the filesystem needs to read through the logs,
+              determine the set of **committed** operations, and then apply them. Observe that:
+              -- The filesystem can determine whether a transaction is committed or not by comparing 
+                 transaction IDs in TxnBegin and TxnEnd records.
+              -- It is safe to apply the same redo log multiple times. 
+
+              Operationally, when the system is recovering from a crash, the system 
+              does the following:
+                
+                Step 1: The file system starts scanning from the beginning of the log. 
+                Step 2: Every time it finds a TxnBegin entry, it searches for a 
+                    corresponding TxnEnd entry.
+                Step 3: If matching TxnBegin and TxnEnd entries are found -- indicating that
+                    the transaction is committed -- the file system applies (checkpoints) the
+                    changes.
+                Step 4: Recovery is completed once the entire log is scanned.
+
+                Note, for redo logs, filesytems generally begin scanning the log from the
+                **start of the log**.
+
+            * What to log? 
+            Observe that logging can double the amount of data written to disk.
+            To improve performance, Ext3 and 4 allow users to choose what to log.
+                * Default is to log only metadata. The idea here is that many people
+                  are willing to accept data loss/corruption after a crash, but 
+                  keeping metadata consistent is important. This is because if metadata is
+                    inconsistent the FS may become unusable, as the data
+                    structures no longer have integrity.
+                * Can change settings to force data to be logged, along with metadata.
+                  This incurs additional overheads, but prevents data loss on crash.
+
+        -- Undo logging
+            * Not used in isolation by any file system.
+
+            * Key idea: Log contains information on how to rollback any changes made
+            to data. Mechanically, during normal operations:
+            Step 1: Write a TxBegin entry to the log.
+            Step 2: For each operation, write instructions for how to undo any updates
+            made to a block. These instructions might include the original data in the
+            block. In-place changes to the block can be made right after these instructions
+            have been persisted.
+            Step 3: Wait for in-place changes (what we referred to as checkpointing) to finish
+            for all blocks.
+            Step 4: Write a TxnEnd entry into the block, thereby committing the transaction.
+            *Note* this implies that if a transaction is committed, then all changes have been written to 
+            the actual data structures of the file system.
+
+            During crash recovery:
+            Step 1: Scan the log to find all uncommitted transactions, these are ones where a
+            TxnBegin entry is present, but no TxnEnd entry is found.
+            Step 2: For each such transaction check to see whether the undo entry is valid. This
+            is usually done through the use of a checksum.
+                Why do we need this? Remember a crash might occur before
+                the undo entry has been successfully written. If that
+                happened, then (by the procedure described above), the
+                actual changes corresponding to this undo entry have not
+                been written to disk, so ignoring this entry is safe. On
+                the other hand, trying to undo using a partially
+                complete entry might result in data corruption, so using
+                this entry would be **unsafe**.
+            Step 3: Apply all valid undo entries found, in order to restore the disk
+            to a consistent state.
+
+            Note, for undo logs, logs are generally scanned from the
+            **end of the log**.
+
+            * Advantage: Changes can be checkpointed to disk as soon as the undo log
+            has been updated. This is beneficial when the amount of buffer cache is
+            low.
+
+            * Disadvantage: A transaction is not committed until all dirty blocks have
+            been flushed to their in-place targets.
+
+        -- Redo Logging vs Undo Logging
+
+            This is just a recap of the advantages and disadvantages.
+
+            **Redo logging**
+
+            * Advantage: A transaction can commit without all in-place updates (writes
+            to actual disk locations) being completed. Updating the journal is sufficient.
+                Why is this useful? In-place updates might be scattered all over the disk,
+                so the ability to delay them can help improve performance.
+
+            * Disadvantage: A transaction's dirty blocks need to be kept in the buffer-cache
+              until the transaction commits and all of the associated journal entries have
+              been flushed to disk. This might increase memory pressure.
+
+
+            **Undo log**
+
+            * Advantage: A dirty block can be written to disk as soon as the undo-log entry
+            has been flushed to disk. This reduces memory pressure.
+
+            * Disadvantage: A transaction cannot commit until all dirty blocks have been flushed
+            to disk. This imposes additional constraints on the disk scheduler, might result in 
+            worse performance.
+
+
+        -- Combining Redo and Undo Logging
+
+            * Done by NTFS. 
+
+            * Goals:
+                - Allow dirty buffers to be flushed as soon as their associated journal entries
+                are written. This can reduce memory pressure when necessary.
+                - Transactions commit as soon as logging is done, so the system has greater flexibility
+                when scheduling disk writes.
+
+            * How does this work?
+
+            * Basic operations
+                Step 1: filesystem computes what would change due to an operation. For instance,
+                creating a new file involves changes to directory inodes, appending to a file 
+                involves changes to the file's inode and data blocks.
+                
+                Step 2: the file system computes where in the log it can write this transaction,
+                and writes a transaction begin record there (TxnBegin in the handout). This 
+                record contains a transaction ID, which needs to be unique. The file system 
+                **does not** need to wait for this write to finish and can immediately proceed to
+                the next step.
+                
+                Step 3: the file system writes both a redo log entry and an undo log entry for each
+                of the changes it computed in step 1. These live together. The filesystem can begin
+                making in-place changes (checkpointing changes) the moment this undo + redo log
+                information has been written.  
+
+                Step 4: Wait until the TxnBegin record, and all the log records from step 3, have been
+                written, the system writes a transaction end record (TxnEnd in the handout). 
+                This record contains the same transaction ID as was written in Step 2, and the 
+                transaction is considered committed once it has been successfully written to disk.
+                
+                Step 5: Similar to the redo logging case, the filesystem asynchronously continues to
+                checkpoint/perform in-place writes whenever it is convenient.
+
+
+            * Crash Recovery
+                First, the "redo pass": the filesystem goes through the log finding all 
+                committed transactions, and using the redo entry within them to apply committed 
+                changes.
+
+                Next, the "undo pass": Next it scans through the log (backwards) finding all 
+                uncommitted transactions, and uses the undo entries associated with these to undo any
+                in-place updates.
+
+            * Why? Designed for a time when the same Operating System ran on machines with very
+            little memory (8-32MB), and also on "big-iron" servers with lots of memory (1GB+). 
+            This was an attempt to get the best of both worlds. 
+
+
+Here's a recent paper about a production storage system that
+incorporates several of the concepts that we've studied:
+    https://assets.amazon.science/77/5e/4a7c238f4ce890efdc325df83263/using-lightweight-formal-methods-to-validate-a-key-value-storage-node-in-amazon-s3-2.pdf

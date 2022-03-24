@@ -1,0 +1,56 @@
+thread_create cause thread to be running
+
+handout 3
+if line 26 before line 32, then x is 2
+
+b. 
+25 or 13
+
+c.
+x = 1, 2, 3
+when f or g is fully executed 
+
+2 threads use same memory
+diff reg, same memo
+
+assume
+x at 0x5000
+1. movq 0x5000, %rax
+2. addq 1, %rax
+3. movq %rax, 0x5000
+
+loading values from memo to reg
+
+4. movq 0x5000, %rax
+5. addq 2, %rax
+6. movq %rax, 0x5000
+
+x = 2 win
+124563
+
+who store secondly will win
+
+x = 3 win
+123456
+
+
+problem
+count = count + 1
+count = count - 1
+
+
+scheduler respect order of 1 processor
+
+
+distributed sys
+not 1 copy
+can both critical sections run?
+
+depends on whether there is sequential consistency
+
+
+if did not fully understand the class, you did not attend
+the class
+
+invariant
+count has the number of ele in the buffer

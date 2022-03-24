@@ -1,0 +1,20 @@
+75 min exam
+
+x minute
+x < 65
+or
+75 <= x < 78
+at 78
+
+check each note of student
+
+monitor build on mutex
+mutex build on spinlock
+
+possible deadlock when coarse grain
+
+weighting 
+completely fair scheduler
+
+
+

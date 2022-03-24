@@ -1,0 +1,105 @@
+if history diverge
+git commit -am "commitmessage"
+git pull origin
+make
+
+git restore main.c  (useless)
+--
+
+if add a folder
+git commit -am "commitmessage"
+git add <filename>
+--
+
+
+after github edit
+git log
+git pull origin
+git remote -v
+git fetch origin main
+
+
+
+
+--
+after local edit:
+1. on github desktop: commit to main, fetch origin
+2. git pull origin
+
+--
+https://cs.nyu.edu/~mwalfish/classes/21fa/setup.html
+cd base-image
+(vargrant reload)
+vagrant up
+vagrant ssh
+vagrant@bullseye:~/cs202/lab1/mini
+
+use github desktop app to sync vscode with github
+
+edit:
+1) vim part1.c
+2) (E)dit anyway
+
+
+vim save & quit
+:wq
+or
+:qa!
+
+
+compile:
+1) make /*whenever changed a file, type make to re-compile*/
+2) ./build/file_name
+
+
+/*
+sync vscode with ssh
+github desktop: commit, fetch origin
+cygwin: vagrant@bullseye:~/labs-21fa-XiLiu13/lab1/mini$ git pull origin
+*/
+
+
+
+compile standalone program
+$ gcc -pedantic -Wall -std=c11 -g -o fun fun.c
+$ ./fun
+$ ./fun abc def
+
+
+
+pattern:
+/*
+you create a C file and compile it with
+
+$ gcc [flags] -o <output-file-name> <input-file-name>
+You run your program using whatever was after the -o flag.
+
+Inside the program, you gain access to the arguments using the argv array
+*/
+
+list_t is a list of nodes
+directory must contain ~
+
+
+
+vscode
+search ssh
+file named "config", copy & paste
+
+paste 
+"DELL@DESKTOP-I2E55QM ~/base-image
+$ vagrant ssh-config
+Host default
+  HostName 127.0.0.1
+  User vagrant
+  Port 2222
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  IdentityFile C:/cygwin64/home/DELL/base-image/.vagrant/machines/default/virtualbox/private_key
+  IdentitiesOnly yes
+  LogLevel FATAL
+  ForwardAgent yes
+  ForwardX11 yes
+"
+

@@ -1,0 +1,1015 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<p><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-beta1/katex.min.css" integrity="sha384-VEnyslhHLHiYPca9KFkBB3CMeslnM9CzwjxsEbZTeA21JBm7tdLwKoZmCt3cZTYD" crossorigin="anonymous"> 
+</p>
+<div class="container">
+  <title>CS202: Lab 2: Ls</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <style type=text/css>
+  @import url("https://use.typekit.net/jlb5olz.css");
+  
+  /* heavily borrowed from Harvard's cs61, which calls it cs161.css */
+  
+  ol > li > ol {
+  	list-style-type: lower-alpha;
+  }
+  ol.upper-alpha {
+  	list-style-type: upper-alpha;
+  }
+  p + ol, p + ul {
+  	margin-bottom: 1rem;
+  }
+  p:last-child {
+  	margin-bottom: 0.5rem;
+  }
+  
+  /* cs202 additions */
+  .required, .challenge, .question {
+    padding: .5em .5em .5em .5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #f0f0ff;
+  }
+  
+  .highlight {
+      border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+      background: #fffff0;
+      padding-left: 0.25rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-right: 1rem;
+  }
+  
+  .honors {
+    padding: .5em .5em .5em .5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fffff0;
+  }
+  
+  
+  .callout {
+      border-left: 0.25rem solid #5bc0de;
+      background: #5bc0de;
+      padding-left: 0.25rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-right: 1rem;
+  }
+  
+  div.required .header {
+      font-weight: bold;
+  }
+  div.honors .header {
+      font-weight: bold;
+  }
+  
+  div.callout .header {
+      font-weight: bold;
+  }
+  
+  
+  div.challenge .header {
+      font-style: italic;
+  }
+  
+  
+  div.challenge {
+      background-color: #ffe0e0;
+  }
+  
+  
+  
+  div.highlight .header {
+      font-weight: bold;
+  }
+  
+  pre {
+      background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4
+  }
+  
+  #topnavbar ul {
+   width: 100%;
+   float: left;
+  
+   margin: 0;
+   padding: 0;
+  
+   text-align: center;
+   white-space: nowrap;
+   color: #000;
+   font-family: Arial, Helvetica, sans-serif;
+   background-color: white;
+   border-top: solid 2px maroon;
+   border-bottom: solid 2px maroon;
+   clear: right;
+   margin-top: .5em;
+   margin-bottom: .5em;
+  }
+  
+  #topnavbar ul li {
+   display: inline;
+   padding-left: 0;
+   padding-right: 0;
+  }
+  
+  #topnavbar ul li a {
+   padding: 3px 10px;
+   text-decoration: none;
+   color: #000;
+   background-color: white;
+   float: left;
+   border-right: 1px solid black;
+  }
+  
+  #topnavbar ul li a:hover {
+   background-color: maroon;
+   color: white;
+  }
+  
+  #topnavbar div { 
+   clear: both;
+  }
+  
+  div#news {
+    width: 30%;
+    float: right;
+    margin-left: 2em;
+    padding-left: 1em;
+    background-color: #fffff0;
+    margin-bottom: 0.5em;
+    border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+  /*  border: 1px solid maroon;*/
+  }
+  
+  dl.idealist dt { 
+    font-weight: bold;
+  }
+  
+  dl.idealist dt { 
+    margin-top: 0.5em;
+  }
+  
+  
+  dl.newslist { 
+   margin: 0;
+   padding: 0;
+  }
+  
+  dl.newslist dt { 
+   padding-left: 0;
+   color: #000055;
+   font-weight: bold;
+   margin-bottom: 0.2em;
+  }
+  
+  dl.newslist dd {
+    padding-bottom: 1em;
+    margin-bottom: 0;
+    margin-left: 1em;
+    padding-left: 0;
+    margin-right: 1em;
+  }
+  
+  div#news p { 
+  margin-top: 0; 
+  padding-top: 0;
+  }
+  
+  #announcements p { 
+    color: maroon;
+  }
+  
+  #announcements h1 { 
+    color: #ffffff;
+    text-align: center;
+    font-size: 110%;
+    text-decoration: underline;
+  }
+  
+  /* The alternating announcement colors */
+  #announcements p.one { color: #ff0000; }
+  #announcements p.two { color: #00ff00; }
+  #announcements p.three { color: #3333ff; }
+  
+  .announce_date { font-weight: bold; }
+  table.people {
+    margin-left: 10px;
+    padding: 2px;
+    border-collapse: collapse;
+    border: none;
+  }
+  
+  table.people th { 
+    font-weight: bold;
+    text-align: left;
+    border: 0;
+  /*  border-bottom: solid 2px; */
+  }
+  
+  table.people td { 
+    padding-right: 1em;
+  /*
+    border: none;
+    border-bottom: 1px solid #888;
+    padding-right: 1em;
+    padding-left: 1em;
+  */
+  }
+  
+  table.books {
+    margin-left: 2%;
+  /*  margin-bottom: 8px; */
+  }
+  
+  table.books tr,td {
+    vertical-align: top;
+  }
+  
+  table.assignments { 
+  /*  width: 98%; */
+    margin-left: 1%;
+    margin-right: 1%;
+    border-collapse: collapse;
+  }
+  
+  table.assignments th { 
+  /*  background: #E0FFFF;*/
+    color: black;
+    border: none;
+    text-align: left;
+    width: 29%;
+  }
+  
+  table.assignments tr,td { 
+  /*  padding: 50px;
+    border-width: 50px;
+    border-style: solid;
+    border-color: black;
+    border-spacing: 0px;*/
+    border: none;
+  }
+  
+  table.schedule {
+    width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+    border-collapse:  collapse;
+  }
+  
+  table.schedule th { 
+  /*  background: maroon;*/
+    color: black;
+    border-width: 0px;
+    text-align: left;
+  }
+  
+  table.Schedule tr { 
+    padding: 3px;  
+    border-width: 1px; 
+    border-spacing: 0px; 
+    border-style: solid;  
+    border-color: black;
+  }
+  
+  table.Schedule th,td { 
+    padding: 5px;  
+    border-width: 1px; 
+    border-spacing: 0px; 
+    border: none;  
+    border-color: black;
+  }
+  /* Presentation:  No underlines on links in schedule unless you're
+   * moving the mouse over it. */
+  
+  table.schedule tr.lecture { background: white; border-bottom: 1px solid #736F6E; }
+  table.schedule tr.alt { background: #E0FFFF; }
+  /*table.schedule tr.lecture.alt { background: white; }*/
+  /*table.schedule tr.noclass { background: #d3d3d3; }
+  table.schedule tr.makeupclass { background: #FAAFBE; }*/
+  table.schedule tr.noclass { color: #736F6E; }
+  table.schedule tr.makeupclass { color: #FF0000; border-bottom: 1px solid #736F6E;}
+  table.schedule td.readings { color: black; }
+  table.schedule td.altreadings { color: black; }
+  table.schedule tr.due { color: #FF0000; }
+  table.schedule td.due { color: #FF0000; }
+  table.schedule tr.exam    { color: #FF0000; background: #ccf; }
+  table.schedule tr.recitation { background: #ccf; }
+  table.schedule tr.recitation.alt { background: #ccf; }
+  table.schedule tr.lechead { font-weight: bold; text-align: left; height:20px}
+  
+  
+  
+  /* end cs202 additions */
+  
+  blockquote {
+  	margin-left: 2rem;
+  	padding-left: 1rem;
+  }
+  blockquote > h3:first-child {
+  	margin-top: 0.5rem;
+  }
+  blockquote, blockquote.solution.note {
+  	border-left: 0.25rem solid rgba(0, 0, 80, 0.25);
+  }
+  .solution.shown, .solution-collapsed.shown {
+  	animation: slide-down .3s ease-out;
+  }
+  .solution, blockquote.highlight {
+  	border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+  	background: #fffff0;
+  	padding-top: 0.25rem;
+  	padding-bottom: 0.25rem;
+  	padding-right: 1rem;
+  }
+  .solution-collapsed, blockquote.note {
+  	background: #f0f0ff;
+  	padding-top: 0.25rem;
+  	padding-bottom: 0.25rem;
+  	padding-right: 1rem;
+  }
+  .solution-collapsed {
+  	display: table;
+  	border-left: 0rem none;
+  	margin-left: 0rem;
+  	font-size: smaller;
+  }
+  .larger {
+  	font-size: larger;
+  }
+  a.js-solution.hide {
+  	font-size: smaller;
+  }
+  a.js-solution.hide.all {
+  	font-size: inherit;
+  }
+  .githubref {
+  	text-align: right;
+  	margin-top: -0.5rem;
+  	font-style: italic;
+  	font-size: 0.75rem;
+  }
+  .float-left {
+  	float: left;
+  }
+  .float-right {
+  	float: right;
+  }
+  @keyframes slide-down {
+  	0% { opacity: 0; }
+  	100% { opacity: 1; }
+  }
+  .post {
+  	margin-bottom: 3rem;
+  }
+  .post img {
+  	max-width: 100%;
+  }
+  .tall > img {
+  	max-height: 50vh;
+  }
+  h1, h2, h3, h4 {
+  	font-family: "brix-slab", sans-serif;
+  }
+  h1 {
+  	font-weight: 900;
+  }
+  h2 {
+  	margin-top: 3rem;
+  	font-weight: 700;
+  }
+  h2:first-child {
+  	margin-top: 0;
+  }
+  .h3, h3 {
+  	font-size: 1.5rem;
+  }
+  .h4, h4 {
+  	font-size: 1.25rem;
+  	font-style: italic;
+  }
+  h3 {
+  	margin-top: 1.5rem;
+  }
+  h3 > code {
+  	color: inherit;
+  }
+  .container th, .container td {
+  	padding: 0.15rem 1.5rem 0.15rem 0;
+  }
+  .container table {
+  	margin: 0.85rem 0;
+  	border-spacing: 0;
+  }
+  tr.even > td,
+  table.alternate > tbody > tr:nth-child(even) > td {
+  	background: #f0f0ff;
+  }
+  tr.separator > td, tr.separator > th {
+  	background: #d8d8f8;
+  }
+  td > p:first-child, th > p:first-child {
+  	margin-top: 0.25rem;
+  }
+  td > p:last-child, th > p:last-child {
+  	margin-bottom: 0.25rem;
+  }
+  table.padleft > thead > tr > th:first-child,
+  table.padleft > tbody > tr > td:first-child,
+  table.padleft > tbody > tr > th:first-child {
+  	padding-left: 0.35rem;
+  }
+  th.r {
+  	font-weight: normal;
+  }
+  tr.row-wide-padding > td {
+  	padding-left: 3em;
+  	padding-right: 3em;
+  }
+  tr.row-wide-padding > td:first-child {
+  	padding-left: 0;
+  }
+  tr.row-wide-padding > td:last-child {
+  	padding-right: 0;
+  }
+  tr.row-space-above > td {
+  	padding-top: 3em;
+  }
+  div.sp {
+  	margin-top: 3em;
+  }
+  
+  blockquote.float-left {
+  	margin-left: 0;
+  	padding-left: 0;
+  	border-left: 0 none;
+  	margin-right: 3rem;
+  }
+  blockquote.float-left.half-width {
+  	min-width: 25rem;
+  	max-width: 100%;
+  }
+  
+  /* prettier table types */
+  table.wikitable > tr > th,
+  table.wikitable > tr > td,
+  table.wikitable > * > tr > th,
+  table.wikitable > * > tr > td {
+  	border: 1px solid #a2a9b1;
+  	padding: 0.2em 0.4em;
+  }
+  table.wikitable th {
+  	text-align: center;
+  	background-color: #eaecf0;
+  }
+  td.hgray, tr.hgray {
+  	background-color: #888888;
+  }
+  td.hpink, tr.hpink {
+  	background: #ff80bb;
+  }
+  
+  table.truthtable > * > tr > th,
+  table.truthtable > * > tr > td {
+  	border: 2px solid #a2a9b1;
+  	padding: 0.6em;
+  	text-align: center;
+  }
+  
+  table.nowrap1 > * > tr > th:first-child,
+  table.nowrap1 > * > tr > td:first-child {
+  	white-space: nowrap;
+  }
+  table.text-right-1 > * > tr > th:first-child,
+  table.text-right-1 > * > tr > td:first-child {
+  	text-align: right;
+  }
+  table.text-right-2 > * > tr > th:nth-child(2),
+  table.text-right-2 > * > tr > td:nth-child(2) {
+  	text-align: right;
+  }
+  .text-left {
+  	text-align: left;
+  }
+  .text-center {
+  	text-align: center;
+  }
+  .text-right {
+  	text-align: right;
+  }
+  
+  hr.c {
+  	clear: both;
+  	margin: 0;
+  	border: 0 none;
+  	height: 0;
+  }
+  
+  .hellobackground {
+  	position: fixed;
+  	transform: rotate(-15deg);
+  	opacity: 0.15;
+  	z-index: -1;
+  	top: -3rem;
+  	left: -2.5rem;
+  }
+  .float-left.rotate-img-m5 {
+  	margin-right: 1.5em;
+  }
+  .float-right.rotate-img-5 {
+  	margin-left: 1.5em;
+  }
+  img.rotate-img-5, .rotate-img-5 img {
+  	transform: rotate(5deg);
+  }
+  img.rotate-img-m5, .rotate-img-m5 img {
+  	transform: rotate(-5deg);
+  }
+  
+  figure > img {
+  	max-width: 100%;
+  	object-fit: scale-down;
+  }
+  
+  .navbar-has-drafts {
+  	background: yellow;
+  }
+  
+  .hidden {
+  	display: none;
+  }
+  hr.prbr {
+  	border: 0 none;
+  }
+  hr.twoem {
+  	border: 0 none;
+  	margin-top: 2em;
+  }
+  hr.fourem {
+  	border: 0 none;
+  	margin-top: 4em;
+  }
+  hr.eightem {
+  	border: 0 none;
+  	margin-top: 8em;
+  }
+  hr.sixteenem {
+  	border: 0 none;
+  	margin-top: 16em;
+  }
+  
+  @media print {
+  html {
+  	font-size: 125%;
+  }
+  h1 {
+  	font-size: 2rem;
+  }
+  h2 {
+  	font-size: 1.5rem;
+  	margin-top: 2rem;
+  }
+  .prbr {
+  	page-break-before: always;
+  	margin-top: 0;
+  }
+  @page {
+  	margin-top: 0.75in;
+  	margin-bottom: 0.75in;
+  }
+  .hellobackground {
+  	display: none;
+  }
+  .print-hide-solutions .solution, .print-hide-solutions .solution-collapsed {
+  	display: none;
+  }
+  a, a:not(.btn) {
+  	color: inherit;
+  	text-decoration: none;
+  }
+  }
+  
+  @media not print {
+  .pronly {
+  	display: none;
+  }
+  }
+  
+  .navbar .gsc-control-cse {
+  	padding: 0;
+  	padding-top: .5rem;
+  	padding-left: 1rem;
+  	background: inherit;
+  	border: 0 none;
+  }
+  </style>
+</head>
+<body>
+<nav>
+<a href="../index.html">Home</a> |
+<a href="../syllabus.html">Schedule</a> |
+<a href="../policies.html">Policies and grading</a> |
+<a href="../labs.html">Labs</a> |
+<a href="../setup.html">Infrastructure</a> |
+<a href="../exams.html">Exams</a></li> |
+<!--<a href="../tools.html">Tools</a></li>-->
+<a href="../reference.html">Reference materials</a> |
+<a href="../announcements.html">Announcements</a>
+</nav>
+<p></p>
+<header id="title-block-header">
+<h1 class="title">CS202: Lab 2: Ls</h1>
+</header>
+<p></p>
+<div class="post">
+<p>This lab is intended to:</p>
+<ul>
+<li>reinforce the C programming language</li>
+<li>give you experience as a <em>programmatic user</em> of the file system</li>
+<li>give you experience using system calls, which almost always includes consulting documentation (in this case, the “man pages”)</li>
+</ul>
+<p>In this lab, you will build a version of <code>ls</code>, a Unix utility that lists files in a directory. Yours will print <strong>one file</strong> per line (this is equivalent to <code>ls -1</code> on Linux, OS X or other Unix systems) in any mode. When run in the directory containing your code, this should result in output similar to what is shown below:</p>
+<pre><code>$ ./ls
+ls
+main.c
+main.c.o
+Makefile
+README.md</code></pre>
+<p><strong>Note</strong> the difference between <code>ls</code> and <code>./ls</code>. The first one is the “system-supplied” <code>ls</code> (type <code>$ which ls</code> to see where this <code>ls</code> lives). The second one is <em>your</em> <code>ls</code>. The shell knows the difference because <code>.</code> means the current directory, so <code>./ls</code> tells the shell “I want a program named <code>ls</code> in the current directory.” Likewise, <code>..</code> means “the directory above the current one.” So if you were in a directory underneath your lab directory, <code>../ls</code> would again refer to your <code>ls</code>. You should have seen the concepts of <code>.</code> and <code>..</code> in CSO.</p>
+<p>The <code>ls</code> implementation for this lab also needs to support a subset of the options supported by <code>ls</code>. These include the following; the detailed specification is in a section below.</p>
+<ul>
+<li>An arbitrary number of files and directories given on the command line.</li>
+<li><code>-a</code>: list all files, including files starting with <code>.</code> and the pseudo-files <code>.</code> and <code>..</code> (see above for the meanings of these pseudofiles).</li>
+<li><code>-l</code>: use a long listing format: this provides additional information about each file</li>
+<li><code>-R</code>: recursively lists files in subdirectories</li>
+<li>Combinations of the flags above, for example <code>./ls -la</code> and <code>./ls -alR</code></li>
+<li><code>--help</code>: the help message</li>
+<li>Error handling, as specified below</li>
+</ul>
+<p>We recommend that you now read through the whole lab, before executing any of it.</p>
+<h2 id="getting-started">Getting Started</h2>
+<div class="highlight">
+<p><span class="header">NOTE.</span> We recommend attempting to do this lab without searching on the Internet. This will force you to make use of “man pages” and the documentation included on the system. These often contain much more detailed information than Stack Overflow and similar sources.</p>
+</div>
+<p>Obtain and update the lab files as follows. We assume that you have set up the upstream as described in the <a href="../setup.html#localclone">lab setup</a>. Then:</p>
+<pre><code>$ cd ~/cs202
+$ git fetch upstream
+$ git merge upstream/main</code></pre>
+<p>This lab’s files are located in the <code>lab2</code> subdirectory.</p>
+<p>Let’s begin by ensuring that you can build the code you just pulled:</p>
+<pre><code>$ cd ~/cs202/lab2
+$ make</code></pre>
+<p>You should see output similar to the following:</p>
+<pre><code>$ make
+cc -pedantic -Wall -std=c11 -g -D_POSIX_C_SOURCE=200112L -c main.c -o main.c.o
+main.c: In function ‘main’:
+main.c:196:29: warning: variable ‘list_all’ set but not used [-Wunused-but-set-variable]
+     bool list_long = false, list_all = false;
+                             ^~~~~~~~
+main.c:196:10: warning: unused variable ‘list_long’ [-Wunused-variable]
+     bool list_long = false, list_all = false;
+          ^~~~~~~~~
+At top level:
+main.c:56:12: warning: ‘group_for_gid’ defined but not used [-Wunused-function]
+ static int group_for_gid(gid_t gid, char *buf, size_t buflen) {
+            ^~~~~~~~~~~~~
+main.c:44:12: warning: ‘uname_for_uid’ defined but not used [-Wunused-function]
+ static int uname_for_uid(uid_t uid, char *buf, size_t buflen) {
+            ^~~~~~~~~~~~~
+main.c:15:12: warning: ‘err_code’ defined but not used [-Wunused-variable]
+ static int err_code;
+            ^~~~~~~~
+cc ./main.c.o -o ls </code></pre>
+<p>You will also find that an executable named <code>ls</code> has been created in the directory.</p>
+<p>Type:</p>
+<pre><code>$ ./ls</code></pre>
+<p>to see what happens.</p>
+<h2 id="coding">Coding</h2>
+<p>Now that you have ensured that you can build the project, you can start coding. You need to edit only <code>main.c</code>. Read the rest of the lab for utilities, documentation, building blocks, requirements, and hints.</p>
+<div class="highlight">
+<p><span class="header">Compiler warnings.</span> Make sure that, when your code is compiled, the compiler produces <strong>no warnings</strong>. (Example warnings are given above [“variable set but not used”, etc.]; these happen because the code isn’t fleshed out.) We will be deducting points for compile-time warnings.</p>
+</div>
+<div class="highlight">
+<p><span class="header">Programming style.</span> In this and subsequent labs, you will be graded for style. We will deduct up to 20% of total lab points for poor style based on our subjective evaluation. Please read this <a href="https://cs61.seas.harvard.edu/site/2019/Style/">style guide</a>.</p>
+</div>
+<h2 id="argument-parsing">Argument parsing</h2>
+<p>Look at the <code>main()</code> function. <code>main()</code> uses <code>getopt_long()</code> for argument parsing. You will need to understand this function, which requires finding and reading documentation. To start, let us use the <code>apropos</code> command to find where the documentation for <code>getopt_long</code> lives. Type:</p>
+<pre><code>$ apropos getopt_long</code></pre>
+<p>This should result in:</p>
+<pre><code>$ apropos getopt_long
+getopt_long (3)      - Parse command-line options
+getopt_long_only (3) - Parse command-line options</code></pre>
+<p>This output indicates that <code>getopt_long</code> provides a mechanism for parsing command-line options, and is documented in section <strong>3</strong> of the manual pages. You can now read this documentation by running:</p>
+<pre><code>$ man 3 getopt_long</code></pre>
+<p>This shows you information on <code>getopt_long()</code>, including example use. In this case, the <code>man</code> command provides access to the Linux manual pages, the <code>3</code> specifies that you are looking for a page in section 3 of the manual, and <code>getopt_long</code> specifies the function you are looking for.</p>
+<h2 id="documentation">Documentation</h2>
+<p>Individual man pages are often referenced using notation like <code>GETOPT(3)</code>, which indicates that you are looking at the <code>GETOPT</code> man page in section 3. Similarly, the convention in referring to functions is that <code>function_name(num)</code> refers to a function (or syscall) documented at section <code>num</code> in the man pages. For example, <code>getopt(3)</code> refers to “the getopt() documented in section 3 of the man pages”; <em>it does not refer to invoking getopt with an argument of 3</em>. We’ll be using the <code>func(num)</code> notation below.</p>
+<p>As we showed above, you can find out what section documents a function using the <code>apropos</code> command.</p>
+<p>In fact, you can find more documentation for apropos itself by running</p>
+<pre><code>$ apropos apropos
+apropos (1)          - search the manual page names and descriptions
+$ man apropos</code></pre>
+<h2 id="building-blocks">Building blocks</h2>
+<p>You will need to use the following syscalls. Learn about them through <code>man</code> pages.</p>
+<ul>
+<li><p><code>readdir(3)</code>: (type: <code>man 3 readdir</code> and <code>man 3p readdir</code>, and see below for the difference between the <code>3</code> and the <code>3p</code>) will let you list all the files in a directory and figure out their type. Takes a <code>DIR*</code> structure, which you can get from <code>opendir</code>.</p></li>
+<li><p><code>opendir(3)</code>: (<code>man 3 opendir</code> and <code>man 3p opendir</code>) will let you open a directory and get a <code>DIR*</code> structure that you can then pass to <code>readdir</code>.</p></li>
+<li><p><code>closedir(3)</code>, <code>rewinddir(3)</code>: (<code>man 3 closedir</code>, <code>man 3p closedir</code>, <code>man 3 rewinddir</code>) will let you close the directory or being listing anew.</p></li>
+<li><p><code>stat(2)</code>: (<code>man 2 stat</code>) will allow you to check whether a file exists and also return file information necessary when running <code>ls -l</code>. See also <code>inode(7)</code>.</p></li>
+<li><p><code>exit(3)</code>: (<code>man 3 exit</code>) is how you exit out of your program with a status code. By convention, programs exiting without failure return status code 0; you can see an example of this in the <code>help()</code> function. You will use exit() to return the error codes that are specified below.</p></li>
+</ul>
+<p>On <code>3</code> versus <code>3p</code>: this is confusing. The ‘3’ refers to section 3 in the man pages of <em>Linux</em> (which of course is an operating system) whereas the ‘3p’ refers to section 3 in the man pages of <em>POSIX</em>, which is a <em>standard</em> for Unix-like systems that Linux mostly implements, and in some cases extends. The documentation you see in the ‘3’ man pages is authoritative for the Linux system, but the ‘3p’ pages for <code>readdir</code> and <code>opendir</code> may give you inspiration, as they contain example usage. For this lab, it’s best to consult both sets of pages.</p>
+<h2 id="requirements">Requirements</h2>
+<p>Here are the required pieces; later in the lab we’ll describe steps for building out your solution to address the requirements.</p>
+<ul>
+<li><p>Your solution may not invoke the system-supplied <code>ls</code>. For example, using <code>system()</code>, <code>fork()</code>, <code>exec()</code>, <code>pipe()</code> to call the “real” <code>ls</code> will not receive credit for the main lab. But see <a href="#extracredit">extra credit</a>.</p></li>
+<li><p>In all output from your <code>ls</code>, directories should have a <code>/</code> (forward slash) appended to the name. For example:</p>
+<pre><code>$ cd ~/cs202
+$ lab2/ls 
+lab1/   &lt;--- NOTE: lab1/ not lab1
+lab2/   &lt;--- NOTE: lab2/ not lab2</code></pre></li>
+</ul>
+<p>This applies to non-pseudo directories; see below for handling of pseudo-directories.</p>
+<ul>
+<li><p>There is no required output order. You may, if you want, output the contents of a directory in any order (the real <code>ls</code> by default sorts alphabetically).</p></li>
+<li><p>Files and directories: You need to handle an arbitrary number of files and directories given on the command line; from <code>ls</code>’s perspective, these are the “actual arguments” (the <code>-l</code>, <code>-a</code> are “options”). For example:</p>
+<pre><code>$ mkdir test           # create a directory named &#39;test&#39;
+$ touch test/foo       # create a file named &#39;foo&#39; inside &#39;test&#39;
+$ lab2/ls lab2 test
+lab2:
+ls
+main.c
+main.c.o
+Makefile
+README.md
+
+test:
+foo</code></pre>
+<p>When given a file, your <code>ls</code> should print the file name if it exists, for example:</p>
+<pre><code>$ lab2/ls lab2 test/foo
+test/foo
+
+lab2:
+ls
+main.c
+main.c.o
+Makefile
+README.md</code></pre>
+<p><strong>Note</strong>: as in the previous requirement, there is no required output order. You may, if you want, handle each argument in the order given.</p></li>
+<li><p><code>-a</code>: list all files, including files starting with <code>.</code> and the pseudo-files <code>.</code> and <code>..</code>. When executed in the directory containing your code, this should result in output similar to:</p>
+<pre><code>$ ./ls -a
+.    &lt;--- NOTE: no slash
+..   &lt;--- NOTE: no slash
+.gitignore
+ ls
+ main.c
+ main.c.o
+ Makefile
+ README.md</code></pre></li>
+</ul>
+<p>Note that the pseudodirectories <code>.</code> and <code>..</code> do not have slashes appended.</p>
+<ul>
+<li><p><code>-l</code>: Use a long listing format: this provides additional information about each file including file permissions (see below), number of links (normally, this is 1 for files, and for directories, counts the number of entries), user who owns the file, the group which owns the file (see below for utility functions), its size (in bytes) and the last time file status was modified (referred to as <code>mtime</code> in most OS structures). When executed in a directory containing your code, this should result in output similar to:</p>
+<pre><code>$ ls -l
+-rwxr-xr-x 1 apanda apanda 17128 May 29 11:43 ls
+-rw-r--r-- 1 apanda apanda  3091 May 29 11:37 main.c
+-rw-r--r-- 1 apanda apanda  3264 May 29 11:43 main.c.o
+-rw-r--r-- 1 apanda apanda   307 May 29 10:16 Makefile
+-rw-r--r-- 1 apanda apanda    46 May 29 10:33 README.md</code></pre>
+<ul>
+<li><p>For those first 10 characters, you will need to convert the file mode (<code>st_mode</code> in <code>struct stat</code>) into a <em>permissions</em> string as specified below (you should have seen the underlying concepts surrounding permissions in CSO, but for better or worse, you don’t need a firm grasp on those concepts to do this part of this assignment):</p>
+<ul>
+<li>The first character indicates the type of the file. For normal files this is a <code>-</code>, for directories it is a <code>d</code>, and for all other files it is a <code>?</code>. <strong>Note</strong> this is a subset of the actual type indicators used by the system-supplied <code>ls</code>.</li>
+<li>The next three characters (the so-called <code>rwx</code> or permissions bits) indicate access mode for the user who owns the file:
+<ol type="1">
+<li>The first of these three characters is <code>r</code> if the user can read the file or <code>-</code> otherwise</li>
+<li>The second is similarly <code>w</code> if the user can write to the file and <code>-</code> otherwise</li>
+<li>The last is <code>x</code> if the user can execute the file or <code>-</code> otherwise. Similar to above, this scheme is a subset of the actual mode strings used on Unix (specifically, we do not account for the set-user-ID bit, the set-group-ID bit or the sticky bit).</li>
+</ol></li>
+<li>The next three characters are the same as above, but for the <em>group</em> that owns the file, rather than the user.</li>
+<li>Finally the last three characters indicate the permissions for “everyone else”, or “other” (non-user, non-group members). You can find information about how to interpret the file mode in <code>inode(7)</code>, or <code>man 7 inode</code><br />
+</li>
+<li>You can confirm your mode string output by comparing to the output given when running the “real” <code>ls -l</code>.</li>
+</ul></li>
+<li><p>You also need to print username and groupname. For this purpose, we have provided you with the utility functions <code>uname_for_uid</code> and <code>group_for_gid</code>, which convert from what stat provides – numeric user ID (<code>st_uid</code>) and group ID (<code>st_gid</code>) – to appropriate strings.</p></li>
+<li><p>You need not correctly identify and display information for symlinks (if this last sentence doesn’t mean anything to you, then you should ignore it). See the extra credits at the end of this write-up for more information.</p></li>
+<li><p>You do not need to precisely line up all fields as <code>ls</code> does. Make a reasonable effort at formatting your output.</p></li>
+<li><p>You should use the provided <code>date_string</code> function to format <code>mtime</code>.</p></li>
+<li><p><code>stat(3)</code> (<code>man 3 stat</code>) may be inspiring, in that it points to <code>man 3 fstatat</code>, which could be helpful.</p></li>
+</ul></li>
+<li><p><code>-R</code>: <code>ls -R</code> recursively lists files in subdirectories. For example consider the following directory:</p>
+<pre><code>$ ./lab2/ls
+lab1/
+lab2/
+test/</code></pre>
+<p>Running <code>ls -R</code> here would yield output similar to:</p>
+<pre><code>$ ./lab2/ls -R
+.:     # printing this line is optional
+lab1/
+lab2/
+test/
+
+./lab1:
+....
+
+./lab2:
+ls
+main.c
+main.c.o
+Makefile
+README.md
+
+./test:
+foo</code></pre>
+<p>Remember: a correct implementation of recursive listing must handle arbitrarily nested directories.</p></li>
+<li><p>Combinations of flags: <code>ls -la</code> (or <code>ls -al</code> or <code>ls -a -l</code>) must work correctly. For example, your output for <code>./ls -al</code> should be similar to:</p>
+<pre><code>$ ./ls -al
+drwxr-xr-x 3 apanda apanda  4096 May 29 11:43 .
+drwxr-xr-x 4 apanda apanda  4096 May 29 09:52 ..
+-rw-r--r-- 1 apanda apanda     7 May 29 09:34 .gitignore
+-rwxr-xr-x 1 apanda apanda 17128 May 29 11:43 ls
+-rw-r--r-- 1 apanda apanda  3091 May 29 11:37 main.c
+-rw-r--r-- 1 apanda apanda  3264 May 29 11:43 main.c.o
+-rw-r--r-- 1 apanda apanda   307 May 29 10:16 Makefile
+-rw-r--r-- 1 apanda apanda    46 May 29 10:33 README.md</code></pre>
+<p>Similarly, a correct implementation of <code>-R</code> should allow combination with <code>-l</code> and <code>-a</code>.</p></li>
+<li><p><code>--help</code>: the help function <code>help()</code> should appropriately document the options you implement, including any extra credit options.</p></li>
+<li><p><strong>Error handling</strong>: You should ensure that your code returns error code <code>0</code> when it can run successfully. You should also ensure that your program performs all actions it can successfully perform before exiting. For example consider the following:</p>
+<pre><code>$ ./ls
+a/
+b
+$ echo $?
+0
+$ ./ls c a d
+ls: cannot access c: No such file or directory.
+                          # This blank line is optional
+a:
+test
+                          # This blank line is optional
+ls: cannot access d: No such file or directory.
+$ echo $?
+72 </code></pre>
+<p>In the example above, <code>echo $?</code> prints the exit code returned by the last command to be executed on this shell. As you can see, the first run of <code>./ls</code> is successful and hence has an exit code of <code>0</code>, while the next run encounters a problem where two of the arguments (c and d) do not exist, and it returns <code>72</code> to indicate that this is the case. Also observe that despite encountering an error when attempting to list <code>c</code>, the program continues to execute until all arguments have been processed.</p>
+<p>As another example consider the following run:</p>
+<pre><code>$ ./ls
+a/
+b/
+$ ./ls -R
+.:
+a/
+b/
+c/
+
+./a:
+test
+
+ls: cannot open directory ./b: Permission denied.
+
+./c:
+test-c
+$ echo $?
+80 </code></pre>
+<p>Again, note that we return error code 80 to indicate that <code>ls -R</code> could not successfully list all subdirectories. However, even though we could not list files under <code>b</code> we still continue listing files under <code>c</code>.</p>
+<p>For this assignment we will be using error codes that <strong>are different</strong> from what is used by <code>ls</code> in Linux, OS X or other Unixes.</p>
+<p>You will encode errors as a bit vector, corresponding to values 64,72,and others. Specifically:</p>
+<ul>
+<li>In the bit numbering below, note that “bit i” means “the bit whose value when set is <span class="math inline">2<sup><em>i</em></sup></span> (two-raised-to-the-power i)”.</li>
+<li>If there was any error, set bit 6 (<code>0b1000000</code> in binary, <code>0x40</code> in hex). In addition, set bits according to the rules below:</li>
+<li>Set bit 3 (<code>0b1000</code> in binary, <code>0x08</code> in hex) if a file specified in the command-line was not found.</li>
+<li>Set bit 4 (<code>0b10000</code> in binary, <code>0x10</code> in hex) if your program was denied access to a file or directory</li>
+<li>Set bit 5 (<code>0b100000</code> in binary <code>0x20</code> in hex) if another type of error happened (for example, could not get a group ID or user ID).</li>
+</ul>
+<p>The error code you return should have the corresponding bit set for each type of error encountered. Specifically this means that:</p>
+<ul>
+<li>If no error is encountered, you return error code 0, i.e., your program exits by calling <code>exit(0);</code></li>
+<li>If you <em>only</em> encounter errors where a specified file does not exist, return error code 72 (bit 6 and bit 3)</li>
+<li>If you <em>only</em> encounter one or more errors where access is denied return error code 80 (bit 6 and bit 4)</li>
+<li>If you encounter an error where a specified file does not exist <em>and</em> you don’t have access to another file, return error code 88 (<code>0b1011000</code> in binary).</li>
+<li>If you <em>only</em> encounter an error where the <code>uname_for_uid</code> or <code>group_for_gid</code> function return an error, you should return error code 96. Of course, if you encounter such errors and the others, you may wind up returning other values.</li>
+</ul>
+<p>Also, in case either <code>uname_for_uid</code> or <code>group_for_gid</code> return an error you should <strong>not print</strong> an error message; instead you should just print the numeric UID or GID. For instance:</p>
+<pre><code>$ ./ls -l
+    -rw-r--r-- 1 1002 wheel  32 May 29 11:37 bad_user
+$ echo $?
+96 </code></pre></li>
+</ul>
+<h2 id="debugging">Debugging</h2>
+<p>The supplied Makefile passes in compile flags that enable detection of memory leaks, underflow, and overflow. The use of these leak detection tools can at times make it annoying to use GDB for debugging your program. You therefore need to disable sanitization when debugging your program. This can be done by setting the <code>ASAN_OPTIONS</code> environment variable to <code>detect_leaks=0</code>. Thus to start <code>gdb</code> you should use a command such as:</p>
+<pre><code>$ ASAN_OPTIONS=detect_leaks=0 gdb ls</code></pre>
+<h2 id="recommendations-and-hints">Recommendations and hints</h2>
+<p>Some general recommendations followed by some specific steps:</p>
+<ul>
+<li>Use <code>gdb</code> to trace the flow of your code. We covered <code>gdb</code> in the prior lab, and a hint is immediately above.</li>
+<li>Use the system-supplied <code>ls</code> for inspiration about what your output should look like. In cases of divergence between <code>ls</code> and the sample output here in the lab desription, you can follow the sample output here.</li>
+<li>In general, you will be consulting man pages a lot</li>
+<li>Use <code>git commit</code> and <code>git push</code> after each piece of functionality that you build. <a href="../setup.html#savingchanges">See the setup page for advice</a>.</li>
+<li>To make your life easier, use editing tools that we saw in lab 1. For example, <code>Ctrl+]</code> in vim jumps to function definitions.</li>
+<li>You will need to add <code>#include</code>s to the top of <code>main.c</code>. The man pages will guide you here.</li>
+<li>The <code>PRINT_ERROR</code> macro in <code>main.c</code> might be helpful in interpreting why some of the system calls you use return errors.</li>
+<li>Speaking of errors, <em>be sure you are handling the return values of syscalls correctly</em>. Part of systems programming (or, really, any programming) is handling error cases properly.</li>
+<li><code>main.c</code> includes some example function signatures (also known as function prototypes). You can use those if you wish, but you do not have to.</li>
+<li>the variable <code>errno</code> will be useful when you need to check error types. See the man pages for <code>errno</code>, and individual functions’ references to <code>errno</code> in the man pages.</li>
+</ul>
+<p>We recommend building your solution in pieces (and creating a git commit after each piece). Each piece may necessitate some refactoring and rewriting versus the prior piece; this is common in software development. Here’s one possible sequence:</p>
+<ul>
+<li><p>first get <code>$ ./ls</code> working (no arguments). This should list the contents of the current directory, meaning <code>.</code>, and will give you a warmup calling some of the system calls that you need (listed above: <code>opendir</code>, <code>readdir</code>).</p></li>
+<li><p>then handle <code>$ ./ls &lt;dir1&gt; &lt;dir2&gt; ...</code>. This should list the contents of all directories supplied, and will give you experience with argument-handling code. Make sure you handle newlines between directories correctly. As hints:</p>
+<ul>
+<li>If <code>optind == argc</code> then it means that no arguments after the flags were given.</li>
+<li>Otherwise, arguments indexed from <code>optind</code> to <code>argc - 1</code> are all of the arguments after the flags.</li>
+</ul></li>
+<li><p>Next, <code>$ ./ls &lt;dir1&gt; &lt;fname1&gt; &lt;fname2&gt; &lt;dir2&gt; ...</code>. Now extend your code so you handle the case that filenames are passed on the command-line. For this, you will need to implement logic that determines whether an argument is a filename or directory. This will be your first use of <code>stat</code>. It’s probably a good idea to implement a function called <code>is_dir(char* fname)</code>, since you’ll need that several times.</p></li>
+<li><p>Now move onto the flags. Implement <code>$ ./ls -a</code>. This should be a relatively small modification on top of what you have. In fact, you may have been in “-a” mode all along, so your modification will be to move out of “-a” mode unless your <code>ls</code> is called with the <code>-a</code> flag.</p></li>
+<li><p>Implement <code>$ ./ls -l</code>. First, extend your argument-handling code to work with the <code>-l</code> option. Then implement the long-printing functionality. The following may be useful here:</p>
+<ul>
+<li><code>man 3 stat</code> (not just <code>man 2 stat</code>). Notice this points you to <code>man 3 fstatat</code>.</li>
+<li><code>printf(3)</code> width specifiers (for example, <code>printf("%6jd")</code>). As usual, type <code>man 3 printf</code>.</li>
+<li><code>snprintf(3)</code> (<code>man 3 snprintf</code>) to concatenate strings</li>
+</ul></li>
+<li><p>Implement <code>$ ./ls -R</code>. Some hints:</p>
+<ul>
+<li>Start by extending the argument-handling code.</li>
+<li>It may help to write out pseudocode, and then translate that pseudocode to real C. The pseudocode should be something like “define a directory-printing routine that: for the given directory, prints out the entries, and then, for each of those entries that is a directory, calls that same directory-printing routine.”</li>
+<li>For <code>./ls -aR</code>, don’t recurse infinitely! That means <em>not</em> recursing on <code>..</code> and <code>.</code></li>
+</ul></li>
+<li><p>Check the requirements section above again, to make sure you’re following the specification.</p></li>
+</ul>
+<h2 id="testing">Testing</h2>
+<p>You can run a set of tests by invoking <code>make test</code>. Note that these tests are not exhaustive; you should write further tests for yourself. You can read through the test script by editing <code>test.bats</code>, which is a test system called <code>bats(1)</code> (see <code>man 1 bats</code> and <code>man 7 bats</code> for more information). You might find some of the commands used in setting up the test in <code>mktest.sh</code> useful when conducting your own tests. For example, <code>touch -t</code> allows you to set the <code>mtime</code> for a file.</p>
+<p>We have written the tests so they provide a diff between the output of your <code>ls</code> and what was expected. However, sometimes a bug in your code might result in your version of <code>ls</code> crashing (with a SEGFAULT or other error) when run on our test directory. You can use the supplied <code>mktest.sh</code> script to debug such scenarios. To create a test directory named <code>test</code> simply call</p>
+<pre><code>$ ./mktest.sh test</code></pre>
+<p>This will create a directory and a set of files for which we have set <code>mtime</code>s, owners, and groups in a manner that will exercise different portions of your program. <strong>Note</strong> the <code>./mktest.sh</code> script will refuse to run if the directory specified as an argument <strong>already exists</strong>. You can delete the directory once done using <code>rm -r</code> as usual. Before submitting your work, you should make sure that you can pass all of the supplied tests.</p>
+<h2 id="extracredit">Extra Credit</h2>
+<p>We have a few extra credit options for this assignment:</p>
+<h3 id="implement-the--h-flag">Implement the <code>-h</code> flag</h3>
+<p><code>ls -lh</code> prints “human readable” file sizes rather than file sizes in bytes. This means that <code>ls -lh</code> will print file sizes in KB, MB or GB as appropriate; the unit chosen is the largest unit for which file size is greater than 0. For example</p>
+<pre><code>$ ./ls -lh
+-rwxr-xr-x 1 apanda apanda  17K May 29 12:03 ls
+-rw-r--r-- 1 apanda apanda 2.9K May 29 11:59 main.c
+-rw-r--r-- 1 apanda apanda 3.2K May 29 12:03 main.c.o
+-rw-r--r-- 1 apanda apanda  307 May 29 10:16 Makefile
+-rw-r--r-- 1 apanda apanda   46 May 29 10:33 README.md</code></pre>
+<p>Corresponds to the output for <code>ls -l</code> shown above. Implementing this will require writing functionality to print sizes as appropriate.</p>
+<h3 id="correctly-handle-symbolic-links-in-ls--l">Correctly Handle Symbolic Links in <code>ls -l</code></h3>
+<p>Symbolic links are Unix features that allow to create “pseudo-files” that point to other files. You can create one using <code>ln -s</code>, for example running</p>
+<pre><code>$ ln -s main.c main.c.link</code></pre>
+<p>creates a new file <code>main.c.link</code> that points to <code>main.c</code>. The system <code>ls</code> has special handling for printing symbolic links when showing long listing format. For example in the following output:</p>
+<pre><code>$ ls -l
+total 36
+-rwxr-xr-x 1 apanda apanda 17128 May 29 12:03 ls
+-rw-r--r-- 1 apanda apanda  2874 May 29 11:59 main.c
+lrwxrwxrwx 1 apanda apanda     6 May 29 14:02 main.c.link -&gt; main.c
+-rw-r--r-- 1 apanda apanda  3224 May 29 12:03 main.c.o
+-rw-r--r-- 1 apanda apanda   307 May 29 10:16 Makefile
+-rw-r--r-- 1 apanda apanda    46 May 29 10:33 README.md</code></pre>
+<p>Observe that <code>main.c.link</code> is displayed as <code>main.c.link -&gt; main.c</code>. Implement similar handling for your version of <code>ls</code>. In implementing this you might find the <code>readlink(2)</code> syscall useful. Also observe that the permission string for the link in this case uses <code>l</code> to indicate links.</p>
+<h3 id="implement-the-cheeky-hack-of-calling-the-real-ls">Implement the cheeky hack of calling the “real” <code>ls</code></h3>
+<p>If the argument to your <code>./ls</code> is <code>--hack</code>, invoke the system-supplied <code>./ls</code> to solve the lab, using the system calls <code>fork()</code>, <code>exec()</code>, <code>pipe()</code> (you may need others). Do not use the <code>system()</code> system call. You need not follow the error handling that is specified for the rest of the assignment.</p>
+<h2 id="handin-procedure">Handin Procedure</h2>
+<p>Handing in consists of three steps:</p>
+<ol type="1">
+<li><p><strong>Executing this checklist</strong>:</p>
+<ul>
+<li>Make sure your code builds, with <strong>no compiler warnings</strong>.</li>
+<li>Make sure you’ve used <code>git add</code> to add any files that you’ve created.</li>
+<li>Fill out the top of the <code>answers.txt</code> file, including your name and NYU Id</li>
+<li>Make sure you’ve answered every question in <code>answers.txt</code></li>
+<li>Create a file called <code>slack.txt</code> noting how many slack days you have used for this assignment. (This is to help us agree on the number that you have used.) Include this file even if you didn’t use any slack days.</li>
+</ul></li>
+<li><p><strong>Push your code to GitHub, so we have it</strong>:</p>
+<pre><code>$ cd ~/cs202/lab2    
+$ git commit -am &quot;hand in lab2&quot;
+$ git push origin 
+
+Counting objects: ...
+....
+To ssh://github.com/nyu-cs202/labs-21fa-&lt;username&gt;.git
+  7337116..ceed758  main -&gt; main</code></pre></li>
+<li><p><strong>Actually submit, by timestamping and identifying your pushed code</strong>:</p>
+<ul>
+<li>Decide which git commit you want us to grade, and copy its id (you will paste it in the next sub-step). A <a href="http://cs61.seas.harvard.edu/wiki/2014/Git#Repositories">commit id is a 40-character hexadecimal string</a>. Usually the commit id that you want will be the one that you created last. The easiest way to obtain the commit id for the last commit is by running the command <code>git log -1 --format=oneline</code>. This prints both the commit id and the initial line of the commit message. If you want to submit a previous commit, there are multiple ways to get the commit id for an earlier commit. One way is to use the tool <code>gitk</code>. Another is <code>git log -p</code>, as explained <a href="http://cs61.seas.harvard.edu/wiki/2014/Git#Logging">here</a>, or <code>git show</code>.</li>
+<li>Now go to NYU Brightspace; there will be an entry for this lab. Paste <em>only</em> the commit id that you just copied.</li>
+<li>You can submit as many times as you want; we will grade the last commit id submitted to Brightspace.</li>
+</ul></li>
+</ol>
+<p><strong>NOTE:</strong> <em>Ground truth is what and when you submitted to Brightspace. Thus, a non-existent commit id in Brightspace means that you have not submitted the lab, <strong>regardless</strong> of what you have pushed to GitHub. And, the time of your submission for the purposes of tracking lateness is the time when you upload the id to Brightspace, not the time when you executed <code>git commit</code>.</em></p>
+<p><strong>This completes the lab.</strong></p>
+<h2 id="acknowledgments">Acknowledgments</h2>
+<p>The scaffolding and architecture of this lab are due to Aurojit Panda, with modifications by the CS202 staff.</p>
+</body>
+</html>

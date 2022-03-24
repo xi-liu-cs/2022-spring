@@ -1,0 +1,396 @@
+therac-25
+
+wiki
+Because of concurrent programming errors
+(also known as race conditions),
+it sometimes gave its patients radiation 
+doses that were hundreds of times greater 
+than normal, resulting in death or serious injury
+
+
+
+
+
+1
+computerized radiation therapy machine
+Therac-25
+6 known accidents involved massive overdoses
+by Threrac-25
+
+Many companies building safety-critical software
+are not using proper procedures from 
+a software-engineering and safety-engineering perspective
+
+attribute a single cause to an 
+accident is usually a serious mistake
+
+
+
+
+
+
+2
+The Therac-25 accidents are the most 
+serious computer-related accidents to 
+date (at least nonmilitary)
+
+genesis
+Medical linear accelerators (linacs) 
+accelerate electrons to create high energy
+beams that can destroy tumors 
+with minimal impact on the surrounding 
+healthy tissue
+
+shallow tissue : treated with accelerated electrons 电子
+deeper tissue : the electron beam 波束
+is converted into X-ray photons 光子
+
+Atomic Energy of Canada Limited
+produced 
+1. the Therac-6, a 6 million (10^6) electron volt (MeV) accelerator 
+capable of producing X rays only
+2. the Therac-20. a 20-MeV dual mode (X rays or electrons) accelerator
+
+AECL developed "double pass"
+A douhle-pass accelerator needs 
+much less space to develop comparable 
+energy levels
+
+more economic:
+use magnetron(磁控管 high-power vacuum tube
+that generates microwaves using the 
+interaction of a stream of electrons with
+a magnetic field) rather than klystron
+(速调管 linear-beam vacuum tube)
+
+higher energy, depth dose
+
+
+
+3
+as energy increases, the depth in the 
+body at which maximum dose buildup 
+occurs also increases, sparing tissue above target area
+
+only 1 machine required
+for both treatment modalities 模式
+(electrons and photons)
+
+programmed data processor (PDP)
+
+therac-25 has more responsiblity for maintaining safety
+
+therac-20 has independent protective circuits for 
+monitoring electron-beam scanning
+
+hardware interlocks and backups 
+interlock
+(= a device or mechanism for connecting 
+or coordinating the function of different components)
+are not worth the expense
+
+therac-25 software developed by single person
+using assembly
+
+lack of documentation on 
+software specifications and a software test plan
+
+beam on in response to operator command
+beam off when treatment is completed
+
+therac-25 has a stand-alone
+real-time treatment os
+
+software in assembly
+has 
+1. stored data
+2. scheduler
+3. set of critical & noncritical tasks
+4. interrupt services
+
+
+
+
+4
+assumptions
+1. errors reduced by testing on hardware simulator
+2. program software does not degrade due to wear, 
+fatigue, reproduction process
+3. execution errors caused by faulty hardware components
+soft errors induced by alpha particles & electromagnetic noise
+
+hardware failure
+OR gate leading to event of getting wrong energy:
+probability of 10^-11
+
+massive overdoses
+
+extensive design changes, including 
+hardware safeguards against software errors
+
+kennestone oncology 肿瘤学 center
+details of accident are sketchy
+
+after lumpectomy (肿块切除术) to remove
+malignant breast tumor,
+
+scheduler controis the sequences of all noninterrupt 
+events and coordinates all concurrent processes
+
+software allows concurrent access to shared 
+memory, that there is no real synchronization aside from 
+data stored in shared variables
+
+"test" and "set" 
+for such variables are not indivisible operations. 
+Race conditions resulting from this implementation of multitasking 
+played an important part in the accidents.
+
+
+
+5
+When the machine 
+turned on. she felt a " tremendous force 
+of heat ... this red-hot sensation."
+
+patient went home,
+developed a reddening and swelling
+in center of the treatment area
+shoulder froze
+
+Doses of 1000 
+rads can be fatal if delivered to the 
+whole body
+
+
+
+6
+rad = (radiation absorbed dose 辐射吸收剂量) 
+cause death in 50 percent
+of the cases is 500 rads
+
+the patient's breast had 
+to be removed because of the radiation 
+burns. She completely lost the use of 
+her shoulder and her arm, and was in 
+constant pain
+
+operators of the machine refused 
+to believe that it could have been caused 
+by the Therac-25
+
+Again, the machine shut down 
+in the same manner. 
+The operator repeated this process 
+four times after the 
+original attempt - the display showing 
+"no dose" delivered to the patient each 
+time. 
+
+complained of burning,
+hip pain, and excessive swelling
+in the region of treatment
+
+autopsy revealed the cause of death as 
+the cancer
+
+if not died, a total hip replace ment would 
+have been necessary as a result of the 
+radiation overexposure
+
+
+
+7
+operators complained 
+that it took too long to enter the treatment plan
+
+operators use carriage return 
+to copy treatment site data
+
+series of carriage returns would complete data entry
+
+2 ways shut down:
+1. treatment suspend, 
+which required a complete machine reset to restart
+2. treatment pause,
+single-key command to restart machine
+
+The operator's manual supplied with the machine does 
+not explain nor even address the malfunction codes.
+
+no indication that these malfunctions could place a 
+patient at risk
+
+This software package does not 
+appear to contain a safety system 
+
+she had been taught that there were "so many 
+safety mechanisms" that she understood it was virtually 
+impossible to overdose a patient
+
+The problem was exacerbated by the 
+design of the mechanism
+
+
+
+
+8
+turntable 转盘 is a rotating table
+therapeutic modes: electron mode and photon 
+mode
+3rd position: no beam at all
+correct positioning of the patient
+
+turntable position is monitored by three microswitches 微型开关
+corresponding to the three cardinal turntable positions
+
+position of turntable, sent to computer as 
+a 3-bit binary signal
+
+raw, highly concentrated accelerator is 
+dangerous to living tissue
+
+software checks were substituted for 
+many traditional hardware interlocks.
+
+
+
+9
+turntable position tolerated a 1 bit error
+
+"analysis of the hazard rate of the new solution 
+indicates an improvement over the old 
+system
+
+testing of the microswitch was "inconclusive."
+The similarity of the errant 
+behavior
+
+flawed microswitch
+
+erythema 红斑
+
+
+
+11
+data-entry speed during editing was the key factor in producing the 
+error condition
+if prescription data was edited at a fast pace,
+the overdose occurred
+
+It took some practice before the physicist could repeat the procedure rapidly 
+enough to elicit the Malfunction 54 message at will
+
+he determined that the dose was 
+somewhere over 4,000 rads
+
+AECL said they had measured 
+the dosage (at the center of the field) to 
+be 25,000 rads
+
+
+12
+frying sound heard by 
+the patient was the ion chambers being 
+saturated
+
+focusing on particular software bugs is 
+not the way to make a safe system
+
+virtually all complex software can be made 
+to behave in an unexpected 
+fashion under certain conditions
+
+particular coding error
+is not as important as general unsafe design of software overall
+
+treatment monitor task (Treat) 
+controls the various phases of treatment by 
+executing its eight subroutines
+
+One of Treat's subroutines, called 
+Datent (data entry), communicates with 
+the keyboard handler task (a task that 
+runs concurrently with Treat) via a 
+shared variable (data-entry completion flag)
+
+datent subroutine detects the 
+variable's change in status
+and changes the value of Tphase
+
+
+
+19
+When software was involved, AECL made no assessment 
+of the "how and why" of software faults 
+and took any combination of software faults as a single event
+
+AND/OR tree format, 
+using a basic understanding
+of the machine operation to determine the causes
+
+
+21
+medical accelerator "industry" has become perhaps 
+a little complacent about safety
+
+Accidents usually involve 
+a complex web of 
+interacting events with 
+multiple contributing 
+factors.
+
+mistake
+= tendency to believe that 
+the cause of an accident 
+had been determined
+ (for example, a microswitch failure in the Hamilton accident)
+without adequate evidence to
+ come to this conclusion and 
+without looking at all possible contributing factors
+
+virtually all factors involved in accidents can 
+be labeled human error
+
+It is nearly as useless to ascribe the 
+cause of an accident to a computer error 
+or a software error
+
+
+
+contributing factors:
+• management inadequacies and lack 
+of procedures for following through on 
+all reported incidents. 
+• ovcrconfidence in the software and 
+removal of hardware interlocks (making the software into a single point of 
+failure that could lead to an accident). 
+• presumably less-than-acceptable 
+software-engineering practices, and 
+• unrealistic risk assessments along 
+with overconfidence in the results of 
+these assessments.
+
+
+software will 
+not or cannot fail: this attitude leads to 
+complacency and overreliance on computerized functions
+
+
+
+
+22
+When prohlemsstarted occurring, 
+investigators assumed that hardware was 
+the cause and focused only on the hardware. 
+
+In the Hamilton accident, a transient microswitch failure was assumed 
+to be the cause
+
+
+The Therac-25 software "lied" 
+to the operators. and the machine itself 
+could not detect that a massive overdose had occurred
+
+engineers need to design for worst case
+

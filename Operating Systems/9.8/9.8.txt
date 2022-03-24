@@ -1,0 +1,28 @@
+--Purpose of OS: provide services to user-level programs
+
+--Definition: An operating system creates, for processes, a machine
+    that is easier to program than the raw hardware would be.
+
+
+
+os is a software that does
+1. manage resources of the machine
+scheduling -- give every process some cpu
+virtual memo -- give every some physical memo
+
+resource management means one bad program does
+not ruin another, os does
+	--multiplexing(simultaneous transmission)
+	--isolation, protection
+	--sharing
+
+2. abstracting hardware
+hide details of hardware (os gets dirty)
+repeated code
+unclear how to run > 1 application at once
+
+
+--one of our labs will be a miniOS that boots on real hardware
+ --labs could/should actually be fun
+--Regardless, you need to allocate time
+

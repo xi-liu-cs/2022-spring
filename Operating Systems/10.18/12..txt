@@ -1,0 +1,73 @@
+multi-level page tables
+because a linear array would be gigantic
+
+virtual address:
+9 + 9 + 9 + 9 + 12 = 48 bits
+physical address:
+40 + 12 = 52 bits
+
+the offsets of virtual address and physical address 
+need to have the same number of bits
+
+sparse: most virtual page numbers are mapped to
+null 
+allocates only pieces of that "array" when needed
+
+x86-64:
+64 bits architecture:
+fundamental unit of word length on a machine
+is 64 bits = 8 bytes
+when go load or store in memory
+by default, 
+code is compiled in such way 
+that pointers are represented as 8 bytes
+
+
+%cr3 stores the physical address
+of the root of page structure (8 byte)
+
+context switch:
+loading a diff value into %cr3
+
+
+
+
+page fault is when there is an illegal memory reference by a process
+1. reference a virtual page number for which 
+the present bit is not set
+2. or it tries to store to memory for which the 
+R/W bit is not set
+3. or it tries to gain access to memory as an application space
+for which the supervisor bit is not set
+
+TLB miss -> page fault	(no)
+might move into a new page that has not been referenced
+and the TLB was just cleared
+
+page fault -> TLB miss	(no)
+illegal memory operation:
+it is in the cache (TLB knows about that this vpn maps to this ppn)
+but the R/W bit is set to 0 (read only)
+if the process tries to store (write) to that page
+(write to a pointer that is declared const)
+
+
+
+
+
+
+
+
+
+from office hour:
+scribble12
+
+page7
+4KB = 2^12 bytes, which is page size
+2MB = 2^12 * 2^9 = 2^21 bytes
+1GB = 2^12 * 2^9 * 2^9 = 2^30 bytes
+512GB = 2^12 * 2^9 * 2^9 * 2^9 = 2^39 bytes
+in virtual address:
+each of vpn 1, 2, 3, 4 is 9 bits
+so there are 2^9 possible entries in each page directory (L1, 2, 3)
+ 

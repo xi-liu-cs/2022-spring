@@ -1,0 +1,343 @@
+Class 4
+CS 202
+20 September 2021
+
+On the board
+------------
+
+1. Last time
+2. Process birth
+3. The shell, part I
+4. File descriptors
+5. The shell, part II
+6. Processes: the OS's view
+7. Threads
+8. Intro to concurrency
+
+------------------------------------------------------------------------
+
+1. Last time
+
+    - stack frames
+
+    - system calls
+
+    - process/OS control transfers
+
+    - Git/lab setup
+
+2. Process birth
+
+    How does a process come into being?
+
+	--answer: a system call!
+	    
+	--in Unix, it is fork()
+
+	--fork() creates an exact copy (almost; the return value is
+	different).
+
+	--thus, what happens if a system had two important users, and
+	one of them runs a process that executes this code:
+
+	    for (i = 0; i < 10; i++) {
+		fork();
+	    }
+
+	    while (1) {}
+
+	[answer: one of the users gets a LOT more of the CPU than
+	another]
+   
+	    --what behavior do you want?
+
+	    [this actually corresponds to research.... difficult on
+	     Linux-like systems to impose true resource containers.]
+
+
+3. The shell, part I
+
+    --a program that creates processes
+
+    --the human's interface to the computer
+
+    --GUIs (graphical user interfaces) are another kind of shell.
+
+    A. How does the shell start programs?
+
+	--example: 
+	    $ ls
+
+	[see panel 1 on handout; go line-by-line]
+
+	--calls fork(), which creates a copy of the shell. now there are
+	two copies of the shell running
+
+	--then calls exec(), which loads the new program's instructions
+	into memory and begins executing them.
+	    --(exec invokes the loader)
+
+	while (1) {
+		write(1, "$ ", 2);
+		readcommand(command, args); // parse input
+		if ((pid = fork()) == 0) // child?
+			execve(command, args, 0);
+		else if (pid > 0) // parent?
+			wait(0); //wait for child
+		else
+			perror("failed to fork");
+	}
+
+	--how can shell wait for the end of a process?
+	    --with wait() or waitpid() system calls
+
+        --background process. example:
+            $ sleep 10
+            vs
+            $ sleep 10 &
+
+	--QUESTION: why is fork different from exec? What the ...?
+	
+	    * We will come back to this.
+
+
+    B. Redirection, motivation
+
+        What does this do?
+
+        $ ./first3 abcd efgh > foo
+
+        What about this?
+
+        $ ps xc | grep ...
+
+        or say we wanted to extract all of your GitHub ids...how would
+        you do that without pipelines?
+
+        download html from https://github.com/nyu-cs202
+        then
+        $ cat blob | grep -o labs-21fa-[a-zA-Z0-9\-]* | sort -f | uniq > students.txt
+
+        How are these things implemented? Remember, the programmer of
+        first3 or cat or grep is long gone, and their output is winding
+        up somewhere that the original program never specified.
+
+4. File descriptors
+
+    --every process can usually expect to begin life with three file
+    descriptors already open:
+	0: represents the input to the process (e.g., tied to
+	    terminal)
+	1: represents the output
+	2: represents the error output
+
+	these are sometimes known as stdin, stdout, stderr
+
+    --NOTE: Unix hides for processes the difference between a device and
+    a file. this is a very powerful hiding (or abstraction), as we will
+    see soon
+
+5. The shell, part II
+
+    - Back to 
+         $ ./first3 abcd efgh > foo
+
+    How is that implemented?
+   
+    Answer: just before exec, shell does:
+
+            close(1)
+            open("/tmp/foo", O_TRUNC | O_CREAT | O_WRONLY, 0666)
+
+        which automatically assigns fd 1 to point to /foo/tmp.
+
+        --now, when first3 runs, it still has in its code: write(1,...),
+        but "1" now means something else.
+
+	What about 
+
+	    $ sh < script > tmp1
+
+	    where script contains 
+		echo abc
+		echo def
+
+	    [draw picture]
+
+    - Pipelines
+        [exercise]
+
+    - The power of the fork/exec separation
+
+	[an innovation from the original Unix. possibly lucky design
+	choice at the time. but turns out to work really well.  allows
+	the child to manipulate environment and file descriptors
+	*before* exec, so that the *new* program may in fact encounter a
+	different environment]
+
+       --To generalize redirections and pipelines, there are lots of
+       things the parent shell might want to manipulate in the child
+       process: file descriptors, environment, resource limits.
+
+       --yet fork() requires no arguments!
+
+       --Contrast with CreateProcess on Windows:
+
+	    BOOL CreateProcess(
+		name,
+		commandline,
+		security_attr,
+		thr_security_attr,
+		inheritance?,
+		other flags,
+		new_env,
+		curr_dir_name,
+		.....)
+
+	    [http://msdn.microsoft.com/en-us/library/ms682425(v=VS.85).aspx]
+
+	    there's also CreateProcessAsUser, CreateProcessWithLogonW,
+	    CreateProcessWithTokenW, ...
+
+	* The issue is that any conceivable manipulation of the
+	environment of the new process has to be passed through 
+	arguments, instead of via arbitrary code.
+
+    in other words:
+
+	    because whoever calls CreateProcess() (or its variant) needs
+	    to perfectly configure the process before it starts running.
+
+	    with fork(), whoever calls fork() **is still running** so
+	    can arrange to do whatever it wants, without having to work
+	    through a rigid interface like the above. allows arbitrary
+	    "setup" of the process before exec().
+
+
+
+    - Discussion: what makes a good abstraction?
+
+        --simple but powerful
+
+        --examples we've seen:
+
+            --stdin (0), stdout (1), stderr (2) [nice by themselves, but
+            when combined with the mechanisms below, things get even better]
+
+            --file descriptors
+
+            --fork/exec() separation
+
+            --very few mechanisms lead to a lot of possible
+            functionality
+
+
+Aside:
+
+     - Fork bomb at the bash command prompt:
+
+            $ :(){ : | : & }; :
+
+
+6. Implementation of processes
+
+    Briefly cover the OS's view:
+
+		 PCB
+	    -----------------
+	    |   process id  |
+	    |   state       |   (ready, runnable, blocked, etc.)
+	    |   user id     |
+	    |   IP (ins ptr)|
+	    |   open file   |
+	    | VM structures |
+	    |   registers   |
+	    |   .....       |  (signal mask, terminal, priority, ...) 
+	    ----------------
+
+	    called "proc" in Unix, "task_struct" in Linux, and
+	    "process_t" in lab4.
+
+
+
+    [draw an array of these.]
+
+    point out that during scheduling, a mechanism that we have not seen,
+    a core switches between processes. will discuss the mechanism for
+    this later.
+    
+
+    Note: these PCBs will have an analog when considering threads,
+    below.
+
+
+7. Threads
+
+    Interface to threads:
+
+        tid thread_create (void (*fn) (void *), void *); 
+            Create a new thread, run fn with arg
+
+        void thread_exit (); 
+
+        void thread_join (tid thr); 
+        
+            Wait for thread with tid 'thr' to exit
+        
+      plus a lot of synchronization primitives, which we'll see 
+      in the coming classes
+
+    Assume for now that threads are: 
+        --an abstraction created by OS
+        --preemptively scheduled
+
+    [draw abstract picture of threads: own registers, share memory]
+
+    (later, we will explore alternatives)
+
+8. Intro to concurrency
+
+    There are many sources of concurrency.
+
+    --what is concurrency?
+        
+        --stuff happening at the same time
+
+    --sources of concurrency
+
+        --computers have multiple CPUs and common memory, so
+        instructions in multiple threads can happen at the same time!
+ 
+        --on a single CPU, processes/threads can have their instructions
+        interleaved (helpful to regard the instructions in multiple
+        threads as "happening at the same time")
+   
+        --interrupts (CPU was doing one thing; now it's doing another)
+
+    --why is concurrency hard?
+
+        *** Hard to reason about all possible interleavings
+
+
+
+---------------------------------------------------------------------------
+
+--here are some other system calls (these are included in the
+notes so that you know what the basic interface to a Unix-like
+OS looks like):
+
+    --int open(char*, int flags, [, int mode]);
+    --int read(int fd, void*, int nbytes):
+    --int write(int fd, void* buf, int nbytes);
+    --off_t lseek(int fd, off_t pos, int whence)
+    --int close(int fd);
+    --int kill(int pid, int signal)
+    --void exit (int status)
+    --int fork(void)
+    --int waitpid(int pid, int* stat, int opt)
+    --int execve(char* prog, char** argv, char** envp)
+    --int dup2 (int oldfd, int newfd)
+    --int pipe(int fds[2])
+
+
+

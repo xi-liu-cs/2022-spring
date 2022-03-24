@@ -1,0 +1,78 @@
+1.
+os323
+context switch between threads:
+register state of T1 must be saved (push_reg ...)
+and register state of T2 restored 
+before running T2
+
+os93
+context switch:
+save a few register values for the currently-executing process
+restore a few reg values for the currently-executing process
+save context
+
+os94
+in timer interrupt handler
+os switch from running process a to b
+calls switch() routine
+saves current reg values (into process struct of a)
+restore reg of process b
+switch contexts: 
+*changing stack pointer to use b's kernel stack
+write_register(RSP, t2->stack)
+
+
+
+2.1 (right)
+20 GB/disk. 10 platters/disk * 4096 tracks/platter * 1024 sectors/track * 512 bytes/sector =
+10*4*1024*1024*512 = 40*1MB*512 = 40*.5GB = 20 GB.
+
+2.2
+12000 rpm = 12000 rotations / 60 sec
+= 200 rotations / sec
+= 1 rotation / 0.005 sec
+= 1 rotation / 5 ms
+1 rotation read 1 track
+(1 track)(1024 sectors / track)(512 bytes / sector)
+=  524288 bytes
+sequential transfer bandwidth is 
+(200 rotations / sec)(524288 bytes / rotation)
+= 2^26 bytes / sec = 64MB / sec
+
+
+2.3
+512 bytes / sector
+1 read get 512 bytes  
+
+total throughput
+= bytes / time
+= 512 bytes / (rot + seek + transfer) 
+/*average rotational delay 
+= 1/2 (time per rotation)
+= 1/2 (5 ms) 
+= 2.5ms*/
+= 512 bytes / (2.5 + 15 + 0)ms
+= 29 bytes / ms
+= 29000 bytes / sec
+
+
+
+3.
+(a) os37
+shortest seek time first 
+= picking requests on nearest track to complete first
+
+* ARM IS INITIALLY AT TRACK 20 
+
+20 -> 22 -> 10 -> 6 -> 2 -> 38 -> 40
+
+
+(b)
+elevator
+a single pass across the disk 
+from outer to inner tracks: (travel down first)
+20 -> 10 -> 6 -> 2 -> 22 -> 38 -> 40
+
+from inner to outer: (travel up first)
+20 -> 22 -> 38 -> 40 -> 10 -> 6 -> 2
+

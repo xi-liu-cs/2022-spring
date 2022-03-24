@@ -1,0 +1,913 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<p><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-beta1/katex.min.css" integrity="sha384-VEnyslhHLHiYPca9KFkBB3CMeslnM9CzwjxsEbZTeA21JBm7tdLwKoZmCt3cZTYD" crossorigin="anonymous"> 
+</p>
+<div class="container">
+  <title>CS202: Lab 3: Multi-threaded programming</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <style type=text/css>
+  @import url("https://use.typekit.net/jlb5olz.css");
+  
+  /* heavily borrowed from Harvard's cs61, which calls it cs161.css */
+  
+  ol > li > ol {
+  	list-style-type: lower-alpha;
+  }
+  ol.upper-alpha {
+  	list-style-type: upper-alpha;
+  }
+  p + ol, p + ul {
+  	margin-bottom: 1rem;
+  }
+  p:last-child {
+  	margin-bottom: 0.5rem;
+  }
+  
+  /* cs202 additions */
+  .required, .challenge, .question {
+    padding: .5em .5em .5em .5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #f0f0ff;
+  }
+  
+  .highlight {
+      border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+      background: #fffff0;
+      padding-left: 0.25rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-right: 1rem;
+  }
+  
+  .honors {
+    padding: .5em .5em .5em .5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fffff0;
+  }
+  
+  
+  .callout {
+      border-left: 0.25rem solid #5bc0de;
+      background: #5bc0de;
+      padding-left: 0.25rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-right: 1rem;
+  }
+  
+  div.required .header {
+      font-weight: bold;
+  }
+  div.honors .header {
+      font-weight: bold;
+  }
+  
+  div.callout .header {
+      font-weight: bold;
+  }
+  
+  
+  div.challenge .header {
+      font-style: italic;
+  }
+  
+  
+  div.challenge {
+      background-color: #ffe0e0;
+  }
+  
+  
+  
+  div.highlight .header {
+      font-weight: bold;
+  }
+  
+  pre {
+      background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4
+  }
+  
+  #topnavbar ul {
+   width: 100%;
+   float: left;
+  
+   margin: 0;
+   padding: 0;
+  
+   text-align: center;
+   white-space: nowrap;
+   color: #000;
+   font-family: Arial, Helvetica, sans-serif;
+   background-color: white;
+   border-top: solid 2px maroon;
+   border-bottom: solid 2px maroon;
+   clear: right;
+   margin-top: .5em;
+   margin-bottom: .5em;
+  }
+  
+  #topnavbar ul li {
+   display: inline;
+   padding-left: 0;
+   padding-right: 0;
+  }
+  
+  #topnavbar ul li a {
+   padding: 3px 10px;
+   text-decoration: none;
+   color: #000;
+   background-color: white;
+   float: left;
+   border-right: 1px solid black;
+  }
+  
+  #topnavbar ul li a:hover {
+   background-color: maroon;
+   color: white;
+  }
+  
+  #topnavbar div { 
+   clear: both;
+  }
+  
+  div#news {
+    width: 30%;
+    float: right;
+    margin-left: 2em;
+    padding-left: 1em;
+    background-color: #fffff0;
+    margin-bottom: 0.5em;
+    border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+  /*  border: 1px solid maroon;*/
+  }
+  
+  dl.idealist dt { 
+    font-weight: bold;
+  }
+  
+  dl.idealist dt { 
+    margin-top: 0.5em;
+  }
+  
+  
+  dl.newslist { 
+   margin: 0;
+   padding: 0;
+  }
+  
+  dl.newslist dt { 
+   padding-left: 0;
+   color: #000055;
+   font-weight: bold;
+   margin-bottom: 0.2em;
+  }
+  
+  dl.newslist dd {
+    padding-bottom: 1em;
+    margin-bottom: 0;
+    margin-left: 1em;
+    padding-left: 0;
+    margin-right: 1em;
+  }
+  
+  div#news p { 
+  margin-top: 0; 
+  padding-top: 0;
+  }
+  
+  #announcements p { 
+    color: maroon;
+  }
+  
+  #announcements h1 { 
+    color: #ffffff;
+    text-align: center;
+    font-size: 110%;
+    text-decoration: underline;
+  }
+  
+  /* The alternating announcement colors */
+  #announcements p.one { color: #ff0000; }
+  #announcements p.two { color: #00ff00; }
+  #announcements p.three { color: #3333ff; }
+  
+  .announce_date { font-weight: bold; }
+  table.people {
+    margin-left: 10px;
+    padding: 2px;
+    border-collapse: collapse;
+    border: none;
+  }
+  
+  table.people th { 
+    font-weight: bold;
+    text-align: left;
+    border: 0;
+  /*  border-bottom: solid 2px; */
+  }
+  
+  table.people td { 
+    padding-right: 1em;
+  /*
+    border: none;
+    border-bottom: 1px solid #888;
+    padding-right: 1em;
+    padding-left: 1em;
+  */
+  }
+  
+  table.books {
+    margin-left: 2%;
+  /*  margin-bottom: 8px; */
+  }
+  
+  table.books tr,td {
+    vertical-align: top;
+  }
+  
+  table.assignments { 
+  /*  width: 98%; */
+    margin-left: 1%;
+    margin-right: 1%;
+    border-collapse: collapse;
+  }
+  
+  table.assignments th { 
+  /*  background: #E0FFFF;*/
+    color: black;
+    border: none;
+    text-align: left;
+    width: 29%;
+  }
+  
+  table.assignments tr,td { 
+  /*  padding: 50px;
+    border-width: 50px;
+    border-style: solid;
+    border-color: black;
+    border-spacing: 0px;*/
+    border: none;
+  }
+  
+  table.schedule {
+    width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+    border-collapse:  collapse;
+  }
+  
+  table.schedule th { 
+  /*  background: maroon;*/
+    color: black;
+    border-width: 0px;
+    text-align: left;
+  }
+  
+  table.Schedule tr { 
+    padding: 3px;  
+    border-width: 1px; 
+    border-spacing: 0px; 
+    border-style: solid;  
+    border-color: black;
+  }
+  
+  table.Schedule th,td { 
+    padding: 5px;  
+    border-width: 1px; 
+    border-spacing: 0px; 
+    border: none;  
+    border-color: black;
+  }
+  /* Presentation:  No underlines on links in schedule unless you're
+   * moving the mouse over it. */
+  
+  table.schedule tr.lecture { background: white; border-bottom: 1px solid #736F6E; }
+  table.schedule tr.alt { background: #E0FFFF; }
+  /*table.schedule tr.lecture.alt { background: white; }*/
+  /*table.schedule tr.noclass { background: #d3d3d3; }
+  table.schedule tr.makeupclass { background: #FAAFBE; }*/
+  table.schedule tr.noclass { color: #736F6E; }
+  table.schedule tr.makeupclass { color: #FF0000; border-bottom: 1px solid #736F6E;}
+  table.schedule td.readings { color: black; }
+  table.schedule td.altreadings { color: black; }
+  table.schedule tr.due { color: #FF0000; }
+  table.schedule td.due { color: #FF0000; }
+  table.schedule tr.exam    { color: #FF0000; background: #ccf; }
+  table.schedule tr.recitation { background: #ccf; }
+  table.schedule tr.recitation.alt { background: #ccf; }
+  table.schedule tr.lechead { font-weight: bold; text-align: left; height:20px}
+  
+  
+  
+  /* end cs202 additions */
+  
+  blockquote {
+  	margin-left: 2rem;
+  	padding-left: 1rem;
+  }
+  blockquote > h3:first-child {
+  	margin-top: 0.5rem;
+  }
+  blockquote, blockquote.solution.note {
+  	border-left: 0.25rem solid rgba(0, 0, 80, 0.25);
+  }
+  .solution.shown, .solution-collapsed.shown {
+  	animation: slide-down .3s ease-out;
+  }
+  .solution, blockquote.highlight {
+  	border-left: 0.25rem solid rgba(255, 255, 0, 0.5);
+  	background: #fffff0;
+  	padding-top: 0.25rem;
+  	padding-bottom: 0.25rem;
+  	padding-right: 1rem;
+  }
+  .solution-collapsed, blockquote.note {
+  	background: #f0f0ff;
+  	padding-top: 0.25rem;
+  	padding-bottom: 0.25rem;
+  	padding-right: 1rem;
+  }
+  .solution-collapsed {
+  	display: table;
+  	border-left: 0rem none;
+  	margin-left: 0rem;
+  	font-size: smaller;
+  }
+  .larger {
+  	font-size: larger;
+  }
+  a.js-solution.hide {
+  	font-size: smaller;
+  }
+  a.js-solution.hide.all {
+  	font-size: inherit;
+  }
+  .githubref {
+  	text-align: right;
+  	margin-top: -0.5rem;
+  	font-style: italic;
+  	font-size: 0.75rem;
+  }
+  .float-left {
+  	float: left;
+  }
+  .float-right {
+  	float: right;
+  }
+  @keyframes slide-down {
+  	0% { opacity: 0; }
+  	100% { opacity: 1; }
+  }
+  .post {
+  	margin-bottom: 3rem;
+  }
+  .post img {
+  	max-width: 100%;
+  }
+  .tall > img {
+  	max-height: 50vh;
+  }
+  h1, h2, h3, h4 {
+  	font-family: "brix-slab", sans-serif;
+  }
+  h1 {
+  	font-weight: 900;
+  }
+  h2 {
+  	margin-top: 3rem;
+  	font-weight: 700;
+  }
+  h2:first-child {
+  	margin-top: 0;
+  }
+  .h3, h3 {
+  	font-size: 1.5rem;
+  }
+  .h4, h4 {
+  	font-size: 1.25rem;
+  	font-style: italic;
+  }
+  h3 {
+  	margin-top: 1.5rem;
+  }
+  h3 > code {
+  	color: inherit;
+  }
+  .container th, .container td {
+  	padding: 0.15rem 1.5rem 0.15rem 0;
+  }
+  .container table {
+  	margin: 0.85rem 0;
+  	border-spacing: 0;
+  }
+  tr.even > td,
+  table.alternate > tbody > tr:nth-child(even) > td {
+  	background: #f0f0ff;
+  }
+  tr.separator > td, tr.separator > th {
+  	background: #d8d8f8;
+  }
+  td > p:first-child, th > p:first-child {
+  	margin-top: 0.25rem;
+  }
+  td > p:last-child, th > p:last-child {
+  	margin-bottom: 0.25rem;
+  }
+  table.padleft > thead > tr > th:first-child,
+  table.padleft > tbody > tr > td:first-child,
+  table.padleft > tbody > tr > th:first-child {
+  	padding-left: 0.35rem;
+  }
+  th.r {
+  	font-weight: normal;
+  }
+  tr.row-wide-padding > td {
+  	padding-left: 3em;
+  	padding-right: 3em;
+  }
+  tr.row-wide-padding > td:first-child {
+  	padding-left: 0;
+  }
+  tr.row-wide-padding > td:last-child {
+  	padding-right: 0;
+  }
+  tr.row-space-above > td {
+  	padding-top: 3em;
+  }
+  div.sp {
+  	margin-top: 3em;
+  }
+  
+  blockquote.float-left {
+  	margin-left: 0;
+  	padding-left: 0;
+  	border-left: 0 none;
+  	margin-right: 3rem;
+  }
+  blockquote.float-left.half-width {
+  	min-width: 25rem;
+  	max-width: 100%;
+  }
+  
+  /* prettier table types */
+  table.wikitable > tr > th,
+  table.wikitable > tr > td,
+  table.wikitable > * > tr > th,
+  table.wikitable > * > tr > td {
+  	border: 1px solid #a2a9b1;
+  	padding: 0.2em 0.4em;
+  }
+  table.wikitable th {
+  	text-align: center;
+  	background-color: #eaecf0;
+  }
+  td.hgray, tr.hgray {
+  	background-color: #888888;
+  }
+  td.hpink, tr.hpink {
+  	background: #ff80bb;
+  }
+  
+  table.truthtable > * > tr > th,
+  table.truthtable > * > tr > td {
+  	border: 2px solid #a2a9b1;
+  	padding: 0.6em;
+  	text-align: center;
+  }
+  
+  table.nowrap1 > * > tr > th:first-child,
+  table.nowrap1 > * > tr > td:first-child {
+  	white-space: nowrap;
+  }
+  table.text-right-1 > * > tr > th:first-child,
+  table.text-right-1 > * > tr > td:first-child {
+  	text-align: right;
+  }
+  table.text-right-2 > * > tr > th:nth-child(2),
+  table.text-right-2 > * > tr > td:nth-child(2) {
+  	text-align: right;
+  }
+  .text-left {
+  	text-align: left;
+  }
+  .text-center {
+  	text-align: center;
+  }
+  .text-right {
+  	text-align: right;
+  }
+  
+  hr.c {
+  	clear: both;
+  	margin: 0;
+  	border: 0 none;
+  	height: 0;
+  }
+  
+  .hellobackground {
+  	position: fixed;
+  	transform: rotate(-15deg);
+  	opacity: 0.15;
+  	z-index: -1;
+  	top: -3rem;
+  	left: -2.5rem;
+  }
+  .float-left.rotate-img-m5 {
+  	margin-right: 1.5em;
+  }
+  .float-right.rotate-img-5 {
+  	margin-left: 1.5em;
+  }
+  img.rotate-img-5, .rotate-img-5 img {
+  	transform: rotate(5deg);
+  }
+  img.rotate-img-m5, .rotate-img-m5 img {
+  	transform: rotate(-5deg);
+  }
+  
+  figure > img {
+  	max-width: 100%;
+  	object-fit: scale-down;
+  }
+  
+  .navbar-has-drafts {
+  	background: yellow;
+  }
+  
+  .hidden {
+  	display: none;
+  }
+  hr.prbr {
+  	border: 0 none;
+  }
+  hr.twoem {
+  	border: 0 none;
+  	margin-top: 2em;
+  }
+  hr.fourem {
+  	border: 0 none;
+  	margin-top: 4em;
+  }
+  hr.eightem {
+  	border: 0 none;
+  	margin-top: 8em;
+  }
+  hr.sixteenem {
+  	border: 0 none;
+  	margin-top: 16em;
+  }
+  
+  @media print {
+  html {
+  	font-size: 125%;
+  }
+  h1 {
+  	font-size: 2rem;
+  }
+  h2 {
+  	font-size: 1.5rem;
+  	margin-top: 2rem;
+  }
+  .prbr {
+  	page-break-before: always;
+  	margin-top: 0;
+  }
+  @page {
+  	margin-top: 0.75in;
+  	margin-bottom: 0.75in;
+  }
+  .hellobackground {
+  	display: none;
+  }
+  .print-hide-solutions .solution, .print-hide-solutions .solution-collapsed {
+  	display: none;
+  }
+  a, a:not(.btn) {
+  	color: inherit;
+  	text-decoration: none;
+  }
+  }
+  
+  @media not print {
+  .pronly {
+  	display: none;
+  }
+  }
+  
+  .navbar .gsc-control-cse {
+  	padding: 0;
+  	padding-top: .5rem;
+  	padding-left: 1rem;
+  	background: inherit;
+  	border: 0 none;
+  }
+  </style>
+</head>
+<body>
+<nav>
+<a href="../index.html">Home</a> |
+<a href="../syllabus.html">Schedule</a> |
+<a href="../policies.html">Policies and grading</a> |
+<a href="../labs.html">Labs</a> |
+<a href="../setup.html">Infrastructure</a> |
+<a href="../exams.html">Exams</a></li> |
+<!--<a href="../tools.html">Tools</a></li>-->
+<a href="../reference.html">Reference materials</a> |
+<a href="../announcements.html">Announcements</a>
+</nav>
+<p></p>
+<header id="title-block-header">
+<h1 class="title">CS202: Lab 3: Multi-threaded programming</h1>
+</header>
+<p></p>
+<div class="post">
+<h2 id="introduction">Introduction</h2>
+<p>In this lab, you will implement a model of an online store. Your model will support safe parallel updates to a central inventory database, which maintains stock of all items available for sale from the online store. Updates to this inventory database will come from both suppliers (who add goods to the inventory and enable or disable deals on items, such as discounts and free shipping) and customers (who, by purchasing items from the online store, remove them from the inventory). In the model, customers and suppliers will be represented by different threads, all executing in parallel.</p>
+<p>Though your store is only a model, the concepts you will learn and use throughout this lab could be applied similarly in a real-world setting. Suppliers and customers would be on different computers, talking to a central inventory database over the Internet. Requests sent over the Internet from suppliers and customers would be handled by different threads on the central inventory computer, and any operations on the database would have to be done with proper synchronization, just as in your model.</p>
+<div class="highlight">
+<p><span class="header">Coding style.</span> In this and subsequent labs, you will be graded for style. We will deduct up to 20% of total lab points for poor style based on our subjective evaluation. You will have to pay attention to things like indentation and spacing (which need to be consistent), variable names (which need to be clear and consistent), repeated code (which needs to be avoided), spaghetti code (which needs to not happen), etc. Follow this <a href="https://cs61.seas.harvard.edu/site/2019/Style/">style guide</a>.</p>
+</div>
+<div class="highlight">
+<p><span class="header">Concurrency commandments.</span> You will need to read <a href="programming-with-threads.pdf">Coding Standards for Programming with Threads</a>, by Mike Dahlin. <strong><em>You are required to follow these standards for this project</em></strong>. In the real world, unclear multi-threaded code is particularly dangerous – because it is difficult or impossible to test. Moreover, if it's not clear, then the programmer who comes after you cannot debug it, maintain it, or add new features.</p>
+</div>
+<p>Because it is impossible to determine the correctness of a multithreaded programming via testing, grading on this project will primarily be based on reading your code. If your code is difficult to understand, then you will lose points (potentially lots of them), even if the program seems to work. Feel free to sit down with the TAs or instructor during office hours for code inspections before you turn in your project (note: to take advantage of this, start on time! [which is probably earlier than you think]).</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>You’ll be working on the devbox as usual. From within the devbox, obtain the lab files as follows:</p>
+<pre><code>$ cd ~/cs202
+$ git fetch upstream
+$ git merge upstream/main</code></pre>
+<p>This lab’s files are located in the <code>lab3</code> subdirectory.</p>
+<p>If you have any “conflicts” from lab 2, <a href="https://cs61.seas.harvard.edu/site/ref/git/#conflicts">resolve them</a> before continuing further. Run <code>git push</code> to save your work back to your personal repository.</p>
+<p>Let’s begin by ensuring that you can build the code you just pulled:</p>
+<pre><code>$ cd ~/cs202/lab3
+$ make</code></pre>
+<p>You should see output similar to the following:</p>
+<pre><code>g++ -pipe -MD -I. -Wall -g -c  estoresim.cpp -o build/estoresim.o
+estoresim.cpp:116:1: warning: ‘void* customer(void*)’ defined but not used [-Wunused-function]
+ customer(void* arg)
+ ^~~~~~~~
+estoresim.cpp:95:1: warning: ‘void* supplier(void*)’ defined but not used [-Wunused-function]
+ supplier(void* arg)
+ ^~~~~~~~
+estoresim.cpp:74:1: warning: ‘void* customerGenerator(void*)’ defined but not used [-Wunused-functio]
+ customerGenerator(void* arg)
+ ^~~~~~~~~~~~~~~~~
+estoresim.cpp:43:1: warning: ‘void* supplierGenerator(void*)’ defined but not used [-Wunused-functio]
+ supplierGenerator(void* arg)
+ ^~~~~~~~~~~~~~~~~
+g++ -pipe -MD -I. -Wall -g -c  TaskQueue.cpp -o build/TaskQueue.o
+g++ -pipe -MD -I. -Wall -g -c  EStore.cpp -o build/EStore.o
+g++ -pipe -MD -I. -Wall -g -c  RequestGenerator.cpp -o build/RequestGenerator.o
+g++ -pipe -MD -I. -Wall -g -c  RequestHandlers.cpp -o build/RequestHandlers.o
+g++ -pipe -MD -I. -Wall -g -c  sthread.cpp -o build/sthread.o
+g++ -pipe -o build/estoresim build/estoresim.o build/TaskQueue.o build/EStore.o build/RequestGenerator.o build/RequestHandlers.o build/sthread.o -lpthread -lrt</code></pre>
+<h2 id="a-quick-introduction-to-c">A Quick Introduction to C++</h2>
+<p>A very helpful way to think of shared state is as shared <em>objects</em>. We're therefore going to use C++, C's object-oriented descendant, for this project.</p>
+<p>If you haven't used C++ before, don't worry. For the subset of C++ relevant to this project, the learning curve will be gentle (especially assuming you already know Java). Furthermore, we will provide template code to which you will add the details; this should largely insulate you from having to learn much C++ syntax.</p>
+<p>Read <a href="../ref/c++.pdf">A Quick Introduction to C++</a>, and you should be good to go. Note that this document was written over a decade ago, so a few of the comments on the state of standards and tools are a bit out of date (for example, the document warns against using C++ templates because debuggers didn't understand them well back then; this warning is much less applicable today.) Nonetheless, it provides a good, quick overview of the key ideas to use (and some issues/pitfalls to avoid.)</p>
+<div class="highlight">
+<p><span class="header">C++ References.</span> See <a href="../reference.html">our references page</a> for some tutorials and futher references on C++.</p>
+</div>
+<h2 id="working-with-threads">Working with Threads</h2>
+<p>As noted earlier, you will need to read and follow <a href="programming-with-threads.pdf">Coding Standards for Programming with Threads</a>, by Mike Dahlin. Also note that we covered monitors in class, and assigned <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/threads-monitors.pdf">this chapter from OSTEP</a>.</p>
+<p>To simplify your task, we supply a simple thread package (written by Mike Dahlin) on top of the standard POSIX thread library (which is known as pthreads). The idea is to shield you from irrelevant detail. This way, you use the standard package but you also focus on the project at hand. However, you are not required to use the wrapper; you may instead use pthreads if you so choose. The code for the simple thread package (which we will refer to hereafter as sthreads) we provide is in <code>sthread.cpp</code> and <code>sthread.h</code>.</p>
+<p>The package provides threads (<code>sthread_t</code>s), mutex locks (<code>smutex_t</code>s), and condition variables (<code>scond_t</code>s) as well as some other utility functions that you may need. We suggest that you read over these functions to see how they are used. It may be helpful to write a couple of example programs using sthreads before starting this project. For more information, see the man pages for the pthreads library functions used in the <code>sthread.cpp</code> code.</p>
+<p>You should keep the following in mind as you code these labs:</p>
+<ul>
+<li>If you find that the problem is underspecified, please make reasonable assumptions and document them in the documentation file.</li>
+<li>You are required to adhere to the multi-threaded coding standards/rules discussed in class and above. Code that fails to conform to these rules is incorrect and will receive little credit when this lab is graded.</li>
+<li>Code will be evaluated based on its correctness, clarity, and elegance. Strive for simplicity. Think before you code.</li>
+<li>One of the most common mistakes we see on projects year after year is using <code>sthread_sleep</code> when you should be using <code>scond_wait</code>. The standards document above discusses this issue in more detail. This year, we don't want anyone to make this mistake, so be warned: seeing an <code>sthread_sleep</code> in your code in the wrong place is an easy way for a TA to conclude that you don't know how to write multithreaded programs, and the TAs will be instructed to deduct a large number of points from any project that uses <code>sleep</code> when it should <code>wait</code> on a condition variable. If you find yourself writing <code>sleep</code>, treat that as a red flag that you might be making a mistake. If you don't know when to use one and when to use the other, come to office hours, but don't start writing code!</li>
+<li>Before writing any code, think of different types of simple generic data structures (e.g., bounded buffer, readers/writers, ...). These particular data structures may (or may not) be directly useful for this project, but this flavor of data structure will be extremely useful.</li>
+</ul>
+<h2 id="part-a-navigating-code-grep">Part A: Navigating code: <code>grep</code></h2>
+<p>Before we get into the meat of the lab, we will cover a useful tool: <code>grep</code>.</p>
+<p><code>grep</code> can be used to search for a text string or regular expression in files. It is commonly called with the following pattern:</p>
+<pre><code>$ grep [flags] [expression-to-search-for] [files-to-search]</code></pre>
+<p>To see a concrete example, run the following command:</p>
+<pre><code>$ grep &quot;void&quot; sthread.h</code></pre>
+<p><code>grep</code> scans the file <code>sthread.h</code> and prints out each line that contains the term <code>void</code>. You should get the following output:</p>
+<pre><code>void smutex_init(smutex_t *mutex);
+void smutex_destroy(smutex_t *mutex);
+void smutex_lock(smutex_t *mutex);
+void smutex_unlock(smutex_t *mutex);
+...</code></pre>
+<p>Multiple files can be passed into the command:</p>
+<pre><code>$ grep &quot;void&quot; sthread.h sthread.cpp
+sthread.h:void smutex_init(smutex_t *mutex);
+sthread.h:void smutex_destroy(smutex_t *mutex);
+sthread.h:void smutex_lock(smutex_t *mutex);
+sthread.h:void smutex_unlock(smutex_t *mutex);
+sthread.h:void scond_init(scond_t *cond);
+sthread.h:void scond_destroy(scond_t *cond);
+sthread.h:void scond_signal(scond_t *cond, smutex_t *mutex);
+sthread.h:void scond_broadcast(scond_t *cond, smutex_t *mutex);
+sthread.h:void scond_wait(scond_t *cond, smutex_t *mutex);
+sthread.h:void sthread_create(sthread_t *thrd,
+sthread.h:                  void *(start_routine(void*)), 
+sthread.h:                  void *argToStartRoutine);
+sthread.h:void sthread_exit(void);
+sthread.h:void sthread_join(sthread_t thrd);
+sthread.h:void sthread_sleep(unsigned int seconds, unsigned int nanoseconds);
+sthread.h:long sutil_random(void);
+sthread.cpp:void smutex_init(smutex_t *mutex)
+sthread.cpp:void smutex_destroy(smutex_t *mutex)
+sthread.cpp:void smutex_lock(smutex_t *mutex)
+sthread.cpp:void smutex_unlock(smutex_t *mutex)
+sthread.cpp:void scond_init(scond_t *cond)
+sthread.cpp:void scond_destroy(scond_t *cond)
+sthread.cpp:void scond_signal(scond_t *cond, smutex_t *mutex __attribute__((unused)))
+sthread.cpp:void scond_broadcast(scond_t *cond, smutex_t *mutex __attribute__((unused)))
+sthread.cpp:void scond_wait(scond_t *cond, smutex_t *mutex)
+sthread.cpp:void sthread_create(sthread_t *thread,
+sthread.cpp:                void (*start_routine(void*)), 
+sthread.cpp:                void *argToStartRoutine)
+sthread.cpp:void sthread_exit(void)
+sthread.cpp:void sthread_join(sthread_t thrd)
+sthread.cpp:void sthread_sleep(unsigned int seconds, unsigned int nanoseconds)
+
+$ grep &quot;void&quot; sthread.*
+# (Same output!)</code></pre>
+<p>You can also search all files in a directory recursively with the <code>-r</code> flag:</p>
+<pre><code>$ grep -r &quot;void&quot; .</code></pre>
+<p>(This command searches all files in the current directory; it should return hundreds of lines.)</p>
+<div class="required">
+<p><span class="header">Exercise G1.</span> Run the following command:</p>
+<pre><code>$ grep -r &quot;smutex&quot; .</code></pre>
+<p>Answer the following questions</p>
+<ul>
+<li>Informally, what does the command above do?</li>
+<li>Paste the first few lines of the output into answers.txt</li>
+</ul>
+</div>
+<div class="required">
+<p><span class="header">Exercise G2.</span> Answer the following questions in answers.txt:</p>
+<ul>
+<li>What command can you use to search the file <code>RequestGenerator.cpp</code> for <code>Task</code> objects?</li>
+<li>What command can you use to search all header files for the keyword <code>return</code>?</li>
+</ul>
+</div>
+<p>Grep can also match <em>regular expressions</em>. We will give a simple demo here. To learn more about grep and regular expressions, read the man pages!!</p>
+<div class="required">
+<p><span class="header">Exercise G3.</span> Run the following command:</p>
+<pre><code>$ grep -r &quot;smutex.*(.*);&quot; .</code></pre>
+<p>What types of lines are returned by the program? What information does this command give you about your code? Place your answer in answers.txt.</p>
+</div>
+<h2 id="part-b-task-queue-and-coarse-grained-store-synchronization">Part B: Task Queue and Coarse-Grained Store Synchronization</h2>
+<p>For our model, we will simulate a fixed number of customers and suppliers. For each customer and each supplier, there will be a unique thread representing that customer or supplier. We will often refer to these threads throughout this document as <em>worker threads</em>. These worker threads will get jobs to work on from a <em>task queue</em>, which you will implement. There will be one queue for all customer threads and one queue for all supplier threads. This task queue must allow for multiple worker threads to simultaneously attempt to add or remove jobs while still maintaining the integrity of the queue's internal data structures by using locks (i.e., your task queue must be <em>thread-safe</em>).</p>
+<p>It is a common pattern in multi-threaded programming to have a single (or small number of) task queue(s) for a large number of threads. A thread-safe task queue makes the job of allocating work to threads (and having threads allocate work to other threads, should the case arise) easy to do and (relatively) easy to reason about.</p>
+<div class="required">
+<p><span class="header">Exercise 1.</span> Look through the queue interface in <code>TaskQueue.h</code> and the documentation for its methods in <code>TaskQueue.cpp</code>. Fill out the rest of the members in <code>class TaskQueue</code> in <code>TaskQueue.h</code> to finish the definition of your task queue class, then implement the rest of the queue methods in <code>TaskQueue.cpp</code>. You are welcome to use any standard C++ container to help build the functionality of your queue (such as a <code>std::queue</code> or <code>std::deque</code>), or you can create your own data structures (like a linked list) and add any needed helper structures to do the same.</p>
+<p>A task in the task queue is represented by a <code>struct Task</code> (also found in <code>TaskQueue.h</code>), which consists of a pointer to a function and an argument to be passed to that function. When a worker thread removes a task from the task queue, it should call the function given in the <code>struct Task</code> with the argument given in the <code>Task</code>.</p>
+<p>Run make to make sure your queue code compiles. For now, there's no executable to run.</p>
+</div>
+<p>A task queue is little good to worker threads if there is no work available to be put on it. We have provided some code to generate work requests to be put on your task queues in <code>RequestGenerator.h</code> and <code>RequestGenerator.cpp</code>. Become familiar with this code. Specifically, there are two subclasses of the main <code>class RequestGenerator</code> that you should know the purpose of: <code>class CustomerRequestGenerator</code> and <code>class SupplierRequestGenerator</code>. The former <code>CustomerRequestGenerator</code>, as its name would suggest, generates requests for customer threads to perform (such as buying items). The latter <code>SupplierRequestGenerator</code> generates requests for supplier threads to perform (such as adding or removing items from inventory, or putting items on sale). You will use these generator classes to implement task generator threads, which will produce work for customer and supplier threads.</p>
+<p>Before you start implementing any thread functions, however, you should actually have some threads running. In the main source file for our simulator, <code>estoresim.cpp</code>, is a function called <code>startSimulation</code>. This function kicks off all threads in the simulator (generators, customers, and suppliers) and then, after starting all threads, waits for them to finish. When all threads have finished working, the simulation is complete.</p>
+<div class="required">
+<p><span class="header">Exercise 2.</span> Read the documentation for, and then implement, the <code>startSimulation</code> function in <code>estoresim.cpp</code>. Use <code>sthread_create</code> to create threads. The worker thread functions <code>supplierGenerator</code>, <code>supplier</code>, <code>customerGenerator</code> and <code>customer</code> all reside in <code>estoresim.cpp</code>. Use the provided <code>class Simulation</code> to keep track of task queues and the number of customers and suppliers. When you have finished writing your code, run make run-sim to run the simulator. You may want to have the threads produce some output to make sure that you are starting them correctly.</p>
+<p>Don't worry about the meaning of the <code>fineMode</code> variable in <code>Simulation</code> for now, just make sure it is set to the value passed in the parameter <code>useFineMode</code>.</p>
+<p>You may also find it useful in this exercise, and in others throughout this lab, to call <code>printf</code> in some choice places (where worker threads start, for instance). The code we provide you doesn't print anything to the terminal, and so when you run the simulator with make run-sim, you won't see any output unless you put the <code>printf</code>s in yourself.</p>
+</div>
+<p>At the moment, all of the threads you have created start and then immediately stop, as none of their associated functions are implemented (they just return when called). However, since you have actual threads running, you can proceed to implement the generator, customer, and supplier thread functions. If you put <code>printf</code>s in these functions as suggested, you should see all the threads print to the terminal.</p>
+<div class="required">
+<p><span class="header">Exercise 3.</span> Implement the <code>customer</code>, <code>supplier</code>, <code>supplierGenerator</code>, and <code>customerGenerator</code> functions in <code>estoresim.cpp</code>. Read the code referred to above (e.g. <code>RequestGenerator.cpp</code>) and the comments for these functions to get an idea of what they should be doing. The generator functions should look similar to each other, as should the supplier and customer functions to each other. Produce some output from these threads to make sure they're running and that jobs are being pushed between them properly.</p>
+<p>For the <code>supplierGenerator</code> and <code>customerGenerator</code> functions, you will also have to implement the <code>enqueueStops</code> method in <code>RequestGenerator.cpp</code>.</p>
+<p>Run make run-sim to run the simulator. You should see the output of your worker threads. You can stop the simulator by pressing Control-C.</p>
+</div>
+<p>Now you have many customers and suppliers working on jobs generated by the generator threads. But there is no inventory for items in the store, nor are any of the work functions produced by the request generators implemented. So, for the moment, our simulator spawns many workers in parallel to do very little. For the workers to have anything to work on, there should be an inventory of items to purchase from and add to. To this end, we have provided the skeleton of this inventory for you as <code>class EStore</code>, in the files <code>EStore.h</code> and <code>EStore.cpp</code>.</p>
+<div class="required">
+<p><span class="header">Exercise 4.</span> Design and implement the <code>EStore</code> class, filling in all the method skeletons we provide and adding any new methods you may find necessary. Read through all the provided comments in the files related to the <code>EStore</code> class (but don't worry about the <code>buyManyItems</code> method for now). The <code>EStore</code> will have to keep track of many <code>Item</code>s and ensure that all modifications to <code>Item</code>s in the <code>EStore</code> are synchronized.</p>
+<p>You should implement the <code>EStore</code> as a monitor; that is, there should be a single lock on the entire store, which is acquired upon entering any of the store's methods and released upon exit.</p>
+<p>As a reminder, the <code>buyItem</code> method in <code>EStore</code> should <em>wait</em> for an item to become available or on discount if necessary. So, if a customer comes in looking to buy an item outside of the given budget, the customer should wait until the item is being sold at a sufficiently high discount and then buy, instead of just immediately returning.</p>
+<p>Run make run-sim to make sure your code compiles and doesn't have any segfault-inducing bugs in the constructor for <code>class EStore</code>. For the moment, no threads are actually interacting with the <code>EStore</code>, so if you put any <code>printf</code>s in its methods, you won't see them output anything just yet.</p>
+</div>
+<p>There is only one piece remaining to make the simulator work now: the handlers for the jobs created by the request generators and pushed to the worker threads. These jobs consist of adding and removing items from the <code>EStore</code> inventory or setting discounts on items (for suppliers) and of purchasing items (for customers). We've provided skeletons for these handlers in <code>RequestHandlers.cpp</code>. Before you implement these handlers, you may find it helpful to read through all the different kinds of requests that exist in <code>Request.h</code>.</p>
+<div class="required">
+<p><span class="header">Exercise 5.</span> Go through and implement each handler in <code>RequestHandlers.cpp</code> one-by-one. Print a message at the beginning of each handler which contains the name of the handler and the fields of the request struct passed to it (you don't need to print the value of the <code>store</code> pointer). This will produce a trace of the work done by your threads as they process jobs.</p>
+<p>Your handler functions should largely make use of the methods you implemented previously in <code>EStore</code>.</p>
+<p>After implementing all the handlers (including <code>stop_handler</code>), your simulator may not terminate on its own. This will happen in the case where a customer is blocked on buying an item, but the item never gets discounted enough for the customer to buy, which will happen sometimes and should be expected. In this case, you will still need to kill the simulator with Control-C.</p>
+<p>Run make run-sim after you implement each handler and make sure that requests are being dispatched to your new handlers.</p>
+</div>
+<p>Here's some example output from the staff solution to part B of the lab to give you an idea of what running your simulator should look like. You don't have to worry about matching our output format exactly.</p>
+<pre><code>Handling AddItemReq: item_id - 77, quantity - 94, price - $6370.15, discount - 0.00
+Handling BuyItemReq: item_id - 83, budget - $14308.86
+Handling BuyItemReq: item_id - 35, budget - $33853.86
+Handling AddItemReq: item_id - 92, quantity - 22, price - $5167.49, discount - 0.00
+Handling BuyItemReq: item_id - 62, budget - $9900.27
+Handling AddItemReq: item_id - 90, quantity - 64, price - $5201.59, discount - 0.00
+Handling BuyItemReq: item_id - 26, budget - $6805.40
+Handling AddItemReq: item_id - 26, quantity - 37, price - $892.72, discount - 0.00
+...
+Handling ChangeItemPriceReq: item_id - 96, new_price - $7007.23
+Handling BuyItemReq: item_id - 46, budget - $19934.51
+Handling ShippingCostReq: new shipping cost - $29.21
+Handling BuyItemReq: item_id - 79, budget - $30974.88
+Handling AddItemReq: item_id - 64, quantity - 42, price - $8883.28, discount - 0.00
+...
+Handling StopHandlerReq: Quitting.
+Handling StopHandlerReq: Quitting.
+Handling StopHandlerReq: Quitting.</code></pre>
+<p>You should now have a working store simulator. Run make run-sim a few times and watch the output of your workers as they process jobs. If you notice anything suspicious in the output, go back and check to make sure you did your synchronization correctly and that you are following the multi-threaded coding guidelines.</p>
+<h3 id="checkpoint">Checkpoint</h3>
+<p>At this point, commit and push your code, if you have not done so already.</p>
+<pre><code>$ git status  # see what files you changed
+$ git diff    # examine your changes
+$ make clean  # remove generated code
+$ git commit -am &quot;My partial solutions to lab3&quot;
+$ git push</code></pre>
+<h2 id="part-c-fine-grained-store-synchronization">Part C: Fine-Grained Store Synchronization</h2>
+<p>In part B, you implemented a store simulator using <em>coarse-grained</em> synchronization: there was one lock on the entire <code>EStore</code> that kept concurrent accesses from stepping on each other, which effectively serialized execution of the program (as no two threads could modify the inventory in <code>EStore</code> at the same time). However, you might have noticed that you don't necessarily need to lock the entire inventory if two threads are trying to modify two <em>different</em> items in the inventory. Thus, in part C, we will explore an approach that exposes more parallelism, by using <em>fine-grained</em> locking. Instead of using one large lock on the entire <code>EStore</code>, you will use locks over smaller units of code. In this way, multiple threads that aren't touching the same data can operate on the inventory concurrently.</p>
+<p>Keep in mind throughout the next exercises that you should be able to run the simulator using your old coarse-grained locking approach by running make run-sim and using your yet-to-be-implemented fine-grained locking approach by running make run-sim-fine. The latter command, as might be expected, runs the simulator in "fine-grained mode" (this is related to the mysterious <code>fineMode</code> variable you saw before, which is set to <code>false</code> with make run-sim, but set to <code>true</code> with make run-sim-fine). You may want to abstract some of your locking with methods whose function varies depending on the value of <code>fineMode</code>. To reiterate, <em>your simulator must use your coarse-grained locking approach from part B when we run make run-sim and use your new fine-grained locking approach to be done in part C when we run make run-sim-fine</em>!</p>
+<div class="required">
+<p><span class="header">Exercise 6.</span> Change your <code>EStore</code> implementation to allow multiple threads to access different items at the same time. If two threads try to access the same item at the same time, then only one should be allowed to modify the item at a time.</p>
+<p>Don't worry about modifying the implementation of <code>buyItem</code>. In fine-grained mode, <code>buyItem</code> is not called. You will implement the fine-grained mode version of <code>buyItem</code>, called <code>buyManyItems</code>, in the next exercise.</p>
+<p>Run make run-sim-fine to make sure your code still runs. Since you are now running in fine-grained mode, <code>BuyItem</code> requests are not being generated; instead, <code>BuyManyItems</code> requests are generated. This function is still unimplemented, so only suppliers will be making any modifications to the state of the <code>EStore</code> at the moment.</p>
+</div>
+<p>To flex the new fine-grained locking features of the simulator, you must implement the handler and <code>EStore</code> functionality for the <code>BuyManyItems</code> request. This request requires that many items be looked at (with synchronization!) and, if the right conditions hold, modified (i.e. purchased).</p>
+<div class="required">
+<p><span class="header">Exercise 7.</span> Implement the <code>EStore</code> method <code>buyManyItems</code> and its corresponding handler in <code>RequestHandlers.cpp</code>. Make sure that, as with previous request handlers, you print out the name of the request and the fields of the request struct passed to the handler at the beginning of the <code>buyManyItems</code> handler.</p>
+<p>Run make run-sim-fine. You should now see <code>buyManyItems</code> requests being handled by threads. You should also make sure that your old code still functions correctly with make run-sim.</p>
+</div>
+<p>Here's some sample output from the staff solution to part C. As before, your output doesn't have to look exactly like ours, but this should give you an idea of what we'd like to see when we run your simulator.</p>
+<pre><code>Handling AddItemReq: item_id - 62, quantity - 91, price - $4901.27, discount - 0.00
+Handling BuyManyItemsReq: item_ids - 15 35 49 77 86 92 93 
+Handling BuyManyItemsReq: item_ids - 26 40 63 
+Handling AddItemReq: item_id - 36, quantity - 69, price - $53.11, discount - 0.00
+...
+Handling BuyManyItemsReq: item_ids - 21 29 35 37 58 74 93 95 
+Handling AddItemReq: item_id - 43, quantity - 30, price - $3360.28, discount - 0.00
+Handling BuyManyItemsReq: item_ids - 4 11 43 63 76 
+Handling BuyManyItemsReq: item_ids - 18 
+...
+Handling StopHandlerReq: Quitting.
+Handling StopHandlerReq: Quitting.
+Handling StopHandlerReq: Quitting.</code></pre>
+<h2 id="extracredit">Extra Credit</h2>
+<p>Do these problems on a new branch called lab3-extended (i.e., your commits for these exercises should go on this new branch). The main branch should include your code only up until Exercise 7; we will grade under this assumption. To create the new branch and work inside that branch:</p>
+<pre><code>$ git checkout -b lab3-extended</code></pre>
+<p>To go back to the original branch (which you should do before submitting):</p>
+<pre><code>$ git checkout main</code></pre>
+<p>When submitting, you must push both branches:</p>
+<pre><code>$ git status
+  # Make sure you are on main to avoid future pain!
+
+$ git push origin main
+$ git push origin lab3-extended</code></pre>
+<div class="honors">
+<p><span class="header">Exercise 8.</span> Implement a version of the <code>EStore::buyManyItems</code> method that will wait until the order can be fulfilled instead of giving up. The implementation should not wake up threads unnecessarily. For instance, if an item decreases in price, only threads that are waiting to buy an order that includes that item should be signaled (though all such threads should be signaled).</p>
+</div>
+<div class="honors">
+<p><span class="header">Exercise 9.</span> Ensure that the shipping cost and store discount do not change while processing an order in <code>EStore::buyManyItems</code>.</p>
+</div>
+<h3 id="submission">Submission</h3>
+<p>Handing in consists of three steps:</p>
+<ol type="1">
+<li><p><strong>Executing this checklist</strong>:</p>
+<ul>
+<li>Make sure your code builds, with <strong>no compiler warnings</strong>.</li>
+<li>Make sure you’ve used <code>git add</code> to add any files that you’ve created.</li>
+<li>Fill out the top of the <code>answers.txt</code> file, including your name and NYU Id</li>
+<li>Make sure you’ve answered every question in <code>answers.txt</code></li>
+<li>Make sure you have answered all code exercises in the files, <strong>and that your code is consistent with the expectations described in the <a href="#introduction">introduction</a></strong>.</li>
+<li>Make sure that, if you did the extra credit, you are back on the <code>main</code> branch (use <code>git branch</code> or <code>git status</code> to make sure).</li>
+<li>Create a file called <code>slack.txt</code> noting how many slack days you have used for this assignment. (This is to help us agree on the number that you have used.) Include this file even if you didn’t use any slack days.</li>
+</ul></li>
+<li><p><strong>Push your code to GitHub, so we have it</strong>:</p>
+<pre><code>$ cd ~/cs202/lab3   
+$ git commit -am &quot;hand in lab3&quot;
+$ git push origin 
+
+Counting objects: ...
+....
+To  git@github.com:nyu-cs202/labs-21fa-&lt;YourGithubUsername&gt;.git
+  7337116..ceed758  main -&gt; main</code></pre>
+<p>(See the extra credit section for additional submission instructions.)</p></li>
+<li><p><strong>Actually submit, by timestamping and identifying your pushed code</strong>:</p>
+<ul>
+<li>Decide which git commit you want us to grade, and copy its id (you will paste it in the next sub-step). A <a href="http://cs61.seas.harvard.edu/wiki/2014/Git#Repositories">commit id is a 40-character hexadecimal string</a>. Usually the commit id that you want will be the one that you created last. The easiest way to obtain the commit id for the last commit is by running the command <code>git log -1 --format=oneline</code>. This prints both the commit id and the initial line of the commit message. If you want to submit a previous commit, there are multiple ways to get the commit id for an earlier commit. One way is to use the tool <code>gitk</code>. Another is <code>git log -p</code>, as explained <a href="http://cs61.seas.harvard.edu/wiki/2014/Git#Logging">here</a>, or <code>git show</code>.</li>
+<li>Now go to NYU Brightspace; there will be an entry for this lab. Paste <em>only</em> the commit id that you just copied.</li>
+<li>You can submit as many times as you want; we will grade the last commit id submitted to Brightspace.</li>
+</ul></li>
+</ol>
+<p><strong>NOTE:</strong> <em>Ground truth is what and when you submitted to Brightspace. Thus, a non-existent commit id in Brightspace means that you have not submitted the lab, <strong>regardless</strong> of what you have pushed to GitHub. And, the time of your submission for the purposes of tracking lateness is the time when you upload the id to Brightspace, not the time when you executed <code>git commit</code>.</em></p>
+<p><strong>This completes the lab.</strong></p>
+<h4 id="acknowledgements">Acknowledgements</h4>
+<p>Parts of the documentation for this lab, as well as the sthreads library, were taken from a lab about a network scheduler by Mike Dahlin. The lab itself was written by Victor Vu and Isami Romanowski, with contributions from Sebastian Angel, Parth Upadhyay, and Navid Yaghmazadeh.</p>
+</body>
+</html>

@@ -1,0 +1,42 @@
+HW7 Solutions
+CS202, fall 2021
+
+1.
+- The kernel's code and data has physical address range 0x40000--0x58000
+- The physical address of the kernel's stack is 0x7f000.
+- The virtual addresses are the same as the physical addresses, because
+for this range of the virtual address space, the kernel's page table
+uses the identity mapping.
+- PAGENUMBER(MEMSIZE_PHYSICAL)
+
+2a. 7 pages, computed as 3 data pages plus 4 pages of metadata.
+
+2b. 2^9 + 6 (=518): computed as 5 pages of metadata (one L1 page table, one L2
+page table, one L3 page table, one L4 page table with 2^9 entries full,
+and one more L4 page table) + 2^9 + 1 data pages.
+
+2c. 2^18 + 2^9 + 6: Each L3 page table points indirectly to 2^18
+last-level page entries (each L3 page table has 2^9 entries, each of
+which points to an L4 page table with 2^9 entries). Thus, the question
+requires two L3 page tables. The first L3 page table points to 2^9 L4
+page tables; the second points to one L4 page table, for a total of 2^9
++ 1 L4 page tables. Thus, the total is: 1+1+2+2^9+1 for the page
+structures (aka metadata) plus 2^18 + 1 for the pages themselves.
+
+3.1. Sometimes. If the page is not present, then a TLB miss and a
+    page fault will happen at the same time. If the page is not writable
+    but it is in the TLB, then a store to memory can cause a page fault but
+    no TLB miss. (And if the page is present and the permissions are
+    consistent with the requested operation, yet the VA,PA mapping is
+    not in the TLB, then there will be a TLB miss but no page fault.)
+
+3.2. Sometimes. If the page is not present, or the permission check
+fails, then there will be a page fault on top of the TLB miss.
+
+3.3. Sometimes. Similar answer to above. 
+
+3.4. Always. PTE_P | PTE_U means user readable.
+
+3.5. Sometimes. If PTE_W is set, then it is permissible, otherwise not.
+
+

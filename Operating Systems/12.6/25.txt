@@ -1,0 +1,209 @@
+Class 25
+CS 202
+6 December 2021
+
+On the board
+------------
+
+1. Last time 
+2. Trusting trust
+    A. Background
+    B. Adding a new feature to a language
+    C. Context
+    D. Goal: bug login
+    E. Self-reproducing programs
+    F. Result
+    G. Moral, discussion
+3. Further thoughts on trust
+
+---------------------------------------------------------------------------
+
+1. Last time
+    
+    Unix protection model
+
+    Attacks and problems
+
+2. Trusting trust
+
+    --first of all, the word "trust" is a bad thing in computer security
+    (this is an unfortunate linguistic fact). to "trust" something means
+    to "assume it correct", which in turn means "to be in trouble if the
+    assumption is false". so "removing trust" is a good thing. so is
+    making things "trust*worthy*" (that is, worthy of being assumed
+    correct), but it is in general hard to make any given component
+    truly trustworthy.
+
+	--you'll notice that the "trusted computing" initiatives from
+	various powerful interests subvert this word. who exactly is
+	being trusted and who is exactly isn't being trusted? "trusted
+	computing" sounds great linguistically, but "trusted computing
+	platforms" do not actually mean what they sound like
+
+    A. Background on this paper by Thompson:
+
+	Thompson gave this lecture/paper after winning the Turing Award,
+	which is considered by many to be the Nobel prize of Computer
+	Science. The paper is stunning but takes patience and a few
+	readings to understand. We're going to reproduce most of what
+	Thompson did but will follow the ideas in an order different
+	from the one in the paper. 
+
+    B. Adding a feature to a language
+
+	What if we wanted to add a feature to Java? Say that the Java
+	compiler is written in C, in a file called java.c. So we modify
+	java.c, and rerun the C compiler on java.c, producing a new Java
+	compiler that understands a new feature of Java
+
+	Now what if we wanted to add a feature to the C programming
+	language? Well, for all practical purposes, the C compiler is
+	also written in C, and let's assume that the entire C compiler
+	is implemented in a file called "cc.c". To add a feature to the
+	C programming language, we need to modify cc.c, and run the old
+	C compiler on the new file. At this point, we have a new C
+	compiler that understands a new feature of the language.
+
+    C. Context
+
+	As sometimes happens today, earlier versions of Unix were distributed with
+	a full set of binaries and source for those binaries. This source included
+	source for the compiler, the OS, the program 'login', etc.
+
+	Because the system was quite small, it was common for people to make a
+	change in one source file and then to recompile all of their programs. So
+	program recompilation happened a lot.
+
+    D. In this environment, how could someone as clever as Thompson add
+    a bug to the login program without leaving a trace in the source
+    files?
+
+	**GOAL: have no source files hint at the bug, and meanwhile, the
+	bug will persist across all recompilations
+
+	[DRAW PICTURES]
+
+    E. How can we write a self-reproducing program in pseudocode?
+
+	X = "Output 'X'. Output '='. Output quote mark. Output X. Output quote mark. Output X."
+	Output 'X'. Output '='. Output quote mark. Output X. Output quote mark. Output X.
+
+	Run that, and you get itself.
+
+        Here's a version that includes other instructions:
+        
+        X = "[execute whatever.] Output 'X'. Output '='. Output quote mark. Output X. Output quote mark. Output X."
+	[execute whatever.] Output 'X'. Output '='. Output quote mark. Output X. Output quote mark. Output X.
+
+	Here is a simpler version:
+
+	    Print this followed by its quotation: "Print this followed
+	    by its quotation".
+
+	    [BTW, the GNU Public License works like this. It's a
+	    self-replicating license! the license specifies that to make
+	    a copy of the code, you have to release the source **with
+	    the license itself included**. the license talks about
+	    itself, just as a self-replicating program must.]
+
+	Here's a self-replicating program in Scheme:
+
+	    ((lambda (x) `(,x ',x))
+	    '(lambda (x) `(,x ',x)))
+
+
+	Self-replicating programs in other languages: 
+		https://rosettacode.org/wiki/Quine
+
+    F. Result:
+
+	some well-known string in the C compiler source now compiles to
+	binary that does the following:
+
+	    <<
+	    (1) if compiling "login", insert a bug
+	    
+	    (2) if you see the well-known string in the C compiler
+	    itself, replace it with everything between << >>
+	    >>
+
+    G. What's the moral of the story?
+
+    What if you disassembled the binaries? Would the attack be visible
+    there? (Depends on whether the disassembler was also bugged.)
+
+    H. Postscript, 1
+
+        Russ Cox reports: "The original hack, by the way, did not work
+        perfectly.  It made the compiler just a little bigger each time
+        it compiled itself.  Eventually someone discovered this and
+        tried to figure out why, and they compiled via an assembly
+        listing (cc -S x.c; as x.s), and the hack disappeared.  (It was
+        not enabled when printing an assembly listing with -S.)"  
+
+        [follow-up: Ken Thompson reports: "it was a '\0' added to a
+        string every time."]
+
+    H. Postscript, 2
+
+        While Ken Thompson's version of this bug was never widely distributed,
+        the same attack was identified in the wild in 2009.  Win32.Induc.A, a
+        worm identified in 2009, attacked the Delphi compiler in order to inject
+        code into compiled applications. 
+        [https://www.veracode.com/blog/2009/08/trust-your-own-code-trust-your-own-compiler]
+
+        Here's a recent one: 
+            https://www.crowdstrike.com/blog/sunspot-malware-technical-analysis/
+
+        As Ken Thompson notes in the paper, he was not the first one to
+        come up with this attack. Karger and Schell had described a
+        similar concern when analyzing MULTICS security, and labelling 
+        attacks of this type a "compiler trap door." Their
+        original report on this can be found at:
+
+        https://csrc.nist.gov/csrc/media/publications/conference-paper/1998/10/08/proceedings-of-the-21st-nissc-1998/documents/early-cs-papers/karg74.pdf
+        (see pp51-52)
+
+        They revisited this report 30 years later, and wrote up a new paper
+        Thirty Years Later: Lessons from the Multics Security Evaluation,
+        that can be found at https://hack.org/mc/texts/classic-multics.pdf.
+        (see section 3.2.4)
+
+        Compiler trap doors are only one of a large number of security vulnerabilities
+        they identified, several of which -- including "installation and booting trap doors"
+        (now known as root kits), distribution trap doors (and others)
+        -- continue to be concerns today.
+
+
+3. Further thoughts on trust
+
+    Question: what do you have to trust to be sure that no one is aware
+    of, nor can ever be aware of, your IM conversation with someone
+    else?
+
+        no eavesdropping
+
+        no dumping of data to be analyzed later
+
+        IM binary isn't bugged
+
+    Question: what if the hardware itself is buggy? What do we do then?
+    (People are worried about this.)
+
+    Question: can you ensure privacy through encryption?
+
+	--answer: DEPENDS ON THE THREAT MODEL (and what you mean by
+	privacy).
+
+	--what if you know that two nations are talking?
+
+	--what if you know that Coca Cola is talking to bankruptcy
+	lawyers?
+
+	(sometimes, you don't need to know *what* information is being
+	relayed. sometimes, it's enough to know that two parties are
+	communicating.)
+
+    Why isn't gmail encrypted?
+
+

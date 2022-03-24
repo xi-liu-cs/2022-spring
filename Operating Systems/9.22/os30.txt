@@ -1,0 +1,90 @@
+1.
+a thread wishes to check whether a condition is true
+before continuing its execution
+parent thread might wish to check whether a
+child thread has completed before continuing
+join()
+
+how to indicate child thread done?
+how to wait for child?
+
+shared var = hugely inefficient
+
+
+2, 3
+instead,
+put the parent to sleep until the condition we are waiting for (e.g., the
+child is done executing) comes true
+
+condition variable:
+an explicit queue that threads can put themselves on when 
+some state of execution (condition) is not as desired
+
+A condition variable has two
+operations associated with it: wait() and signal()
+wait(): when a thread want to put itself to sleep
+signal(): when a thread has changed something in the
+program and wants to wake a sleeping thread
+
+wait() takes mutex as a parameter
+assumes this mutex is locked when wait() is called
+
+call thr exit() to wake the parent thread;
+grabs the lock, sets the state variable done,
+and signals the paretn thus waking it
+
+5
+But just before it calls wait to go to sleep,
+the parent is interrupted, 
+and the child runs
+
+child changes state variable done to 1
+
+
+6
+producer/consumer 
+or bounded-buffer problem
+
+producers generate data items and place them in a buffer
+consumers grab said items from the buffer 
+
+grep foo file.txt | wc -l
+grep writes lines from file.txt with string foo 
+unix shell redirects output to unix pipe
+other end of pipe is process wc
+
+grep process = producer
+wc process = consumer
+
+shared buffer: producer puts data
+a consumer takes data
+
+
+7
+put() assumes buffer is empty,
+and puts a value into the shared buffer, 
+and marks it full by setting count to 1
+
+get() sets teh buffer to empty
+(set count to 0)
+return the value
+
+conditions:
+1. only put data into the buffer when count is zero
+2. only get data from the buffer when count is one
+
+
+8
+when producer wants to fill the buffer
+it waits for it to be empty
+
+T = thread
+c = consumer
+p = producer
+T_{c1} , T_{c2} = two consumers 
+T_p = one producer
+
+
+12
+a consumer can never accidentally wake a consumer,
+and a producer can never accidentally wake a produce

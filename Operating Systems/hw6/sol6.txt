@@ -1,0 +1,53 @@
+HW6 Solutions
+CS202, fall 2021
+
+1. Answers can vary. One possible answer is that fairness (if we define
+it as equal processor shares, up to each processor's demand, over some
+window) requires some variant of round-robin scheduling: every processor
+has to get time. That means more context switches (and hence higher
+overhead and hence lower throughput) than if the processor worked on a
+job until completion.
+
+In resource allocation, fairness and efficiency are often at odds,
+because implementing fairness usually requires sharing, and sharing
+imposes costs.
+
+In life, fairness and efficiency can also be at odds, depending on your
+definitions of "fairness" and "efficiency," but we will leave that one
+to the philosophers and political scientists.
+
+2. 
+    8     2^8           256 - 1 = 255
+    16   2^16 = 64K     64K - 1
+    32   2^32 = 4G      4G - 1
+    48   2^48 = 256T    256T - 1
+    64   2^64 = 16E     16E - 1  (E: Exabyte)
+
+
+3. 
+	16   4KB   2^{16} / 2^{12} = 2^4 = 16
+	16   8KB   2^{16} / 2^{13} = 2^3 = 8
+	32   4KB   2^{20}=1M
+	32   8KB   2^{19}=512K
+        48   4KB   2^{36}=64G
+
+
+4. 
+	1KB   22    14    10
+	2KB   21    13    11
+	4KB   20    12    12
+	8KB   19    11    13
+
+
+5.1
+    Five. One for code loading. Two for data page 0x200000, and two for
+    data page 0x300000. Why does each data page generate two TLB misses?
+    When virtual address 0x200000 (for example) is referenced, there is
+    a TLB miss (because the page was not present in virtual memory and
+    so would not be in the TLB); then, when the page actually swaps into
+    memory and the instruction is retried, there is another TLB miss.
+    See section 21.5 in the book for more details. 
+
+5.2
+    Two, one for each movq instruction (data pages 0x200000 and
+    0x300000).

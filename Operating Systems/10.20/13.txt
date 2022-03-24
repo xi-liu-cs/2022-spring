@@ -1,0 +1,548 @@
+Class 13
+CS 202
+20 October 2021
+
+On the board
+------------
+
+1. Last time
+2. Page faults: intro and mechanics
+3. Page faults: uses
+4. Page faults: costs
+5. Page replacement policies
+
+---------------------------------------------------------------------------
+
+1. Last time
+    
+    - case study of x86-64: multilevel page tables
+
+    - hardware "walks" those page tables
+
+    - caches the result in the TLB
+
+2. Page faults: intro and mechanics
+
+    We've discussed these a bit. Let's go into a bit more detail...
+
+    Concept:
+    
+        a reference is illegal, either because it's not mapped in the
+        page tables or because there is a protection violation.
+
+        requires the OS to get involved
+
+        this mechanism turns out to be hugely powerful, as we will see.
+
+    Mechanics
+
+        --what happens on the x86?
+
+	    --processor constructs a trap frame and transfers execution to an
+	    interrupt or trap handler
+
+		    ss     [stack segment; ignore]
+		    rsp    [former value of stack pointer]
+		    rflags [former value of rflags]
+		    cs     [code segment; ignore]
+                    rip    [instruction that caused the trap]
+           %rsp --> [error code] 
+
+	    %rip now points to code to handle the trap
+	        [how did processor know what to load into %rip?]
+
+	    error code:
+
+	        [see handout]
+
+	        [ ................................ U/S | W/R | P]
+
+	        U/S: user mode fault / supervisor mode fault
+	        R/W: access was read / access was write
+	        P: not-present page / protection violation
+
+	    on a page fault, %cr2 holds the faulting virtual address
+
+        --intent: when page fault happens, the kernel sets up the
+        process's page entries properly, or kills the process
+
+3. Uses of page faults
+
+    --Best example: overcommitting physical memory (the classical use of
+    "virtual memory")
+
+	--your program thinks it has, say, 64 GB of memory, but your
+	hardware has only 16 GB of memory
+
+	--the way that this worked is that the disk was (is) used to
+	store memory pages
+
+	--advantage: address space looks huge
+
+	--disadvantage: accesses to "paged" memory (as disk pages that
+	live on the disk are known) are sllooooowwwww:
+
+	--Rough implementation:
+
+	    --on a page fault, the kernel reads in the faulting page
+
+	    --QUESTION: what is listed in the page structures? how does
+	    kernel know whether the address is invalid, in memory,
+	    paged, what?
+
+	    --kernel may need to send a page to disk (under what
+	    conditions? answer: two conditions must hold for kernel to
+	    HAVE to write to disk)
+
+		(1) kernel is out of memory
+
+		(2) the page that it selects to write out is dirty
+
+	--Computers have lots of memory, so less common to hear the
+	sound of swapping these days. You would need multiple large memory
+	consumers running on the same computer.
+
+
+    --Many other uses
+
+	--store memory pages across the network! (Distributed Shared
+	Memory)
+
+	    --basic idea was that on a page fault, the page fault
+	    handler went and retrieved the needed page from some
+	    other machine
+
+	--copy-on-write
+
+	    --when creating a copy of another process, don't copy
+	    its memory. just copy its page tables, mark the pages as
+	    read-only
+
+	    --QUESTION: do you need to mark the parent's pages
+	    as read-only as well? 
+
+	    --program semantics aren't violated when programs do
+	    reads
+
+	    --when a write happens, a page fault results. at that
+	    point, the kernel allocates a new page, copies the 
+	    memory over, and restarts the user program to do a write
+
+		--then, only do copies of memory when there is a
+		fault as a result of a write
+
+	    --this idea is all over the place; used in fork(), mmap(),
+	    etc.
+
+	--accounting
+
+	    --good way to sample what percentage of the memory pages
+	    are written to in any time slice: mark a fraction of
+	    them not present, see how often you get faults
+
+	--if you are interested in this, check out the paper
+	"Virtual Memory Primitives for User Programs", by Andrew W.
+	Appel and Kai Li, Proc. ASPLOS, 1991.
+
+        --high-level idea: by giving kernel (or even user-level
+        program) the opportunity to do interesting things on page
+        faults, you can build interesting functionality
+
+
+    --Paging in day-to-day use
+
+        --Demand paging: bring program code into memory "lazily"
+
+        --Growing the stack (contiguous in virtual space, probably not
+        in physical space)
+
+        --BSS page allocation (BSS segment contains the part of the
+        address space with global variables, statically initialized to
+        zero. OS can delay allocating and zeroing a page until the
+        program accesses a variable on the page.)
+
+        --Shared text 
+
+        --Shared libraries 
+
+        --Shared memory 
+
+----
+
+if you're panicking over work/performance:
+
+    - don't panic; there's plenty of time left
+
+    - do work on time management; some advice on this below
+
+    - start assignments on time
+
+    - keep up with the class/reading
+
+
+    some advice/thoughts:
+
+    --workload intended to be heavy (that's life), push you, and
+    potentially cause you to recalibrate what it means to be challenged.
+    BUT not intended to kill or destroy you.
+    
+        --> let's try to increase your speed and effectiveness.
+
+    --motivating anti-patterns (we will address others):
+    
+        --> "there are 5 places in my code where I don't know what the
+        right thing is. let me try all combinations to see what compiles
+        and passes the test scripts.": this takes exponential time.
+
+        --> "the compiler complains about my code. let me quickly change
+        it.": this does not cause you to internalize the right syntax.
+
+        --> "my code doesn't pass the test scripts. let me change it.":
+        this does not result in understanding, and often doesn't address
+        the core issue.
+
+
+        --advice, in response to common anti-patterns:
+
+            --"I work late at night and slow down a bit": Don't work
+            when you're exhausted! (Wake up the morning, stop working,
+            whatever.) Working in a fog does more harm than good.
+
+            --"I'm digging with a spoon because I don't have time to make
+            a shovel": take the time to make the shovel! (Read the
+            guides, internalize the tools, learn the syntax.)
+
+            --"My job is to answer the purple box in Exercise 1." No,
+            your job is to acquire the basics and figure out what's
+            going on. If you have done that, the exercises do not take
+            very long.
+
+----
+
+midterm logistics
+    - 75 minutes
+    - all material covered.
+    - closed book. will be allowed 1 sheet of notes, front and back
+    - proctoring details forthcoming
+
+----
+
+
+4. Page faults: costs
+
+    --What does paging from the disk cost?
+
+	--let's look at average memory access time (AMAT)
+
+	--AMAT = (1-p)*memory access time + p * page fault time,
+	where p is the prob. of a page fault.
+	
+	memory access time ~ 100ns 
+	disk access time   ~ 10 ms = 10^7 ns
+
+	--QUESTION: what does p need to be to ensure that paging hurts
+	performance by less than 10%?
+
+	1.1*t_M = (1-p)*t_M + p*t_D
+	p = .1*t_M / (t_D - t_M) ~ 10^1 ns / 10^7 ns = 10^{-6} 
+
+	so only one access out of 1,000,000 can be a page fault!!
+
+	--basically, page faults are super-expensive (good thing the
+	machine can do other things during a page fault)
+
+        Concept is much larger than OSes: need to pay attention to the
+	slow case if it's really slow and common enough to matter.
+
+
+5. Page replacement policies
+
+    --the fundamental problem/question:
+	
+	--some entity holds a cache of entries and gets a cache miss.
+	The entity now needs to decide which entry to throw away. How
+	does it decide?
+
+	--make sure you understand why page faults that result from
+	"page-not-present in memory" are a particular kind of cache miss
+
+	    --(the answer is that in the world of virtual memory, the
+	    pages resident in memory are basically a cache to the
+	    backing store on the disk; make sure you see why this claim,
+	    about virtual memory vis-a-vis the disk, is true.)
+
+    --the system needs to decide which entry to throw away, which calls
+    for a *replacement policy*.
+    
+    --let's cover some policies....
+ 
+    Specific policies
+
+        * FIFO: throw out oldest (results in every page spending
+	the same number of references in memory. not a good idea.  pages
+	are not accessed uniformly.)
+
+	* MIN (also known as OPT). throw away the entry that won't
+	be used for the longest time. this is optimal.
+	
+	    our textbook and other references assert its optimality, but
+	    they do not prove it. it's a good idea to get in the habit
+	    of convincing yourselves of (or disproving) assertions.
+	    Here's a proof, under the assumption that the cache is
+	    always full:
+
+	    Choose any other scheme. Call it ALT. Now let's sum the
+	    number of misses under ALT or OPT, and induct over the
+	    number of references. Four cases at any given reference:
+	    {OPT hits, ALT hits}, {OPT hits, ALT misses}, {OPT misses,
+	    ALT misses}, {OPT misses, ALT hits}. The only interesting
+	    case is the last one (in the other cases, OPT does as well
+	    or better than ALT, so OPT keeps pace with, or beats, the
+	    competition at every reference). Say that the last case
+	    happens at a reference, r. By the induction hypothesis, OPT
+	    was optimal right up until the *last* miss OPT experienced,
+	    at reference, say, r - a.  After that reference, there has
+	    been only one miss (the current one, at r). The alternative,
+	    ALT, couldn't have done better than OPT up until r-a (by the
+	    induction hypothesis). And since r-a, OPT has had only one
+	    miss. But ALT could not have had 0 misses between r-a and
+	    now because if it did, it means that OPT replaced the wrong
+	    entry at r-a (another way to say the same thing: OPT chose
+	    which page to evict so that a is maximal). Thus, OPT is no
+	    worse than ALT at r. In the remaining cases, OPT is as good
+	    or better than ALT in terms of contributing to the number of
+	    misses. So by induction, OPT is optimal.
+
+    --evaluating these algorithms
+	
+	input
+	--reference string: sequence of page accesses
+	--cache (e.g., physical memory) size 
+
+	output
+	--number of cache evictions (e.g., number of swaps)
+
+    --examples......
+
+	--time goes left to right. 
+	--cache hit = h
+
+        ------------------------------------
+
+	FIFO
+
+	phys_slot    A B C A B D A D B C B
+	S1           A     h   D   h   C 
+	S2             B     h   A 
+	S3               C           B   h
+
+		7 swaps, 4 hits
+
+        ------------------------------------
+
+	OPTIMAL
+
+	phys_slot    A B C A B D A D B C B
+	S1           A     h     h     C
+	S2             B     h       h   h
+	S3               C     D   h
+
+		5 swaps, 6 hits
+
+        ------------------------------------
+
+       * LRU: throw out the least recently used (this is often a good
+	idea, but it depends on the future looking like the past. what
+	if we chuck a page from our cache and then were about to use
+	it?)
+
+
+	LRU
+
+	phys_slot    A B C A B D A D B C B
+	S1           A     h     h     C
+	S2             B     h       h   h
+	S3               C     D   h
+
+		5 swaps, 6 hits
+
+        --LRU looks awesome!
+
+        --but what if our reference string were ABCDABCDABCD?
+
+	phys_slot   A B C D A B C D A B C D 
+	 S1         A     D     C     B
+	 S2           B     A     D     C
+	 S3             C     B     A     D
+
+	 12 swaps, 0 hits. BUMMER.
+
+        --same thing happens with FIFO.
+
+        --what about OPT? [not as much of a bummer at all.]
+
+        --other weirdness: Belady's anomaly: what happens if you add memory
+        under a FIFO policy?
+
+	phys_slot   A B C D A B E A B C D E 
+	S1          A     D     E         h
+	S2            B     A     h   C
+	S3              C     B     h   D
+
+	    9 swaps, 3 hits. not great. let's add some slots. maybe we
+	    can do better
+
+	phys_slot   A B C D A B E A B C D E 
+	S1          A       h   E       D
+	S2            B       h   A       E
+	S3              C           B
+	S4                D           C
+
+	   10 swaps, 2 hits. this is worse. 
+
+        --do these anomalies always happen?
+
+	    --answer: no. with policies like LRU, contents of memory with X
+	    pages is subset of contents with X+1 pages
+
+    --all things considered, LRU is pretty good. let's try to implement
+    it......
+
+    --implementing LRU 
+
+	--reasonable to do in application programs like Web servers that
+	cache pages (or dedicated Web caches).
+	    [use queue to track least recently accessed and use hash map
+	    to implement the (k,v) lookup]
+
+	--in OS, LRU itself does not sound great. would be doubling
+	memory traffic (after every reference, have to move some
+	structure to the head of some list)
+
+	--and in hardware, it's way too much work to timestamp each
+	reference and keep the list ordered (remember that the TLB may
+	also be implementing these solutions)
+
+
+    --how can we approximate LRU?
+
+    --another algorithm:
+        * CLOCK
+
+	--arrange the slots in a circle. hand sweeps around, clearing
+	a bit. the bit is set when the page is accessed. just evict a
+	page if the hand points to it when the bit is clear.
+    
+	--approximates LRU ... because we're evicting pages that haven't
+	been used in a while....though of course we may not be evicting
+	the *least* recently used one (why not?)
+
+    --can generalize CLOCK:
+        * NTH CHANCE
+
+	--don't throw a page out until the hand has swept by N times.
+
+	--OS keeps counter per page: # sweeps
+
+	--On page fault (need to evict a page), OS looks at where the hand is currently
+	pointing, call it physical page p. check the use bit of p.
+	    1 --> clear use bit and clear counter
+	    0 --> increment counter
+		if counter < N, keep going
+		if counter = N, replace the page: it hasn't been used in
+		  a while
+
+	--How to pick N?
+	    Large N --> better approximation to LRU
+	    Small N --> more efficient. otherwise going around the
+	    circle a lot (might need to keep going around and around
+	    until a page's counter gets set = to N)
+
+	--modification:
+
+	    --dirty pages are more expensive to evict (why?)
+
+	    --so give dirty pages an extra chance before replacing
+
+	    common approach (supposedly on Solaris but I don't know):
+	    --clean pages use N = 1
+	    --dirty pages use N = 2 
+		(but initiate write back when N=1, i.e., try to get the
+		page clean at N=1)
+
+
+    --Summary:
+
+	--optimal is known as OPT or MIN 
+
+	--LRU is usually a good approximation to optimal
+
+	--Implementing LRU in hardware or at OS/hardware interface is a
+	pain
+
+	--So implement CLOCK or NTH CHANCE ... decent approximations to
+	LRU, which is in turn good approximation to OPT *assuming that
+	past is a good predictor of the future* (this assumption does
+	not always hold!)
+
+--------
+
+    [Will pick up from here after the midterm]
+
+--------
+ 
+    Miscellaneous implementation points
+
+	Note that many machines, x86 included, maintain 4 bits per page
+	table entry:
+
+	    --*use*: Set when page referenced; cleared by an algorithm
+	    like CLOCK (the bit is called "Accessed" on x86)
+
+	    --*modified*: Set when page modified; cleared when page
+	    written to disk (the bit is called "Dirty" on x86)
+
+	    --*present*: It's set only if page is in memory [asterisk:
+	    note that it's an "only if" not an "if". There are cases
+	    when the page in physical memory but the bit is clear.]
+
+	    --*read-only*: program can read page, but not modify it. Set
+	    if page is truly read-only? [no. similar case to above, but
+	    slightly confusing because the bit is called "writable". if
+	    a page's bits are such that it appears to be read-only, that
+	    page may or may not be truly "read only". meanwhile, if a
+	    page is truly read-only, it better have its bits set to be
+	    read-only.]
+
+	Do we actually need Use and Modified bits in the page tables
+	set by the hardware?
+
+	    --[again, x86 calls these the Accessed and Dirty bits]
+
+	    --answer: no.
+
+	    --how could we simulate them?
+
+	    --for the Modified [x86: Dirty] bit, just mark all pages
+	    read-only. Then if a write happens, the OS gets a page fault
+	    and can set the bit itself. Then the OS should mark the page
+	    writable so that this page fault doesn't happen again
+
+	    --for the Use [x86: Accessed] bit, just mark all pages as
+	    not present (even if they are present). Then if a reference
+	    happens, the OS gets a page fault, and can set the bit,
+	    after which point the OS should mark the page present (i.e.,
+	    set the PRESENT bit).
+
+
+    Fairness
+
+	--if OS needs to swap a page out, does it consider all pages in one
+	pool or only those of the process that caused the page fault? 
+
+	--what is the trade-off between local and global policies?
+
+	    --global: more flexible but less fair
+
+	    --local: less flexible but fairer
+

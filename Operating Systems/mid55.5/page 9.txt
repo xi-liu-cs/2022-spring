@@ -1,0 +1,8 @@
+linux
+pthread_cond_wait
+These functions atomically release mutex 
+and cause the calling thread to block on
+ the condition variable cond
+
+then another thread can acquire the mutex
+but the operation of remove is not done

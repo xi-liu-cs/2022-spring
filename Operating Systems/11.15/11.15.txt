@@ -1,0 +1,121 @@
+constraints of placing a file sys
+onto a hard disk
+
+file sys
+persistence for data
+name a set of bytes on disk
+
+default location: disk
+file cabinet: file sys on paper
+
+cloud:
+persistence depend on servers like google's
+
+disk: modifiable & persistent
+possible to poison, corrupted state
+
+file:
+from user's view: contiguous run of bytes
+file sys: collection of disk blocks
+(disk divided into sectors)
+
+job of fs
+map: {file, offset in file} ---(fs)---> disk address
+
+random disk access is costly
+few disk access as possible
+
+metadata: (answer the query about where a data is)
+descriptors, inode
+
+cannot optimize both of these things
+access pattern:
+sequential
+random access
+
+
+free sectors
+
+contiguous allocation
+user pre-specified length
+[<free>a1 a2 a3 <5 free>b1 b2 <free>]
+- advantage: simple, lower space, random, sequential
+- disadvantage: fragmentation (ex: when ask 7 contiguous mem),
+length of every file is bounded
+
+
+
+linked files
+metadata is pointer (disk address) to file's first block
+- advantage: no external fragmentation, sequential access is good
+(allocate blocks in a cluster), file length not bounded
+- disadvantage: random access disaster 
+(ex: read data on 10,000 sector, read every block before)
+alignment of data is messed up
+end of every block (4 bytes at end reserved)
+512 is nice number
+
+
+
+
+
+indexed files
+metadata
+inode
+
+- advantage: 
+  great random access
+take offset to figure out which entry in table
+tells where on disk to find data (like bits in virt addr, in page table)
+  great sequential
+
+- disadvantage: 
+   ton of metadata or huge disk files, mem wasted
+   need to store array or too large disk blocks
+
+
+random access ideal: 1 disk access 
+(met by contiguous allocation and offset)
+
+
+multiple levels (like page table):
+use 1 entry 
+
+- advantage: 
+  saves space 
+- disadvantage:   
+  random access gets worst
+  now need to go to disk to find anything
+
+
+
+
+
+
+
+
+
+
+
+inode (actual indexed node)
+inbalanced tree
+
+single, double, triple 
+indirect block address
+
+
+- advantage: 
+  small files are fast to access
+  small number of accesses for larger files
+  huge max file length
+
+- disadvantage: 
+  inode = inumber (refer to that node by number
+  (x th entry in the inode array))
+ 
+  data strewn throughout the disk
+
+
+
+disk blocks store several inodes
+

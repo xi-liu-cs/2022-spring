@@ -1,0 +1,35 @@
+in handout:
+
+movq %rsp, (%rdi)  
+#take the current value of the
+%rdi is the first argument of function,
+so %rdi holds the value current
+treating %rdi as a pointer,
+%rdi is an address,
+move sth to that address
+value at %rdi is the first
+data member of the struct 
+(the one with offset 0)
+this takes the current value
+of the stack pointer from the cpu
+and stick it into saved memory
+
+movq (%rsi), %rsp
+instant of the context switch
+%rsi is second argument of function,
+
+
+preemption抢占式多任务处理 =
+ability of os to preempt (stop or pause)
+a currently scheduled task in favor
+of a higher priority task
+
+
+--recall: kernel threads are always preemptive
+--user-level threading can be non-preemptive 
+(cooperative) or preemptive. we'll look at both.
+
+Note confusion: a "context switch" really is two things:
+        - switching the view of memory (%cr3)
+        - switching the registers
+

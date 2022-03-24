@@ -1,0 +1,65 @@
+.c --(gcc)--> .s --( (as) assembler)-->
+ .o --( (ld) link editor, linker)--> a.out
+ 
+
+object 
+ld: link editor
+ld combines a number of object and archive files, 
+relocates their data and ties up symbol references.
+Usually the last step in compiling a program is to run ld
+ld is a linker, resolve references to addresses and create
+a unified executable binary
+
+
+loader: 
+one process can just wait for input
+
+contiguous memory from 0 to 2^48 - 1
+text section = actual machine instructions
+
+x86 64 architecture
+multi-core is a given, every current device  
+
+cannot directly modify %rip
+speed != competence
+ 
+virtual section, point of contact
+ask questions on campuswire
+mapping brightspace
+
+understanding in real time: not necessay & not suffi
+movq 0x1248, %rbx  #dereference a pointer
+
+pushq %rax =
+subq $8, %rsp       #decrement stack pointer, 
+movq %rax, (%rsp)  #move to location of %rsp, 
+dereference, stick stuff to the lower address
+#WRONG = movq %rax, %rsp; which set the stack 
+pointer to be whatever %rax was
+but want to take the content of %rax and put it
+at the value of (the address that) the stack pointer
+is holding
+
+
+popq %rax =
+movq (%rsp), %rax   #move the variable at the memory of %rsp to %rax
+addq $8, %rsp   #increment stack pointer
+
+call 0x12348 /* where f lives */ = 
+pushq %rip
+movq $0x12348, %rip /* cannot modify %rip*/
+
+ret = 
+popq %rip
+
+call preserved = callee-save : when you call into a function,
+you have the assurance when that function ret, the registers
+will be exactly where you left it (caller no worry about
+that register look diff when that funct ret)
+
+call clobbered (treat 打, 处理) = caller-save : when i leave a
+funct, if i care about the value of %rax, i better save %rax 
+myself
+
+
+each process 

@@ -1,0 +1,281 @@
+Class 27 (last one!)
+CS 202
+13 December 2021
+
+---------------------------------------------------------------------------
+
+1. Last time 
+
+2. Today: final exam review
+
+3. Your questions
+
+4. Wrap-up
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    How a computer gets a terminal on the screen, starting with power-on.
+
+    Lots of fork/exec-like things, including actual forks and execs.
+
+    Exec depends on the loader, which gets its direction (in terms of
+    how to set up memory and where the starting instruction is) from the
+    executable. Executables are written in a particular format; that
+    format creates a contract between the linker and the loader. 
+
+2. Final exam
+
+Ground rules
+
+--110 minute exam
+
+    --at 100 minutes, you have to stay seated; do not get up and distract
+    your classmates.
+
+    --you must hand your exam to me (we are not going to collect them).
+    the purpose of this is to give everyone the same amount of time.
+
+    --at 115 minutes, I will walk out of the room and won't accept any
+    exams when I leave
+
+    --thus you must hand in your exam at time x minutes, 
+	x <= 100 or 110 <= x < 115
+
+--Closed-book
+
+--Bring id
+
+--TWO two-sided sheet of notes; formatting requirements listed on Web page
+
+--**NOTE**: We do not guarantee that these review notes are
+necessary or sufficient: there is likely to be material on the final
+that is not referenced here, and there is likely to be material
+referenced here that is not on the final.
+
+Material
+
+--Readings
+
+--Labs
+
+--Homeworks
+
+--Classes. Following topic list taken verbatim from first midterm review
+
+    [including in notes, not putting on the board during class]
+
+
+    --Operating systems: what are they?
+
+        --goals, purpose
+
+    -- Processes:
+        
+        -- process's view of memory and registers
+
+        -- stack frames
+
+        -- OS's view of processes
+
+    -- system calls
+
+    -- Process/OS control transfers
+
+    -- Processes birth: fork()/exec()
+
+    -- Shell 
+
+    -- File descriptors 
+
+    -- Redirection, pipelines
+
+    --threads
+
+    --concurrency
+
+        --hard to deal with; abstractions help us, but not completely
+            --critical sections
+            --mutexes
+            --spinlocks
+            --condition variables
+            --monitors
+
+	--lots of things can go wrong: safety problems, liveness
+	problems, etc.
+
+            --> lack of sequential consistency makes the problem worse.
+
+	--What's the plan for dealing with these problems?
+
+	    --safety problems: build concurrency primitives that get
+	    help from hardware (atomic instructions, turning off
+	    interrupts, etc.) and move up to higher level abstractions
+	    that are easy to program with
+
+	    --liveness problems: most common is deadlock, and we
+	    discussed strategies for avoiding it. other problems too:
+	    starvation, priority inversion, etc.
+
+	--lots of trade-offs and design decisions
+	    --performance v. complexity
+
+	--lots of "advice". some is literally advice; some is actually
+	required practice in this class.
+
+    --software safety (Therac-25)
+
+    --scheduling
+
+        --intro: when scheduling happens, which metrics, what costs
+
+        --specific disciplines
+        
+        --lessons and conclusions
+
+    --virtual memory
+
+        paging
+
+        virtual memory on the x86-64
+
+	    virtual address: [0000 36bits 12bits]
+
+	    --entry in L1...L4 page tables:
+
+	        [40 bits  more bits   bottom 3 bits]
+
+	    --protection (user/kernel | read/write |  present/not)
+
+	    what's a TLB?
+
+        page faults
+
+            mechanics
+
+            costs
+
+            uses
+
+        page replacement policies (FIFO, LRU, CLOCK, OPT)
+    
+    [latter two topics more general than paging: applies to caching
+    in general]
+
+
+after the midterm:
+
+        
+    --thrashing
+
+    --mmap
+
+    --I/O 
+        
+        --architecture
+
+        --how CPUs and devices interact
+
+            --mechanics (explicit I/O instructions, mem-mapped I/O,
+                interrupts, memory)
+            --polling vs. interrupts
+            --DMA vs. programmed I/O
+
+        --device drivers
+
+    --Synchronous vs async I/O
+
+
+    --Context switches
+    --User-level threading
+
+    --Disks
+
+        geometry
+
+        performance
+
+        interface
+
+        scheduling (skipped in lecture; see book)
+
+    
+    --file systems
+
+ 	--basic objects: files, directories, meta-data, links, inodes
+
+	--how does naming work? what allows system to map
+	    /usr/homes/jo/index.html to a file object?
+
+	--types of file layout
+
+	    --extents/contiguous, linked, indexed structure
+	    
+	    --classic Unix and FFS are variants of indexed structure
+
+        --analogy between inode and page directory
+
+	--tradeoffs
+
+	--performance
+
+    --crash recovery
+
+        --ad-hoc
+
+        --copy-on-write (COW)
+
+        --Journaling (redo logging, undo logging, undo+redo)
+
+    RPC, client/server systems
+
+    case study: NFS (network file system)
+
+        --marquee user of RPC
+
+        --RPC: transparent or not?
+
+    
+    protection and security
+
+        --stack smashing / buffer overflow
+
+        --Unix security model
+            --access control, privileges, setuid, attacks
+
+        --trusting trust
+
+    bootup, from power-on
+
+        --static linking and loading is a key tool here (reviewed
+        use of exec(), described its implementation)
+
+        -the bootstrap process:
+            hardware copies firmware into read/write memory
+            firmware is a mini-OS that sets up the machine so "programs" can run
+            the "programs" are:
+                a stub that invokes a decompressing program
+                a decompressing program that decompresses the kernel and invokes it
+                the kernel
+            kernel invokes init(7)
+            init(7) invokes login(1)
+            login(1) lets you (or Ken Thompson) get a shell and begin invoking programs 
+
+3. Your questions
+
+4. In closing
+
+    --You have learned about the x86; processes, syscalls, fork/exec,
+    shells, concurrency and synchronization and deadlock; software
+    safety (the therac-25), scheduling, virtual memory, I/O, mmap(),
+    disks, file systems, logging and crash recovery, distributed
+    systems, stack smashing, Unix's protection model, other security
+    topics, and how boot works.
+    
+    --You have learned to write and debug low-level code
+
+    --Congratulations on having learned all of these things! I hope you
+    enjoyed it!
+
+

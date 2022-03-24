@@ -1,0 +1,43 @@
+https://cs.nyu.edu/~mwalfish/classes/21fa/hw/hw2.html
+
+1.
+//global var is declared outside of main, so not on stack
+
+main: 
+	push %rbp
+	movq %rsp, %rbp
+
+	movq $2, %rdi
+	call comp
+
+
+comp:
+	push %rbp    
+	movq %rsp, %rbp   
+	
+	subq  $16, %rsp
+	movq $0, -8(%rbp)	   # e = 0
+	movq $0, -16(%rbp)   # f = 0
+
+	movq %rdi, %rsi   #pass n into 2nd paramter
+	leaq x(%rip), %rdi    #pass x into 1st parameter
+	
+	call mul
+
+mul:
+	push %rbp    #prologue
+	movq %rsp, %rbp
+
+	mulq %rdi, %rsi
+	movq %rsi, %rax 
+	
+	movq %rbp, %rsp   #epilogue
+	popq %rbp
+	ret  
+
+
+
+
+
+
+ 

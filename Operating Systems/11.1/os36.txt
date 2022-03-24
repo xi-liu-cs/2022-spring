@@ -1,0 +1,66 @@
+1
+
+no input: same result 
+no output: what is purpose of it running?
+
+single CPU attached to the main memory
+of the system via some kind of memory bus
+
+general I/O bus
+peripheral component interconnet (PCI 外设组件互连标准)
+graphics and other higher-performance I/O
+
+lower down: peripheral bus
+small computer system interface (SCSI 小型计算机系统接口)
+Serial Advanced Technology Attachment (SATA 串口硬盘) 
+universal serial bus (USB, 通用串行总线)
+these connect slow devices to system
+
+why need a HIERARCHICAL STRUCTURE?
+physics & cost
+
+where components that demand high
+performance (such as the graphics card) 
+are nearer the CPU
+
+
+
+
+3
+PCI (peripheral component interconnect
+外设部件互连标准)
+PCI插槽也是主板带有最多数量的插槽类型
+hardware must also present some
+kind of interface that allows the system
+software to control its operation
+firmware(固件permanent software 
+programmed into a read-only memory)
+
+
+
+4
+3 registers: status, command, data
+polling 轮询 the device (basically, just asking it what is going on)
+writes transfer disk block (4 KB) to the device
+polling = inefficient
+wastes cpu time to wait for
+slow device to complete its activity
+
+
+
+5
+interrupt 中断
+instead of polling device repeatedly
+os can issue a request
+put the calling process to sleep,
+and context switch to another task
+
+Without interrupts, the system simply spins, polling
+the status of the device repeatedly until the I/O is complete
+
+
+7
+direct memory access DMA
+OS would program the DMA engine by telling
+it where the data lives in memory,
+how much data to copy, and which device to send it to

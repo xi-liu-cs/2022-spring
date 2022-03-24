@@ -1,0 +1,515 @@
+Class 18
+CS 202
+10 November 2021
+
+On the board
+------------
+
+1. Last time
+2. Disks
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    - Context switches in WeensyOS
+    - User-level threading, intro
+    - Context switches among user-level threads
+
+    end of notes has comparisons among threading models
+
+    today: disks
+
+2. Disks
+
+    A. What is a disk?
+    B. Geometry
+    C. Performance
+    D. Common #s
+    E. How driver interfaces to disk
+    F. Performance II
+    G. Disk scheduling (performance III)
+    H. Technology and systems trends
+
+    Disks have historically been *the* bottleneck in many systems
+
+        - This becomes less and less true every year:
+        - SSDs [solid state drives] now common
+        - PM [persistent memory] now available
+
+    [Reference: "An Introduction to Disk Drive Modeling",
+    by Chris Ruemmler and John Wilkes. IEEE Computer 1994, Vol. 27,
+    Number 3, 1994. pp17-28.]
+
+    What is a disk?
+
+    --stack of magnetic platters
+
+	--Rotate together on a central spindle @3,600-15,000 RPM
+	
+	--Drive speed drifts slowly over time
+
+	--Can't predict rotational position after 100-200 revolutions
+
+	
+	 -------------
+	|          platter
+	| ------------
+	|
+	|
+	| ------------
+	|          platter
+	| ------------
+        |
+	|
+	| ------------
+	|          platter
+	| ------------
+	|          
+
+    --Disk arm assembly
+
+	--Arms rotate around pivot, all move together
+
+	--Pivot offers some resistance to linear shocks
+
+	--Arms contain disk heads--one for each recording surface
+
+	--Heads read and write data to platters
+
+    [interlude: why are we studying this?
+
+        disks are still widely in use (particularly in large cloud
+        infrastructures), and will be for some time. Very cheap. Great
+        medium for backup. Better than SSDs for durability (SSDs have
+        limited number of write cycles, and decay over time)
+        
+        Google, Facebook, etc. historically packed their data centers
+        full of cheap, old disks.
+
+        As a second point, it's technical literacy; many filesystems
+        were designed with the disk in mind (sequential access
+        significantly higher throughput than random access). You have to
+        know how these things work as a computer scientist and as a
+        programmer.
+
+    ]
+
+     --you saw the high-level picture in CS 201; the notes below include
+    some detail.
+
+    Geometry of a disk
+
+	--track: circle on a platter. each platter is divided into
+	concentric tracks.
+
+	--sector: chunk of a track
+
+	--cylinder: locus of all tracks of fixed radius on all platters
+
+	--Heads are roughly lined up on a cylinder
+
+	    --Significant fractions of encoded stream for error correction
+    
+	--Generally only one head active at a time
+
+	    --Disks usually have one set of read-write circuitry
+
+	    --Must worry about cross-talk between channels
+
+	    --Hard to keep multiple heads exactly aligned
+
+	--disk positioning system
+
+	    --Move head to specific track and keep it there
+
+		--Resist physical shocks, imperfect tracks, etc.
+
+	    --a **seek** consists of up to four phases:
+
+		--*speedup*: accelerate arm to max speed or half way point
+    
+		--*coast*: at max speed (for long seeks)
+
+		--*slowdown*: stops arm near destination
+
+		--*settle*: adjusts head to actual desired track
+    
+            [BTW, this thing can accelerate at up to several hundred g]
+
+    Performance (important to understand this if you are building
+    systems that need good performance)
+
+	components of transfer: rotational delay, seek delay, transfer
+	time.
+	    rotational delay: time for sector to rotate under disk head
+	    seek: speedup, coast, slowdown, settle
+	    transfer time: will discuss
+
+	discuss seeks in a bit of detail now:
+
+	--seeking track-to-track: comparatively fast (~1ms). mainly
+	settle time
+
+	--short seeks (200-400 cyl.) dominated by speedup
+
+	--longer seeks dominated by coast
+
+	--head switches comparable to short seeks
+
+	--settle times takes longer for writes than reads. why?
+	    --because if read strays, the error will be caught, and the
+	    disk can retry
+	    --if the write strays, some other track just got clobbered.
+	    so write settles need to be done precisely
+
+	--note: "average seek time" quoted can be many things
+
+	    --time to seek 1/3 of disk
+
+	    --1/3 of the time to seek the whole disk
+
+	    --(convince yourself those may not be the same)
+
+
+    Common #s
+
+	--capacity: high 100s of GB, now TBs common
+
+	--platters: 8
+
+	--number of cylinders: tens of thousands or more
+
+	--sectors per track: ~1000
+
+	--RPM: 10000
+
+	--transfer rate: 50-150 MB/s
+
+	--mean time between failures: ~1-2 million hours
+	    (for disks in data centers, it's vastly less; for a provider
+	    like Google, even if they had very reliable disks, they'd still need
+	    an automated way to handle failures because failures would
+	    be common (imagine 10 million disks: *some* will be on the
+	    fritz at any given moment). so what they do is to buy
+	    defective and cheap disks, which are far cheaper. lets them
+	    save on hardware costs. they get away with it because they
+	    *anyway* needed software and systems -- replication and
+	    other fault-tolerance schemes -- to handle failures.)
+
+    How driver interfaces to disk
+
+	--Sectors
+
+	    --Disk interface presents linear array of **sectors**
+
+	    --traditionally 512 bytes, written atomically (even if power
+	    failure; disk saves enough momentum to complete); moving to
+	    4KB
+	    
+	    --larger atomic units have to be synthesized by OS (will
+	    discuss later)
+		--goes for multiple contiguous sectors or even a whole
+		collection of unrelated sectors
+		--OS will find ways to make such writes *appear* atomic,
+		though, of course, the disk itself can't write more than
+		a sector atomically
+		--analogy to critical sections in code: 
+		
+		    --> a thread holds a lock for a while, doing a bunch
+		    of things. to the other threads, whatever that
+		    thread does is atomic: they can observe the state
+		    before lock acquistion and after lock release, but
+		    not in the middle, even though, of course, the
+		    lock-holding thread is really doing a bunch of
+		    operations that are not atomic from the processor's
+		    perspective
+
+	--disk maps logical sector # to physical sectors
+
+	    --Zoning: puts more sectors on longer tracks
+	  
+	    --Track skewing: sector 0 position varies by track, but let
+	    the disk worry about it. Why? (for speed when doing
+	    sequential access)
+
+	    --Sparing: flawed sectors remapped elsewhere
+	
+	--all of this is invisible to OS. stated more precisely, the OS
+	does not know the logical to physical sector mapping. the OS
+	specifies a platter, track, sector, but who knows where it
+	really is? 
+
+	    --In any case, larger logical sector # difference means
+	    larger seek
+
+	    --Highly non-linear relationship (*and* depends on zone)
+	
+	    --OS has no info on rotational positions
+
+	    --Can empirically build table to estimate times
+
+	    --Turns out that sometimes the logical-->physical sector
+	    mapping is what you'd expect.
+
+
+    Let's work through a disk performance example
+
+        Spindle Speed: 7200 RPM
+        Avg Seek Time, read/write: 10.5ms / 12 ms
+        Maximum seek time: 19ms
+        Track-to-track seek time: 1ms
+        Transfer rate (surface to buffer): 54-128 MB/s
+        Transfer rate (buffer to host): 375 MB/s
+
+    Two questions:
+
+    (a) How long would it take to do 500 sector reads, spread out
+    randomly over the disk (and serviced in FIFO order)?
+
+    (b) How long would it take to do 500 requests, SEQUENTIALLY on the
+    disk? (FIFO order once more)
+
+    Let's begin with (a), looking at one request:
+
+        (rotation delay + seek time + transfer_time)*500
+
+        rotation delay: 60s/1min * 1 min/7200 rotations = 8.33 ms
+            on average, you have to wait for half a rotation: 4.15 ms
+
+        seek time: 10.5 ms (given)
+
+        transfer time: 512 bytes * 1 s/54 MB * 1MB/10^6 bytes = .0095 ms
+
+        **per read**: 4.15 ms + 10.5 ms + .0095 ms = 14.66 ms
+
+        500 reads: 14.66 ms/request * 500 requests = 7.3 seconds.
+
+        total throughput: data/time = 35KB/s
+
+        This is terrible!
+
+    Let's look at (b)
+        
+        rotation delay + seek time + 500*transfer_time
+
+        rotation delay: 4.15 ms (same as above)
+
+        seek time: 10.5 ms (same as above)
+
+        transfer time: 500 * .0095 ms = 4.75 ms
+
+        total: 4.15 ms + 10.5 ms + 4.75 ms = 19.5 ms
+
+        total throughput: 13.1 MB/s
+
+        This is much better!
+
+    Takeaway: Sequential reads are MUCH MUCH MUCH faster than random
+    reads and we should do everything that we can possibly do to perform
+    sequential reads.  When you learn about filesystems, you'll see that
+    this was a very serious concern for filesystem designers (LFS!).
+   
+        --"The secret to making disks fast is to treat them like tape"
+        (John Ousterhout).
+
+   What are some things that help this situation?
+   - Disk Cache used for read-ahead (disk keeps reading at last host request)
+    - otherwise, sequential reads would incur whole revolution
+    - policy decision: should read-ahead cross track boundaries? a head-switch
+      cannot be stopped, so there is a cost to aggressive read ahead.
+   - Write caching can be a big win!
+    - (if battery backed): data in buffer can be written over many times before
+      actually being put back to disk. also, many writes can be stored so they
+      can be scheduled more optimally
+    --if not battery backed, then policy decision between disk
+    and host about whether to report data in cache as on disk or
+    not
+
+    Try to order requests to minimize seek times
+
+        --OS (or disk) can only do this if it has multiple requests
+        to order
+
+        --Requires disk I/O concurrency
+
+        --High-performance apps try to maximize I/O concurrency
+
+            --or avoid I/O except to do write-logging (stick all
+            your data structures in memory; write "backup" copies to
+            disk sequentially; don't do random-access reads from the
+            disk)
+
+    Disk scheduling: not covering in class. Can read in text. Some notes
+    below:
+
+	--FCFS: process requests in the order they are received
+	    +: easy to implement
+	    +: good fairness
+	    -: cannot exploit request locality
+	    -: increases average latency, decreasing throughput
+
+	--SPTF/SSTF/SSF/SJF: shortest positioning time first / shortest seek
+	time first: pick request with shortest seek time
+    
+	    +: exploits locality of requests
+	    +: higher throughput
+	    -: starvation
+	    -: don't always know which request will be fastest
+
+	    improvement: aged SPTF
+		
+		--give older requests priority
+
+		--adjust "effective" seek time with weighting [no pun
+		intended] factor:
+		    T_{eff} = T_{pos} - W*T_{wait}
+
+
+	--Elevator scheduling: like SPTF, but next seek must be in same
+	direction; switch direction only if no further requests
+	    +: exploits locality
+	    +: bounded waiting
+	    -: cylinders in middle get better service
+	    -: doesn't fully exploit locality
+
+	    modification: only sweep in one direction (treating all
+	    address as being circular): very commonly used in Unix.
+
+
+    technology and systems trends
+
+	--unfortunately, while seeks and rotational delay are getting a
+	little faster, they have not kept up with the huge growth
+	elsewhere in computers.
+	
+	--transfer bandwidth has grown about 10x per decade
+
+	--the thing that is growing fast is disk density
+	(byte_stored/$). that's because density is less about the
+	mechanical limitations
+
+	--to improve density, need to get the head close to the surface.
+
+	    --[aside: what happens if the head contacts the surface? called
+	    "head crash": scrapes off the magnetic material ... and,
+	    with it, the data.]
+
+	--Disk accesses a huge system bottleneck and getting worse. So
+	what to do?
+
+	    --Bandwidth increase lets system (pre-)fetch large chunks
+	    for about the same cost as small chunk.
+
+	    --So trade latency for bandwidth if you can get lots of
+	    related stuff at roughly the same time. How to do that?
+
+	    --By clustering the related stuff together on the disk. can
+	    grab huge chunks of data without incurring a big cost since
+	    we already paid for the seek + rotation.
+
+
+	--The saving grace for big systems is that memory size
+	is increasing faster than typical workload size
+
+	    --result: more and more of workload fits in file cache,
+	    which in turn means that the profile of traffic to the disk
+	    has changed: now mostly writes and new data.
+
+	    --which means logging and journaling become viable (more on
+	    this over next few classes)
+
+
+        --And in cloud workloads, you can attach many HDDs to a
+        much smaller number of CPUs. 
+
+        --HDDs vs SSDs:
+
+            see https://www.datacenterdynamics.com/en/opinions/continued-value-hdds-data-centers/
+            https://cloud.google.com/bigtable/docs/choosing-ssd-hdd
+            https://gigaom.com/2020/02/03/the-hard-disk-is-dead-but-only-in-your-datacenter/
+
+----
+
+Comparisons among threading models (pertains to class 17, l17.txt)
+    
+    --Cooperative (user-level) versus preemptive (user-level or
+    kernel-level):
+
+ 	--Cooperative makes it easier to avoid errors from
+	concurrency	
+
+	--Cooperative is harder to program because now the threads have
+	to be good about yielding, and you might have forgotten to yield
+	inside a CPU-bound task.	
+
+     NOTE: Cooperative threading is only user-level; we don't have a
+     notion in this class of cooperative kernel-level threads.
+
+
+    --User-level (cooperative or preemptive) threading versus kernel-level
+    (preemptive):
+
+    Downsides of user-level threading:
+
+	--Can we imagine having two user-level threads truly executing
+	at once, that is on two different processors? (Answer: no. why?)
+
+	--What if the OS handles page faults for the process? (then a
+	page fault in one thread blocks all threads).
+	    --(not a huge issue in practice)
+
+	--Similarly, if a thread needs to go to disk, then that
+	(depending on the syscall) can block *all* threads (for example, the
+	kernel won't allow the run-time to make a non-blocking read()
+	call to the disk). So what do we do about this?
+
+	    --extend the API; or
+	    
+	    --live with it; or
+
+	    --use elaborate hacks with memory mapped files (e.g.,
+	    files are all memory mapped, and runtime asks to handle
+	    its own page faults, if the OS allows it)
+
+
+    Further comparison between user-level threading and kernel-level threading:
+
+	(i). high-level choice: user-level or kernel-level
+	    (but can have N:M threading, in which N user-level
+	    threads are multiplexed over M kernel threads, so the
+	    choice is a bit fuzzier)
+
+	(ii). if user-level, there's another choice:
+	    non-preemptive (also known as cooperative) or preemptive
+
+	[be able to answer: why are kernel-level threads always preemptive?]
+
+	--*Only* the presence of multiple kernel-level threads can give:
+
+	    --true multiprocessing (i.e., different threads running on
+	    different processors)
+
+	    --asynchronous disk I/O using Posix interface [because
+	    read() blocks and causes the *kernel* scheduler to be
+	    invoked]
+
+		--but many modern operating systems provide interfaces
+		for asynchronous disk I/O, at least as an extension
+
+		    --Windows 
+
+		    --Linux has AIO extensions
+
+		--thus, even user-level threads can get asynchronous
+		disk I/O, by having the run-time translate calls that
+		*appear* blocking to the thread [e.g., thread_read()]
+		into a series of instructions that: register for
+		interest in an I/O event, put the thread to sleep, and
+		swtch() to another thread
+
+		--[moral of the story: if you find yourself needing
+		async disk I/O from user-level threads, use one of the
+		non-Posix interfaces!]
+
+

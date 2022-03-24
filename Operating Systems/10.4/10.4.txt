@@ -1,0 +1,65 @@
+deadlock
+cannot occur
+unless 4 conditions present
+
+1. mutual exclusion
+2. hold and wait
+3. no pre-emption
+4. circular wait
+
+race condition much harder to debug than deadlocks
+
+do about deadlock:
+1. ignore
+2. detect recover
+3. avoid algorithmically
+4. negate 1 of the 4 conditions (negate circular wait)
+5. static/dynamic detection tools
+
+unacceptable for race condition on memory
+
+lab3
+using monitors' paradigm
+no more than 1 lock per monitor
+
+a wait on b; b wait on a - deadlock
+
+mars pathfinder
+priority inversion
+
+
+coarse-grained locking 
+fine-grained locking leads to complexity, bugs
+
+
+
+
+handout06.txt
+3/4
+/*program invariant:
+ready set to 1 after some function alloc_foo() finishes*/
+on multi-cpu
+when alloc_foo() is executed, but
+read is still 0 (due to mechanisms of cache)
+then allocated 2 times (bad)
+
+correct sychronization:
+must read hardware & compiler manual
+
+memory fences inside acquire & release
+must access ready inside mutex
+
+if use mutex correctly
+do not have to worry interleaving issues
+
+more details than traditional intro system course
+hardware instruction exchange
+
+
+read paper
+Therac-25 paper
+details = impenetrable
+but overall pic clear
+
+
+1/2 lab implicitly due friday

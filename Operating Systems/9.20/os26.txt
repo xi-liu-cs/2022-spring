@@ -1,0 +1,47 @@
+1
+concurrency 并发性
+
+abstraction of address space 地址空间
+enable program to behave as if it has its own memory
+
+THREAD 线程 是操作系统能够进行运算调度的最小单位. 它被包含
+在进程之中, 是进程中的实际运作单位
+thread of execution is the smallest sequence of programmed
+instructions that can be managed indep by a scheduler调度
+
+multi-threaded program : more than 1 point of execution
+
+each thread is like a separate process
+but threads share the same address space of thus can 
+access the same data
+每个线程类似于独立的进程, 但线程共享地址空间,
+从而能访问相同的数据
+
+context switch we perform between threads
+as compared to processes:
+address space remains the same
+
+
+2
+address space of a classic process (single-threaded process)
+has only 1 stack;
+multi-threaded process, each thread runs 
+independently: 1 stack per thread
+ 
+any stack-allocated variables, parameters,
+return values, and other things
+that we put on the stack will be placed
+in thread-local storage
+
+
+
+3
+parallelism:
+add two large arrays
+(using processors to each perform a portion of the work)
+
+could use multiple processes instead of threads
+but threads share address space 
+easy to share data
+
+

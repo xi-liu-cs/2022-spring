@@ -1,0 +1,23 @@
+in AR = 0 //active readers
+int AW = 0 //active writers 
+int WR = 0 //waiting readers
+int WW = 0 //waiting writers
+
+doneRead()
+{
+m.acquire
+AR--
+if(AR == 0 && WW > 0)
+{
+	signal(&okToWrite, &mutex);
+	/*no point to call broadcast
+	b/c only 1 writer is allowed to run
+	extra threads wake up check condition
+	and go back to sleeping*/
+}
+m.release
+}
+
+starvation:
+if a constant supply of writers
+get no reading done

@@ -1,0 +1,220 @@
+intro
+
+1
+processor 
+a. fetches 取得 (instruction from memory)
+b. decode 解码
+c. execute 执行
+
+OS = body of software, in fact, that is responsible for making it
+easy to run programs
+
+
+2
+crux 症结; (难题或问题的)关键; 最难点 most important point at issue
+
+virtualize resources
+OS ensures system operates correctly and efficiently
+in an easy-to-use manner
+
+virtualization: OS takes a physical resource (processor,
+memo, or disk) and transforms it it a more general 
+and virtual form of itself
+
+tell OS what to do: provides some API you can call
+OS = resource manager, 
+Each of the CPU, memory, and disk is a resource
+of the system; it is thus the operating system's
+role to manage
+
+
+3
+/*
+https://www.tutorialspoint.com/cprogramming/c_command_line_arguments.htm
+
+It should be noted that argv[0] holds the name 
+of the program itself and 
+argv[1] is a pointer to the first command line
+argument supplied
+if you pass one argument then argc is set at 2
+*/
+
+Spin() is a function that repeatedly checks the time and
+returns once it has run for a second
+
+by pressing “Control-c” 
+(which on UNIX-based systems will terminate the program
+running in the foreground)
+
+
+4
+Turning a single CPU (or a small
+set of them) into a seemingly infinite number
+of CPUs and thus allowing many programs
+to seemingly run at once is what we call virtualizing the
+CPU
+
+
+5
+getpid() returns the process identifier 
+(PID) of the calling process.
+(This is often used by routines that generate 
+unique temporary filenames.)
+
+memory = array of bytes
+read & write: specify an address
+memory is accessed all the time when a program is running
+all data structures & instruction in memory
+memory is accessed on each instruction fetch
+
+
+6
+each running program has allocated memory 
+at the SAME ADDRESS (0x200000)
+and each seems to update the value of 
+0x200000 independently
+as if each running program has its own private memory
+
+Each process accesses its own private 
+VIRTUAL ADDRESS SPACE 虚拟地址空间
+(sometimes just called its address space);
+A memory reference within
+one running program does not affect 
+the address space of other processes
+
+
+7
+Stderr, also known as standard error 标准错误,
+is the default file descriptor where a
+process can write error messages
+
+volatile int 
+A variable should be declared volatile 
+whenever its value could change unexpectedly
+
+concurrency 并发性，并行性:
+when working on many things at once
+
+
+8
+thread: a funct running within the same 
+memory space as other funct
+with more than one of them active at a time
+
+
+
+9
+primitives: a simple operation or procedure
+of a limited set from which complex operations
+or procedures may be constructed
+
+shared counter is incremented takes three instructions
+1. load value of counter from memory to register
+2. increment
+3. store it back into memory
+the 3 instructions do not execute atomically
+
+persistence 持久化
+dynamic random access memory 动态随机存取存储器
+(The electric charge on the capacitors
+slowly leaks off,
+so without intervention the data on
+the chip would soon be lost. 
+To prevent this, DRAM requires
+an external memory refresh circuit
+which periodically rewrites the data
+in the capacitors)
+DRAM stores values in a volatile manner
+
+10
+device driver 驱动程序: deep knowledge
+of low level interface
+A device driver is some code 
+in the operating system that
+knows how to deal with a
+specific device
+
+
+11
+build up some abstractions in order
+to make the system convenient and easy to use
+
+Abstraction makes it possible to write
+a large program by dividing it into small
+and understandable pieces:
+write such a program in a high-level language like C
+without thinking about assembly,
+to write code in assembly without
+thinking about logic gates,
+and to build a processor out of gates
+without thinking too much about transistors
+
+
+12
+isolating processes from one another
+is the key to protection 
+and thus underlies much of what an OS must do
+
+mobility is increasingly important 
+as OSes are run on smaller and
+smaller devices
+
+Early OS = just libraries
+set of libraries of commonly-used functions
+ex: OS provides APIs for low level I/O handling code
+
+mainframe computer 大型计算机:
+one program ran at a time (controlled by a human operator)
+batch processing 批处理任务：
+number of jobs set up & run in a "batch" by the operator
+computers not interactive:
+too expensive to let a user sit in front of the computer and
+use it, as most of the time it would just sit idle
+
+
+13
+code run on behalf of the
+OS was special; it had control of devices
+and thus should be treated differently than normal
+application code
+if application read anywhere on disk
+then no privacy
+so should not implement a file system as a library
+
+instead providing OS routines as a library
+(where just make procedure call to access them)
+add a special pair of hardware instructions and hardware state to
+make the transition into the OS a more formal, controlled process
+
+syscall: transfers control into the OS
+while simultaneously raising the HARDWARE PRIVILEDGE LEVEL
+
+user mode 用户态 which means the hardware restricts what applications
+can do (ex: running in user mode can't initiate an I/O request)
+kernel mode 核心态 OS has full access to the hardware of the system
+and thus can do things like initiate an I/O request or make more memory
+available to a program
+内核态是操作系统内核所运行的模式。
+运行在该模式的代码，
+可以无限制地对系统存储、外部设备进行访问
+
+
+14
+multiprogramming 多道程序
+OS load a number of jobs into memory
+and switch rapidly between them, improving CPU utilization
+
+I/O devices were slow: 
+having a program wait on CPU while its I/O was being
+serviced was a waste of CPU time
+
+memory protection: do not want 1 program to access 
+memory of another program
+
+after minicomputer, personal computer came
+
+
+
+17
+a lot of networking code in OS
+graphics

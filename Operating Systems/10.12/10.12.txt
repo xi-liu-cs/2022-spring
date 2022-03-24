@@ -1,0 +1,60 @@
+scarce resource
+which thread is lucky enough to access cpu
+
+non-preemptive scheduling: state changes (ii) and (iii)
+do not take place
+
+waiting/response/output time
+
+fairness (give every thread everything)
+
+change thread, computational cost when switch context
+
+tremendous benefit from 1 process keep executing 
+on 1 cpu
+
+graph, life or journey of a process
+
+
+to understand,
+assume process/thread do no i/o
+first come first serve
+
+throughput: processes completed per unit time
+3 process / (24 + 3 + 3)sec = 0.1 
+
+
+average turnaround time
+(24 + 27 + 30) / 3 = 27 s
+
+minimal context switching
+long process increase too much turnaround time
+
+
+round robin
+- add a timer
+- quantum
+avg tt ~ 100
+
+quantum too small, context switch cost
+choose quantum too large, become FIFO
+
+1ms cpu
+10ms disk
+Short Time to Complete First
+minimal response to output time
+long timing jobs can get starved
+STCF prone to starvation
+
+real system cannot be implemented, cannot know how long a process is
+
+optimal is not achievable
+
+exponentially weighted moving average
+
+each older term given exponentially less weight
+
+
+1. goals
+2. compare against optimal
+3. diff schedulers that interact

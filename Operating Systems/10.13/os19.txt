@@ -1,0 +1,8 @@
+going to memory for translation info is slow
+
+translation-lookaside buffer 转址旁路缓存, 页表缓存
+
+https://stackoverflow.com/questions/37825859/cache-miss-a-tlb-miss-and-page-fault
+
+page fault:
+https://courses.cs.washington.edu/courses/cse451/14sp/asst3.html

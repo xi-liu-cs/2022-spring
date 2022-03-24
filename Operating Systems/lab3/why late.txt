@@ -1,0 +1,23 @@
+10/15 + 1 + 1 + 1 = 10/18
+resubmit again in 10/18 (used 3 slack days)
+because 
+in buyManyItems in EStore.cpp
+1. need to sort 
+2. 
+    if(buyable)
+    {//buy everything
+        for(long unsigned int i = 0; i < item_ids->size(); i++)
+        {
+            Item * item_p = inventory + item_ids->at(i);
+            item_p->valid = false; //this line should be removed
+            item_p->quantity--;
+        }
+    }
+above errors can take 10 points off
+
+
+
+TA michael ma says:
+slack until today is 3 days
+around 6 hours for lab 3 
+each around 8 hours for lab 4 and lab 5

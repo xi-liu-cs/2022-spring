@@ -1,0 +1,374 @@
+Class 16
+CS 202
+3 November 2021
+
+On the board
+------------
+
+1. Last time
+2. I/O architecture
+3. CPU/device interaction
+   --Mechanics
+        (a) explicit I/O 
+        (b) memory-mapped I/O
+        (c) interrupts
+        (d) through memory
+   --Polling vs interrupts
+   --DMA vs. programmed I/O
+4. Software architecture: device drivers
+5. Synchronous vs asynchronous I/O
+6. Context switches (WeensyOS)
+
+---------------------------------------------------------------------------
+
+https://scribbletogether.com/whiteboard/6032C6B9-FBA4-45C6-86CE-8371612D45F3
+
+1. Last time
+
+    finished virtual memory
+
+    WeensyOS
+
+    a few more notes/hints on WeensyOS:
+        - figures (the animated gifs) are from 32-bit version of the lab. so
+        you'll see some differences.
+
+        - x86_64_pagetable: array of 512 entries, each with type
+        x86_64_pageentry_t. an x86_64_pageentry_t is just an 8-byte
+        quantity.
+
+        - bugs in earlier parts show up in later parts
+
+
+2.  I/O architecture (high-level)
+
+    general:
+    [draw picture: CPU, Mem, I/O, connected to BUS]
+
+    devices:
+    [see handout]
+
+    lots of details.
+    fun to play with.
+    registers that do different things when read vs. written.
+
+3. CPU/device interaction (can think of this as kernel/device
+interaction, since user-level processes classically do not interact with
+devices directly.
+
+    A. Mechanics of communication
+
+        (a) explicit I/O instructions
+            
+            outb, inb, outw, inw
+
+            examples:
+
+            (i) WeensyOS boot.c. see handout
+            
+                focus on boot_readsect(), boot_waitdisk()
+
+                compare to Figures 36.5 and 36.6 in the book
+
+                the code on the handout is the bootloader, which is 
+                reading the WeensyOS kernel from disk to memory.
+
+            (ii) reading keyboard input. see handout
+
+                keyboard_readc(); 
+
+            (iii) setting blinking cursor. see handout
+
+                console_show_cursor();
+
+        (b) memory-mapped I/O
+
+            physical address space is mostly ordinary RAM
+
+	    low-memory addresses (650K-1MB) actually refer to other
+	    things. 
+
+	    You as a programmer read/write from these addresses using
+	    loads and stores. But they aren't "real" loads and stores to
+	    memory. They turn into other things: read device registers,
+	    send instructions, read/write device memory, etc.
+
+                --interface is the same as interface to memory
+                (load/store)
+
+                --but does not behave like memory 
+
+		    + Reads and writes can have "side effects"
+
+		    + Read results can change due to external events 
+
+	    Example: writing to VGA or CGA memory makes things appear on
+	    the screen.
+
+	    See handout (last panel):
+
+                console_putc()
+
+                (this is called by console_printf().)
+           
+            Some notes about memory-mapped I/O
+
+                (i) avoid confusion: this is not the same thing as
+                virtual memory. this is talking about the *physical*
+                address.
+
+                    --> is this an abstraction that the OS provides to
+                    others or an abstraction that the hardware is
+                    providing to the OS?  [the latter]
+
+                (ii) aside: reset or power-on jumps to ROM at 0xffff0
+                [not covered in class]
+
+	        --so what is the first instruction going to have to do?
+	            answer: probably jump
+
+        (c) interrupts
+
+        (d) through memory: both CPU and the device see the same memory,
+        so they can use shared memory to communicate. 
+
+            --> usually, synchronization between CPU and device requires
+            lock-free techniques, plus device-specific contracts ("I
+            will not overwrite memory until you set a bit in one of my
+            registers telling me to do so.")
+
+            --> as usual, need to read the manual
+
+    B. Polling vs. interrupts (vs. busy waiting)
+
+        So far, in our examples, the CPU has been busy waiting. This is
+        fine for these examples, but higher bandwidth devices (disks,
+        network cards, etc.) need different techniques.
+
+        Polling: check back periodically 
+
+            kernel...
+            
+           - ... sent a packet? Periodically ask the card when the buffer is
+             free.
+
+           - ... waiting for a packet? Periodically ask whether there is
+             data
+
+           - ... did Disk I/O? Periodically ask whether the disk is done.
+
+            Disadvantages: wasted CPU cycles (if device not busy) and higher latency
+
+        Interrupts: The device interrupts the CPU when its status
+        changes (for example, data is ready, or data is fully written).
+
+            (The interrupt controller itself is initialized with I/O
+            instructions; if you're curious, see the function
+            interrupt_init() in WeensyOS's k-hardware.c.)
+
+            This is what most general-purpose OSes do. There is a
+            disadvantage, however. This could come up if you need to
+            build a high-performance system.
+
+            Namely: If interrupt rate is high, then the computer can
+            spend a lot of time handling interrupts (interrupts are
+            expensive because they generate a context switch, and the
+            interrupt handler runs at high priority).
+
+                --> in the worst case, you can get *receive livelock*
+                where you spend 100% of time in an interrupt handler but no
+                work gets done.
+ 
+        This tradeoff comes up everywhere....
+
+        ANALOGY, courtesy of past TA Parth Upadhyay: "Interrupts vs
+        Polling in the context of phone notifications.  There's 2 ways
+        for you to figure out whether you have more emails/tweets.  1 is
+        to, every time your phone buzzes, stop everything and look at
+        it.  (You don't want to miss that tweet.) The second way is for
+        you to, periodically, check your email. The trade-offs are
+        pretty similar! You get that snapchat 5 minutes later than you
+        could have, but you don't pay the costs of so many context
+        switches."
+
+        How to design systems given these tradeoffs? Start with
+        interrupts. If you notice that your system is slowing down
+        because of livelock, then switch to polling. If polling is chewing
+        up too many cycles, then move towards an adaptive switching
+        between interrupts and polling. (But of course, never optimize
+        until you actually know what the problem.) A classic reference
+        on this subject is the paper 
+            "Eliminating Receive Livelock in an Interrupt-driven
+            Kernel", by Mogul and Ramakrishnan, 1996.
+        
+        We have just seen three approaches to synchronizing with
+        hardware:
+
+            busy waiting
+            polling
+            interrupts
+
+        QUESTION: where have we seen a conceptually similar tradeoff to
+            interrupts vs. the other two?
+
+        ANSWER: spinlocks vs. mutexes. (analogy isn't perfect 
+           because mutex and cv calls are *blocking* whereas the kernel
+           never truly blocks; see discussion of sync-vs-async in a
+           future class.)
+
+    C. DMA vs. programmed I/O
+
+        Programmed I/O: (mostly) what we have been seeing in the handout
+        so far: CPU writes data directly to device, and reads data
+        directly from device.
+
+	DMA: better way for large and frequent transfers (related to part
+	(d) above)
+
+	    CPU (really, device driver programmer) places some buffers
+	    in main memory.
+
+	    Tells device where the buffers are 
+
+	    Then "pokes" the device by writing to register
+
+            Then device uses *DMA* (direct memory access) to read or
+            write the buffers,
+
+            The CPU can poll to see if the DMA completed (or the device
+            can interrupt the CPU when done).
+
+            [rough picture:
+	       buffer descriptor list
+	       <metadata> --> [  buf ]
+	       <metadata> --> [  buf ]
+	       ....
+            ]
+
+        This makes a lot of sense. Instead of having the CPU
+        constantly dealing with a small amount of data at a time, the
+        device can simply write the contents of its operation straight
+        into memory.
+
+        NOTE: book couples DMA to interrupts, but things don't have to
+        work like that. You could have all four possibilities in
+        {DMA, programmed I/O} x {polling, interrupts}. 
+        
+            For example, (DMA, polling) would mean requesting a DMA
+            and then later polling to see if the DMA is complete.
+
+4. Software architecture: device drivers
+
+    The examples on the handout are simple device drivers.
+
+    Device drivers in general solve a software engineering problem ...
+
+        [draw a picture]
+
+        expose a well-defined interface to the kernel, so that the
+        kernel can call comparatively simple read/write calls or
+        whatever.
+
+        For example, reset, ioctl, output, read, write,
+        handle_interrupt()
+
+        this abstracts away nasty hardware details so that the kernel
+        doesn't have to understand them.
+
+        When you write a driver, you are implementing this interface,
+        and also calling functions that the kernel itself exposes
+
+    ... but device drivers also *create* software engineering problems.
+    Fundamental issues:
+
+        Each device driver is per-OS and per-device (often can't reuse
+        the "hard parts")
+
+        They are often written by the device manufacturer (core
+        competence of device manufacturers is hardware development, not
+        software development).
+
+        Under conventional kernel architectures, bugs in device drivers
+        -- and there are many, many of them -- bring down the entire
+        machine.
+
+    So we have to worry about potentially sketchy drivers ...
+
+    ... but we also have to worry about potentially sketchy devices.
+
+        a buggy network card can scribble all over memory 
+        (solution: use IOMMU; advanced topic)
+
+        plug in your USB stick: claims to be a keyboard; starts issuing
+        commands. (IOMMU doesn't help you with this one.)
+
+        plug in a USB stick: if it's carrying a virus (aka malware),
+        your computer can now be infected. (Iranian nuclear reactors are
+        thought to have been attacked this way. Unfortunately for us,
+        the same attacks could work against our power plants, etc.)
+    
+    Stuxnet example
+
+5. Synchronous vs asynchronous I/O
+
+    - A question of interface
+
+    - NOTE: kernel never blocks when issuing I/O. We're discussing the
+    interface presented to user-level processes.
+
+
+    - Synchronous I/O: system calls block until they're handled.
+   
+    - Asynchronous I/O:
+
+        I/O doesn't block. for example, if a call like read() or write()
+        _would_ block, then it instead returns immediately but sets a
+        flag indicating that it _would_ have blocked.
+
+        Process discovers that data is ready either by making another
+        query or by registering to be notified by a signal (discuss
+        signals later)
+
+    - Annoyingly, standard POSIX interface for files is blocking,
+    always. Need to use platform-specific extensions to POSIX to get
+    async I/O for files. (Although below, we will assume a non-blocking
+    read(). This isn't a total abuse because read() can be set to be
+    non-blocking, if the fd represents a device, pipe, or socket.)
+
+    - Pros/cons:
+
+        - blocking interface leads to more readable code, when
+        considering the code that invokes that interface
+        
+        - but blocking interfaces BLOCK, which means that the code
+        _above_ the interface cannot suddenly switch to doing something
+        else. if we want concurrency, it has to be handled by a layer
+        _underneath_ the blocking interface. 
+                
+            - We'll see an example of this below.
+
+
+6. Context switches in WeensyOS
+
+    - on interrupt, hardware saves "trapframe":
+        %rip/%rsp/%eflags and lots of other things
+        saves all of that on the *kernel's stack* at a well-known place in kernel memory
+    - %rdi set equal to stack pointer
+    - %rdi shows up, in C code, as the argument to exception()
+    - exception does a brute force struct copy into process-specific memory in kernel space
+    - now all of the process's registers just live in the PCB / struct proc.
+    - kernel does its thing.
+    - kernel gets ready to choose another process
+    - remember, that process had the same thing happen
+    - so all of *the new process's* registers are sitting in the same kind of memory mentioned above.
+    - now, exception_return (&p->p_registers)
+    - note: %rdi holds address of saved registers
+    - set the stack pointer equal to that address
+    - that means that popq will do the "right" thing
+    - pop the saved registers into the CPU's
+    - add 16 to skip past saved codes (error code if pg fault handler and int code in all cases).
+    - now stack pointer is pointing to the trapframe at the time of the trap
+    - that trapframe includes %rip and trap-time %rsp
+    - iretq brings us back into user space with the %rip,%rsp at the time of the trap
+
+

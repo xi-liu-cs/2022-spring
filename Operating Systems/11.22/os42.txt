@@ -1,0 +1,40 @@
+1
+file sys data structure must persist, survive
+how to update persistent data struct despite 
+presence of power loss or system crash
+what happens if someone trips over power cord
+and machine loses power
+
+崩溃一致性问题 crash-consistency problem:
+need to update 2 on-disk structures, A and B
+disk only service 1 request at a time
+1 of the 2 requests will reach disk first (either A or B)
+if system crashes or loses power
+after 1 write completes,
+on-disk struct will be left in an inconsistent state
+(if system crash or lose power
+between any 2 writes,
+on-disk state may only partially get updated)
+
+
+
+2
+old approach: fsck 文件系统检查程序, (file system checker)
+journaling日志记录
+write-ahead logging预写日志
+
+3
+when append (add a new data block), 
+must update 3 on-disk structures:
+1. inode, must point to new block, record larger size 
+2. new data block
+3. new version of data bitmap
+
+
+
+5
+file system checker fsck: a unix tool 
+for finding inconsistencies and repairing
+
+redundant array of independent disks
+= RAID 独立硬盘冗余阵列

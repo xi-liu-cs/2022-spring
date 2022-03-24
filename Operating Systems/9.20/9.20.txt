@@ -1,0 +1,117 @@
+fork() copy process
+if child, ret 0
+if paret,  ret child id
+
+shell that create processes
+human interface to computer
+
+how does $ ls (list file)
+
+pid is unsigned, pid > 0 instends to say pid != 0
+
+execve : invoke the loader
+
+take that binary (command ls)
+
+created a new copy of shell
+
+point of fork?
+
+when run program on background, how to modify 
+pseudocode 1?
+
+$ sleep 5
+parent wait 5 second for the child
+
+$ sleep 5 &
+dont wait for child, run child at background
+
+&
+we can just not wait for the child
+1. background
+2. rely on synchronization of parent and child
+3. we can decide whether to wait for the child
+
+pipeline : take the output of 1 prog and send it to
+another prog
+
+ps xc 
+ps xc | grep -c vim
+ls > foo
+cat > foo
+
+
+how to know ls output go to file?
+
+how to ask github for all repository?
+	combine using pipeline:
+	cat blob[1-3].txt > blob.txt
+	vi blob.txt
+
+	cat blob.txt | grep -o labs-21fa-[a-zA-Z0-9\-]*
+	| sort -f | uniq > done.txt
+	vi done.txt
+
+
+grep (Globally search 
+for a Regular Expression and Print matching lines)
+
+> redirect to file
+	cat blob[1-3].txt > BLAH 
+| send to another program reading std input
+	
+
+
+
+how do redirection work?
+
+0 = stdin
+1 = stdout, screen
+2 = stderr, error messages
+
+fprintf(stderr...)
+
+
+$ ./first3 abcd efgh > /tmp/foo
+how does tmp/foo get the output
+
+
+shell created  /tmp/foo
+
+43 WRONLY = write only
+
+redirect_file = "/tmp/foo"
+
+
+
+
+createProcess(name, cmdline, security.attr, ...) //30 args
+combine fork and exec 
+
+
+$ :() {: | : &}; :
+
+
+PCB
+TCB
+
+every process has 1 or more threads
+#entries in the process table= # thread
+thread : schedulable executable context
+
+interface to threads
+tid thread.create(void (*fn)(void*), void *) 
+/*function */
+void thread.exit(); //go away
+void thread.join(tid thr) //wait until thr exit
+
+
+
+concurrency
+1. interleaving 1st: scheduling temporal 
+2. multi-cpu, spatial
+3. interleaving 2nd: interrupts 
+
+exponential large # ways to interleave
+terrible to reason about # of interleaving
+reduce # interleaving

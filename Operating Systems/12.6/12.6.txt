@@ -1,0 +1,45 @@
+trusting trust attack
+
+trust is a bad thing
+trust that component means assume that component work better
+
+trust = assumption = vulnerability
+
+ken thompson author of unix
+
+add feature to a language
+
+java compiler is implemented in c
+
+compiler now recongize cs202 as token
+in java files
+
+change 1 feature
+recompile everything
+
+bug login 
+
+add bug to login.c
+requirement: leave no trace at source
+
+compiler should also have no bug
+
+
+quine: self reproduce program
+scheme language
+
+X is program
+
+X = {
+(1) if compiling, insert bug;
+(2) if compiling c compiler, insert X;
+}
+
+if disassembler is not bugged
+
+microchips is not doing what is does
+trusted the build process
+decide what to trust
+
+cc -S cc.c  ->   cc.s
+as cc.s

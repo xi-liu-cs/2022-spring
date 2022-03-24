@@ -1,0 +1,12 @@
+https://www.quora.com/What-is-the-difference-between-cstdio-and-stdio-h
+
+The difference (which is neither minor nor a matter of style)
+is that stdio.h and other C-like libraries when imported in a C++
+file may pollute the global namespace,
+while the corresponding C++ headers (cstdio, cstdlib, cassert)
+place the corresponding functions, variables, etc., in the std namespace.
+It's strongly advised to use the latter in C++
+
+https://stackoverflow.com/questions/54084741/function-was-not-declared-in-this-scope-even-though-header-file-is-present
+the method should be used as a member of an object
+

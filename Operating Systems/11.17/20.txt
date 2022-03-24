@@ -1,0 +1,275 @@
+Class 20
+CS 202
+17 November 2021
+
+On the board
+------------
+
+1. Last time
+2. Directories
+3. Performance
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    - files 
+
+    - for today, remember, the system refers to a file with a number
+
+2. Directories
+
+    --Problem: "Spend all day generating data, come back the next
+    morning, want to use it."  F. Corbato, on why files/dirs
+    invented.
+
+    --Approach 0: Have users remember where on disk their files are
+
+	--like remembering your social security or bank account #
+  
+	--yuck. (people want human-friendly names.)
+
+    --So use directories to map names to file blocks, somehow
+	
+	--But what is in directory?
+
+    --A short history of directories
+
+	--Approach 1: Single directory for entire system
+
+	    --Put directory at known location on disk
+
+	    --Directory contains <name,inumber> pairs
+
+	    --If one user uses a name, no one else can
+
+	    --Many ancient personal computers work this way
+
+	--Approach 2: Single directory for each user
+
+	    --Still clumsy, and "ls" on 10,000 files is a real pain
+	    --(But some oldtimers still work this way)
+
+	--Approach 3: Hierarchical name spaces. 
+
+	    --Allow directory to map names to files ***or other dirs***
+
+	    --File system forms a tree (or graph, if links allowed)
+
+	    --Large name spaces tend to be hierarchical
+
+		--examples: IP addresses, domain names, scoping in
+		programming languages, etc.
+
+		--more generally, the concept of hierarchy is everywhere
+		in computer systems
+
+    --Hierarchial Unix
+
+	--used since CTSS (1960s), and Unix picked it up and used it
+	nicely
+
+	--structure like:
+		            "/"
+	     bin     dvdrom  dev       sbin           tmp    usr
+          ls, grep	             tcpdump 
+
+	--directories stored on disk just like regular files
+
+	    --here's the data in a directory file; this data can be in the
+	    *data blocks* of the directory or else in the inode of the
+	    directory.
+
+	      [<name, inode#>]
+	       <bin, 1021>
+	       <dev, 1001>
+	       <sbin, 2011>
+	       ....
+
+	    --i-node for directory contains a special flag bit
+
+		--only special users can write directory files
+
+	--key point: i-number might reference another directory
+
+	    --this neatly turns the FS into a hierarchical tree, with
+	    almost no work
+
+	--bootstrapping: where do you start looking?
+
+	    --root dir always inode #2 (0 and 1 reserved)
+
+	    --and, voila, we have a namespace!
+
+
+	--special names: "/", ".", ".."
+
+	--given those names, we need only two operations to navigate the
+	entire name space:
+
+	    --"cd name": (change context to directory "name")
+	    --"ls": (list all names in current directory)
+
+
+	--example:
+
+                /a/foo.c
+                /b/c/essay.txt
+           
+            what does the file system look like?
+
+            [ i0 ... i7 || [block ] [ block ] [block ] .....]
+
+	    [Draw picture]
+            
+
+	--links:
+
+	    --hard link: multiple dir entries point to same inode; inode
+	    contains refcount
+
+		"ln a b": creates a synonym ("b") for file ("a")
+
+		--how do we avoid cycles in the graph? (answer: can't
+		hard link to directories).
+
+	    --soft link: synonym for a *name*
+
+		"ln -s /d/a b": 
+
+		--creates a new inode, not just a new directory entry
+
+		--new inode has "sym link" bit set
+
+		--contents of that new file:
+
+		    "/d/a"
+
+3. Performance
+
+    Case study: FFS
+
+	--Unix FS was simple, elegant and ... slow
+
+	    --blocks too small
+
+	    --inode array all at the beginning of the disk
+
+	    --inode had:
+		--too many layers of mapping indirection
+		--transfer rate low (they were getting one block at a time)
+
+            --free blocks were stored in a linked list on the disk
+
+	    --poor clustering of related objects
+
+		--consecutive file blocks not close together
+
+		--Inodes far from data blocks
+
+		--Inodes for a given directory not close together
+
+		--result: poor enumeration performance, meaning things like:
+			"ls" and "grep foo *.c" were slowwwww
+
+	    --other problems:
+		--14 character names were the limit
+		--can't atomically update file in crash-proof way
+ 
+ 
+       --FFS (fast file system) fixes these problems to a degree.
+	
+	    [Reference: "M. K. McKusick, W. N. Joy, S. J. Leffler, and R.
+	    S. Fabry. A Fast File System for UNIX. ACM Trans. on
+	    Computer Systems, Vol. 2, No. 3, Aug. 1984, pp. 181-197.]
+
+      what can we do to above?
+
+      [ask for suggestions]
+
+      * make block size bigger (4 KB, 8KB, or 16 KB)
+
+      * cluster related objects
+
+	  "cylinder groups" (one or more consecutive cylinders)
+
+	[superblock | bookkeeping info | inodes | bitmap | data blocks (512 bytes each) ]
+
+	        [note: it's 512 above, not 4KB, because the file system
+	        doesn't exactly _insist_ that data blocks are larger.
+	        there can be _fragments_. this is a way to group
+	        larger writes to together but to not waste space if 
+	        file size isn't a multiple of 4KB.]
+	
+	    --try to put inodes and data blocks in the same cylinder group
+
+	    --try to put all inodes of files in the same directory in
+	    the same cylinder group
+	    
+	    --new directories placed in cylinder group with greater than
+	    average number of free inodes
+
+	    --as files are allocated, use a heuristic: spill to next
+	    cylinder group after 40 KB of file (which would be the point
+	    at which an indirect block would be required, assuming
+	    4096-byte blocks) and at every megabyte thereafter.
+	    
+      * bitmaps (to track free blocks)
+
+	    --Easier to find contiguous blocks
+
+	    --Can keep the entire thing in memory 
+
+	    --500 GB disk / 4KB disk blocks = 125,000,000 entries = 15MB.
+	    not outrageous these days.
+
+      * reserve space
+	   --but don't tell users. (df makes full disk look 110% full)
+
+      * atomic "rename"
+
+      * symbolic links
+
+      * total performance
+
+	--20-40% of disk bandwidth for large files
+
+	--10-20x of original Unix file system!
+
+	--still not the best we can do
+	    (meta-data writes happen synchronously, which really hurts
+	    performance. but making asynchronous requires story for
+	    crash recovery.)
+
+      Others:
+
+	--Most obvious: big file cache
+
+	    --kernel maintains a *buffer cache* in memory
+
+	    --internally, all uses of ReadDisk(blockNum, readbuf)
+	    replaced with:
+
+		ReadDiskCache(blockNum, readbuf) {
+		    ptr = buffercache.get(blockNum); 
+		    if (ptr) {
+			copy BLKSIZE bytes from ptr to readbuf
+		    } else {
+			newBuf = malloc(BLKSIZE);
+			ReadDisk(blockNum, newBuf);
+			buffercache.insert(blockNum, newBuf);
+			copy BLKSIZE bytes from newBuf to readbuf
+		    }
+
+	--no rotation delay if you're reading the whole track.
+	    --so try to read the whole track
+
+	--more generally, try to work with big chunks (lots of disk
+	blocks) 
+	    --write in big chunks
+	    --read ahead in big chunks (64 KB)
+
+	--why not just read/write 1 MB at a time?
+	    --(for writes: may not get data to disk often enough)
+	    --(for reads: may waste read bandwidth)
+

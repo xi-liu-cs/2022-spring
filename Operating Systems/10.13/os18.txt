@@ -1,0 +1,26 @@
+1
+chop up space into fixed-sized pieces: paging
+
+physical memory =
+array of fixed-sized slots called page frames 页帧
+
+3
+this page table is a per-process
+data structure
+
+movl <virtual address>, %eax
+
+split virtual address into
+1. virtual page number (VPN)
+2. offset (within the page)
+
+
+4
+when process generates a virtual address,
+os & hardware must combine to translate it
+into a meaningful physical address
+
+movl 21, %eax
+
+010101 //2^4 + 2^2 + 2^0 = 16 + 4 + 1 = 21
+ 

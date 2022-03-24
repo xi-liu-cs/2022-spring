@@ -1,0 +1,393 @@
+Class 2
+CS 202
+13 September 2021
+
+On the board
+------------
+
+CS202(-001): Operating Systems
+http://www.cs.nyu.edu/~mwalfish/classes/21fa
+
+1. Last time
+2. Intro to processes
+3. Process's view of memory (and registers)
+4. Stack frames
+
+https://nyu.zoom.us/j/92007696537
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    - introduced course
+
+    - discussed purpose of OS, purpose of the class
+
+    - covered abbreviated history of OSes
+
+    Today: we will use introduce processes.
+
+    We will also use "a process's view of the world" to do several
+    things:
+        - demystify functional scope
+        - demystify pointers
+        - describe how programmers get certain kind of work out of the system.
+
+    Some of this may be review from CSO; that's okay, as our perspective
+    will be different.
+
+2. Process
+    - key abstraction: process
+
+    - motivation: you want your computer to be able to do multiple
+    things at once:
+
+        - you might find it annoying to write code without being able to
+        do anything else during that time.
+
+        - or if we have a computer with multiple users, they all need to
+        get things done simultaneously
+
+    - another motivation: resource efficiency:
+
+        -- example #1: increase CPU utilization:
+
+                <text editor>--->|wait for input|---->|wait for input|
+                         gcc---------------->    
+    
+                [this is called "overlapping I/O and computation"]
+
+         -- example #2: reduce latency:
+                A goes for 80 s, B goes for 20 s
+
+                A-----------> B --> : takes B 100 s
+
+                run A and B concurrently, say for 10s each, makes B finish
+                faster.
+
+
+    [DRAW PICTURE:
+                                             loader
+    HUMAN --> SOURCE CODE --> EXECUTABLE -----------> PROCESS
+
+      
+           vi        gcc         as          ld         loader
+    HUMAN ---> foo.c ---> foo.s ----> foo.o ---> a.out ----> process
+
+    NOTE: 'ld' is the name of the linker. it stands for 'linkage
+    editor'.
+    ]
+
+    
+    classical definition of a process: instance of a running program
+
+        example:
+            --browser, text editor, word processor, PDF viewer, image
+            processor, photo editor, messaging app
+
+
+    - a process can be understood in two ways:
+
+        from the **process's** point of view 
+
+            today / next class
+
+            high-level: process sees an abstract machine 
+            
+                (more accurately, an abstract machine plus lots of calls
+                for manipulating and interacting with that abstract
+                machine.)
+
+        from the **OS's** point of view
+
+            meaning how does the OS implement, or arrange to create, the
+            abstraction of a process?
+
+            we will deprioritize this for now, and come back later in
+            the course.
+   
+
+3. Process view of memory
+
+    Background, before we even get to processes: recall from CSO (or
+    your computer architecture class) that some basic elements in a
+    machine (a computer) are:
+
+        - CPU core (a processor), which consists of
+
+            * Some execution units (like ALUs) that can perform
+            computation, in response to _instructions_ (addq, subq, xorq
+            ...). Arithmetic and logical instructions typically take one
+            _processor cycle_, or less.
+
+            * A small number of registers which execution units can read
+            from very quickly (in under a cycle). 
+            
+            There are many types of registers. For today, we only need
+            to think about two kinds:
+
+               ** _General-purpose_ registers. There are 16 of these on
+               the types of machines we are considering (known as the
+               x86-64 architecture):
+
+                    RAX, RBX, RCX, RDX, RSI, RDI, R8-R15, RSP and RBP. 
+                   
+                RSP is special: it is the _stack pointer_; more on this
+                below.
+
+                RBP is the base pointer (in Intel terminology); we will
+                often call this the _frame pointer_.
+
+
+               ** Special purpose registers. The only one we consider
+               here is:
+                    RIP
+               This is the instruction pointer (also known as program
+               counter). It points to the *next* instruction that the
+               processor will execute, assuming there is no branch or
+               jump to another location.
+            
+
+        -  _Memory_, which takes more time to access than registers
+        (usually 2 to several 100 cycles). 
+
+            [In reality, there are "hierarchies of memory", built from
+            caches, but for today, we will just think of memory as a
+            homogenous resource.]
+
+        - peripherals (disks, GPUs, ...)
+
+    Today, our focus is on registers and memory. 
+
+    Three aspects to a process:
+
+    (i). Each process "has its own registers." What does that mean? It
+    means that while the process is executing (and from the perspective
+    of the programmer who wrote the program that became the process),
+    the process is using those registers mentioned above. This is part
+    of what we mean when we say that a process has the impression that
+    it's executing on an abstract machine.
+
+        (The reason that this should not be taken for granted is that a
+        given physical machine will generally have multiple processes
+        that are sharing the CPU, and each has "its own" registers, yet
+        each process has no knowledge of the others. The mechanisms by
+        which the hardware and OS conspire to give each process this
+        isolated view are outside of our current scope; we'll come back
+        to this when we study context switches. It relates to process/OS
+        control transfers, discussed at the end.)
+
+        (What your book calls "direct execution" is the fact that, while
+        the process is "executing", it's using the actual CPU's true
+        registers.)
+
+    (ii). Each process has its own view of memory, which contains:
+
+    * the ".text" segment: memory used to store the program itself
+    * the ".data" segment: memory used to store global variables
+    * The memory used by the heap, from which programmer allocates using `malloc()`
+    * The memory used for the stack, which we will talk about in more detail below.
+
+    process (really, the developer of the program) thinks of
+    memory as a contiguous array:
+
+    [text/code | data | heap -->    <--- stack ]
+
+    (iii). For a process, very little else is actually needed, but a modern
+    process does have a lot of associated information:
+
+	--- signal state
+
+	--- UID(unique identifier), signal mask, controlling terminal, priority,
+	whether being debugged, etc., etc.
+
+---------------------------------------------------------------------------
+
+Admin:
+
+    - POCs (point of contact, groups assigned to diff TAs)
+
+    - remember class web site
+
+    - quick review of course policies
+
+    - HW1 due tomorrow
+
+    - Lab 1 released, lab 2 will be released
+
+    - lab1 due on Friday. use this NOW to self-assess about whether
+    you're behind in C
+
+    - if falling behind on C, please tell us
+
+    - lab1 easier than the others
+
+    - campuswire
+
+
+---------------------------------------------------------------------------
+
+4. Stack frames
+
+    Crash course in x86-64 assembly + stack:
+
+        syntax:
+            movq PLACE1, PLACE2
+        means "move 64-bit quantity from PLACE1 to PLACE2". the places
+        are usually registers or memory addresses, and can also be
+        immediates (constants).
+
+        pushq %rax   equivalent to :
+                        [  subq $8, %rsp 
+		           movq %rax, (%rsp) ]
+
+        
+        popq %rax    [ movq (%rsp), %rax
+		       addq $8, %rsp     ]
+
+        
+        call 0x12345  [ pseudo:
+		          pushq %rip
+		          movq $0x12345, %rip]
+
+        ret	       [ pseudo:
+			    popq %rip ]
+
+
+    --above we see how call and ret interact with the stack
+	--call: updates %rip and pushes old %rip on the stack
+	--ret: updates %rip by loading it with stored stack value
+
+    --but what happens to a function's state, that is, the registers,
+    when a function is called? they might need to be saved, or not.
+
+    --purely a matter of convention in the compiler, **not** hardware
+    architecture
+
+    Unix calling conventions:
+
+        --on x86-64, *arguments* are passed through registers: %rdi, %rsi,...
+        (more than four? then spill to stack). And the *return value* is
+        passed from callee to caller in %rax.
+
+    inside main, you call function f(), what happens:
+
+    /* here's a different example, not the one we worked in class */
+
+    main():
+
+        # set up frame pointer (aka "base pointer")
+        pushq %rbp
+        movq  %rsp, %rbp
+
+        # push any call-clobbered register that we will need onto the
+        # stack, for example:
+        pushq %rcx
+        pushq %r8
+        pushq %r9
+
+        call f
+        
+        # restore call-clobbered registers that we saved. In the above
+        # example, it would be:
+        popq %r9
+        popq %r8
+        popq %rcx
+
+        # epilogue: restore call-preserved registers
+	movq %rbp, %rsp
+	popq %rbp 
+	ret
+
+
+    f():
+
+        # set up frame pointer (aka "base pointer")
+        pushq %rbp
+        movq  %rsp, %rbp
+
+        ...
+
+
+                            |
+                            |
+                            |
+	   +------------+   |
+	   | ret %rip   |   /
+	   +============+
+    %rbp-> | saved %rbp |   \
+	   +------------+   |
+	   |            |   |
+	   |   local    |   \
+	   | variables, |    >- current function's stack frame
+	   |  call-     |   /
+	   | preserved  |  / 
+	   |   regs,    | |
+	   | etc.       |/
+    %rsp-> +------------+   
+
+
+    example: see handout
+
+        - Consider the state of the stack when arriving at line 23 of example.c
+          (where one is calling f from main). 
+
+        ```
+            |       ...          |
+            |   previous %rbp    | <- base pointer (%rbp)
+            |   x (in main)      |            
+            |       arg          | <- %rsp 
+            |                    | 
+            |                    | 
+            |                    |
+        ```
+
+        - Now consider what happens when the call and the function prologue is
+          executed  (line 42 in as.txt).
+
+        ```
+            |       ...          |
+            |   previous %rbp    |  A
+            |   x (in main)      |    
+            |       arg          | 
+            | address of line 24 | 
+            |  address A ("pr")  | <- %rbp
+            |      x (in f)      |
+            |       ptr          | <- %rsp
+
+            "pr" = "previous rbp" (which was actually address A)
+        ```
+
+        - Finally, note that the epilogue for f (starting on line 49)
+        does the reverse of the prologue, thus restoring the stack to
+        how it was before.
+
+
+    // the points here are:
+
+    -  Calling a function requires agreement between caller and callee
+    about how arguments are passed, and which of them is responsible for
+    saving and restoring registers.
+
+    - In an executing program, the stack is partitioned into a set of
+    stack frames, one for each function. The stack frame for the current
+    function starts at the base pointer and extends down to the stack
+    pointer. 
+    
+        ** Stack frames are how functional scope in languages like C are
+        actually implemented -- allowing each function invocation to
+        refer to different variables with the same name.  In other
+        words, the programmer thinks they are writing a function with
+        local variables; compiler has arranged to implement that with
+        stack frames.
+
+    - de-mystifying pointers: a pointer (like "int* foo") is an
+    address. that's it. repeat: a pointer is an address. that
+    address can be:
+        - on the stack
+        - on the heap
+        - in the text section of the program
+
+    - because of how stack frames work, it's unequivocally a bug
+    to pass a pointer from a prior stack frame.
+

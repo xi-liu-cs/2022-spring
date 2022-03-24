@@ -1,0 +1,607 @@
+Class 22
+CS 202
+24 November 2021
+
+On the board
+------------
+
+1. Last time
+2. Crash recovery, continued
+3. RPC, client/server systems
+4. NFS (case study of RPC and client/server)
+    --Intro and background
+    --How it works
+    --lab5 detour
+    --Statelessness
+    --Transparency
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    Crash recovery
+
+        Ad hoc
+        COW
+        Journaling
+        Redo logging
+        Undo logging
+
+
+    Concept for logging is that sub-operations are buffered in RAM. It's
+    best (for performance) if the file system has maximum flexibility
+    about when those buffered operations have to actually make it to the
+    on-disk data structures.
+
+    For each of undo logging and redo logging (and their combination,
+    which we will look at in a moment), there are required _orderings_.
+
+    The first requirement, which exists in all variants of logging, is
+    "log a sub-operation first, apply the operation only after the
+    sub-operation is logged." This is a consequence of
+    Saltzer-Kaashoek's "Don't modify the only copy." By logging, you
+    make clear what you intend to do, and only after that, do you do it.
+
+    The "actually applying the update to the file system data
+    structures" is known as *checkpointing*. 
+
+    The second requirement is that the TxEnd record can be written only
+    after the TxBegin and all sub-operations have been logged.
+
+    Then, with redo logging and undo logging, the differences are in:
+        - what the sub-operation logs:
+            - redo-only: what the operation is, how to actually apply it
+            - undo-only: what the operation is, how to roll it back
+        - when can the updates actually be applied to the file system
+        data structures, with respect to TxEnd
+            - redo-only logging: any update can happen only after TxEnd 
+            - undo-only logging: TxEnd must follow applying all updates
+            - undo + redo: updates can happen at any point
+        - what does the recovery procedure have to do.
+            - redo-only logging: redo *only* committed transactions
+              (and for performance of crash recovery, that would ideally be
+               only committed transactions that have not yet been
+               checkpointed)
+            - undo-only logging: undo *only* uncommitted transactions
+            - undo + redo: both
+        
+
+2. Redo Logging meets Undo Logging
+
+    This is just a recap of the advantages and disadvantages.
+
+    **Redo logging**
+
+    * Advantage: A transaction can commit without all in-place updates (writes
+    to actual disk locations) being completed. Updating the journal is sufficient.
+        Why is this useful? In-place updates might be scattered all over the disk,
+        so the ability to delay them can help improve performance.
+
+    * Disadvantage: A transaction's dirty blocks need to be kept in the buffer-cache
+      until the transaction commits and all of the associated journal entries have
+      been flushed to disk. This might increase memory pressure.
+
+
+    **Undo log**
+
+    * Advantage: A dirty block can be written to disk as soon as the undo-log entry
+    has been flushed to disk. This reduces memory pressure.
+
+    * Disadvantage: A transaction cannot commit until all dirty blocks have been flushed
+    to disk. This imposes additional constraints on the disk scheduler, might result in 
+    worse performance.
+
+
+    Combining Redo and Undo Logging
+
+    * Done by NTFS. 
+
+    * Goals:
+            - Allow dirty buffers to be flushed as soon as their associated journal entries
+            are written. This can reduce memory pressure when necessary.
+            - Transactions commit as soon as logging is done, so the system has greater flexibility
+            when scheduling disk writes.
+
+        * How does this work?
+
+        * Basic operations
+            Step 1: filesystem computes what would change due to an operation. For instance,
+            creating a new file involves changes to directory inodes, appending to a file 
+            involves changes to the file's inode and data blocks.
+            
+            Step 2: the file system computes where in the log it can write this transaction,
+            and writes a transaction begin record there (TxnBegin in the handout). This 
+            record contains a transaction ID, which needs to be unique. The file system 
+            **does not** need to wait for this write to finish and can immediately proceed to
+            the next step.
+            
+            Step 3: the file system writes both a redo log entry and an undo log entry for each
+            of the changes it computed in step 1. These live together. The filesystem can begin
+            making in-place changes (checkpointing changes) the moment this undo + redo log
+            information has been written.  
+
+            Step 4: Wait until the TxnBegin record, and all the log records from step 3, have been
+            written; then the system writes a transaction end record (TxnEnd in the handout). 
+            This record contains the same transaction ID as was written in Step 2, and the 
+            transaction is considered committed once it has been successfully written to disk.
+            
+            Step 5: Similar to the redo logging case, the filesystem asynchronously continues to
+            checkpoint/perform in-place writes whenever it is convenient.
+
+
+        * Crash recovery
+            First, the "redo pass": the filesystem goes through the log finding all 
+            committed transactions, and using the redo entry within them to apply committed 
+            changes.
+
+            Next, the "undo pass": Next it scans through the log (backwards) finding all 
+            uncommitted transactions, and uses the undo entries associated with these to undo any
+            in-place updates.
+
+        * Why? Designed for a time when the same Operating System ran on machines with very
+        little memory (8-32MB), and also on "big-iron" servers with lots of memory (1GB+). 
+        This was an attempt to get the best of both worlds. 
+
+
+3. RPC, client/server systems
+
+    --what is RPC? (compare to local function calls.)
+
+    --client/server systems
+
+    --potential of RPC: fantastic way to build distributed systems
+       --RPC system takes care of all the distributed/network issues
+
+    --how well does all of this work?
+
+    --question to begin answering for yourself: does RPC look like a
+    local function call, or no?
+
+4. NFS: case study of client/server, and case study of network file system
+
+    Networked file systems:
+
+	--What's a network file system?
+	    --Looks like a file system (e.g., FFS) to applications
+	    --But data potentially stored on another machine
+	    --Reads and writes must go over the network
+	    --Also called distributed file systems
+  
+	--Advantages of network file systems
+	    --Easy to share if files available on multiple machines
+	    --Often easier to administer servers than clients
+	    --Access way more data than fits on your local disk
+	    --Network + remote buffer cache faster than local disk
+	      
+	--Disadvantages
+	    --Network + remote disk slower than local disk
+	    --Network or server may fail even when client OK
+	    --Complexity, security issues
+
+    NFS: seminal networked file system (NFS = Network File System)
+	
+    * Intro and background
+    * How it works
+    * Statelessness
+    * Transparency
+    * Security
+
+    A. Intro and background
+
+	--Reasons to study it
+
+	    --case study of RPC transparency
+
+	    --NFS was very successful.
+
+	    --Still in widespread use today (CIMS machines, for example)
+
+	    --Much research uses it.
+
+	    --Can view much networked file systems research as fixing
+	    problems with NFS
+
+	--background and context
+	    --designed in mid 1980s
+	    --before this, Sun was selling Unix workstations
+		--diskless (to save money)
+		--"ND" network disk protocol (use one big central disk,
+		and let the diskless workstations use it)
+		--allowed disk to live somewhere else, but did not allow for
+		shared file system (every workstation had a partitioned
+		piece of the ND *not* a shared file system)
+
+	   More detail on context:
+
+	   NFS arose in the early-to-mid 1980s. Prior to NFS, each
+	   computer had its own private disk and file system. That
+	   worked for expensive central time-sharing systems when there
+	   weren't many workstations. But in the LAN environment, with
+	   workstations becoming cheaper, people wanted ways to share
+	   files within organizations. The goal was to allow a user to
+	   sit down at any workstation and access their files even
+	   though the files might live on a central server. 
+
+	       --Advantages:
+		  --convenience (get your files anywhere)
+		  --cost (buy workstations without disks)
+	      
+	--only sysadmin has to know where files live. shell, user
+	program, etc. do _not_ have to know (way better than competitors
+	at the time)
+
+
+    B. How it works
+
+	--What's the software/hardware structure?
+
+	    [DRAW PICTURE]
+
+	  --array of vnodes in both client and server
+
+	      --vnode like a primitive C++ or Java object, with methods
+
+	      --represents an open (or openable) file
+
+	     --Bunch of generic "vnode operations":
+
+		--lookup, create, open, close, getattr, setattr, read,
+		write, fsync, remove, link, rename, mkdir, rmdir, symlink,
+		readdir, readlink, ...
+
+		--Called through function pointers, so most system calls don't
+		care what type of file system a file resides on
+
+		--This function-pointer-as-abstraction pattern is common
+		in systems (for instance on your FUSE-based lab).
+
+        [DETOUR: LAB 5: THE SETUP. SEE LAB DIAGRAM. Pull from lab
+        description, and fit into the vnode picture ]
+
+            - a few other lab notes:
+
+                 - each inode is allocated its own disk block instead of
+                 being packed alongside other inodes in a single disk
+                 block.
+
+                - there's a programming pattern that could confuse:
+                pointer-to-pointer. think of it as a kind of return
+                value. if a function takes a pointer-to-pointer, then
+                the caller passes *the address of an address.* what does
+                that mean? literally, it's the address of a variable,
+                and that variable itself holds an address.
+
+            
+     
+	--NFS implements vnode operations through RPC
+	    --Client request to server over network, awaits response
+	    --Each system call may require a series of RPCs
+	    --System mostly determined by NFS RPC **protocol**
+
+	--How does it work?
+
+	    [TRACE RPC FOR OPEN AND WRITE: LOOKUP AND WRITE]
+
+
+	--nice separation between interface and implementation
+
+	    --loopback server
+
+	    --replace NFS server altogether with something that *acts*
+	    like an NFS server to the client.
+
+	    --can make lots of things *look* like a file system just by
+	    implementing the NFS interface. extremely powerful technique
+
+	    --this gain mostly arises because of the power of RPC and
+	    modularity, rather than anything about NFS in particular
+	 
+	--What does a file handle look like?
+
+	    [FS ID | inode # | generation #]
+
+	    Why not embed file name in file handle? (file names can change;
+	    would mess everything up. client needs to use an identifier
+	    that's invariant across such renames.)
+
+	    How does client know what file handle to send? (stored with the
+	    vnode)
+
+    C. Statelessness
+
+	--What the heck do they mean? The file server keeps files;
+	that's certainly state!!
+
+	    --What they really mean is that every network protocol
+	    request contains all of the information needed to carry out
+	    that request, without relying on anything remembered from
+	    previous protocol requests.
+
+	    --convince yourself of this by looking at the calls
+
+	    --but are operations really idempotent? (hint: no, not all
+	    of them.)
+
+		--what happens if two renames() are sent, and the reply
+		to the first one is lost? client sends another one. then
+		the second one returns an error code, even though the
+		operation conceptually succeeded.
+
+		    --similar issue with "mkdir", "create", etc.
+
+	--How are READ and WRITE stateless?
+
+	    (Answer: they contain the disk address (the inode at the
+	    server) as well as an offset.)
+
+	--What are the advantages and disadvantages?
+
+	    +: simplifies implementation
+	    +: simplifies server failure recovery 
+	    -: messes up traditional Unix semantics; see below
+
+	--What happens if the server reboots while the client has a file open?
+
+	   --Nothing!
+
+	   --Client just uses the same file handle.
+	     (file handles are usable across server failures.)
+
+	   --NOTE: a crashed and rebooted server looks the same to
+	   clients as a slow server. Which is cool.
+
+        --Are READ and WRITE idempotent? Yes, because they implicitly
+        reference a disk location on the server. of course, the disk
+        location might have a different meaning in between the "minting"
+        of the FH (file handle) and its use. generation number (see
+        below) solves that problem.
+
+        --Why doesn't NFS have RPCs called OPEN() and CLOSE()?
+
+    D. Transparency and non-traditional Unix semantics
+
+	--Note: transparency is not just about preserving the syscall
+	API (which they do). Transparency requires that the system calls
+	*mean* the same things. Otherwise, existing programs may compile
+	and run but experience different behavior. In other words,
+	formerly correct programs may now be incorrect. (This happened
+	with NFS because of its close-to-open consistency.)
+
+	--what is generation number for?
+
+		(*) What if client A deletes a file and it (or another
+		client) creates a new one that uses the same i-node?
+
+		--generation number prevents
+		    --Stale FH error
+		
+		--served file systems must support
+
+		--So not fully transparent
+
+		More detail:
+    
+		For *all* files that could ever be exposed by NFS, the
+		server stores, in the i-node on disk, a generation
+		number. Every time the server allocates a given i-node,
+		it increments the i-node's generation number. When the
+		server passes a FH to the client (say, in response to a
+		LOOKUP RPC from the client), the server puts the given
+		i-node's _current_ generation number in the FH. 
+
+		How: The way the generation number avoids problems that
+		arise from the special case in (*) is as follows: for
+		each request the client makes of the server, the server
+		checks to see whether the generation number in the
+		client's FH matches the on-disk generation number for
+		the i-node in question. If so, the client has a current
+		FH, and the special case has not arisen. If not, the
+		client's generation number must be older, so we are in
+		the special case, and the client gets a "stale FH" error
+		when it tries to READ() or WRITE().
+
+		Why: Without the generation number, the special case in
+		(*) would cause a client to read and write data it had
+		no business reading or writing (since the given i-node
+		now belongs to some other file).
+
+	
+	--non-traditional Unix semantics
+
+        (i) we mentioned one example above: error returns on successful
+	operations. now we'll go through some other examples of changed
+	semantics
+
+        (ii) most famous one: close-to-open consistency, writes-on-close()
+
+            --can get behaviors that are strange. will detail at the end
+            of this.
+
+	    * Server must flush to disk before returning (why? because
+	    if they didn't, and there were a server crash, the client
+	    wouldn't know to retry -- the client would be unaware that
+	    the write never took effect). So before returning "success",
+	    the server has to make sure:
+
+		  --Inode with new block # and new length safe on disk.
+		  --Indirect block safe on disk.
+		  --So writes have to be synchronous
+
+		  So why isn't performance bad?
+		     caching at client. not all RPCs actually go to server [see
+		     below]
+
+		[NFSv3 handles this a bit better. WRITES() go to server
+		but don't necessarily cause disk accesses at server.]
+
+	    * what kind of caching do they have?
+
+		  --Read-caching of data. Why does this help? (re-reading files)
+
+		  --Write-caching of data. Why does this help? (see above)
+
+		  --Caching of file attributes. Why does this help? 
+		    A command like "ls -l" gets all of the file
+		    attributes, at which point a successive open can
+		    work against the cached copy of the file or the
+		    remote copy, depending on how recently the file was
+		    updated
+
+		  --Caching of name->fh mappings. Why does this help?
+		  (cache prefix like /home/jo)
+
+            * but once you have a cache, you have to worry about
+            coherence and semantics. what kind of coherence
+            does it actually give? (Answer: close-to-open)
+	    
+		A: write(), then close(), B: open(), read(). B
+		    sees A's data. Otherwise, B has an "old" picture
+		    because data not sent by A until close().
+     
+                At a high level, how do they implement it?
+		    --writing client forces dirty blocks during a close()
+
+		    --reading client checks with server during open()
+		    and asks, "is this data current?"
+                       (can reduce traffic from this last one by caching
+                       file attributes)
+	    
+	    * Why do they give this guarantee instead of a stronger
+	    guarantee? (Performance. They are trading off the
+	    semantics for performance.)
+
+            * Upshot:
+
+                ** can get errors on close() [which legacy apps would
+                not have expected] instead of write(). means the app has
+                to change. if server ran out of space, the app finds out
+                about it at a different point than if the file system
+                were local. formerly correct applications now not
+                correct, if they didn't check the return value of
+                close()!
+
+                ** another issue: the following pattern does not work well: 
+                    "some_proc > out" on one client ; "tail -f out" on another
+                issue is that the second client may not find out about the
+                updates done by the first client
+
+	(iii) server failure	
+
+	    --previously, open("some_file", RD_ONLY) failed only if file didn't exist
+
+	    --now, if server has failed, open() can fail or apps hang
+	    [fundamental trade-off if server is remote]
+
+	(iv) deletion or permissions change of open files
+
+            (a) What if client A deletes a file that client B has "open"?
+		--Unix: my reads still work (file exists until all
+		   clients close() it)
+		--NFS: my reads fail
+
+	        --Why?
+
+		    --To get Unix-like behavior using NFS, server would
+		    have to keep track of all kinds of stuff. That state
+		    would have to persist across reboots.
+
+		    --But they wanted stateless server
+
+		    --So NFS just does the wrong thing: RPCs fail if
+		    another client deletes a file you have open.
+
+	    --(Hack if the *same* client does the delete: the NFS client
+	    asks the NFS server to do a rename to .nfsXXX.  That's
+	    another place that stale file handles come from.)
+
+            (b) "chmod -r 0700" [make the file inaccessible except to
+            its owner] while file is open()
+
+                similar issue to the one above, in (a)
+
+		(in Unix, nothing happens. in NFS, future reads fail,
+		since NFS checks permissions on every RPC.)
+
+    
+        (v) execute-only implies read, unlike in Unix
+
+		(in Unix, the operating system draws a distinction
+		between demand-paging in the executable, to execute it,
+		versus returning bytes in a file to a requesting
+		program. a user might have permission to do one, or the
+		other, or both. in NFS, the NFS server cannot care about
+		this distinction because the NFS client needs the data
+		blocks in the file, period. thus, if a file is marked
+		execute-only on the NFS server, the NFS client will
+		still be able to read it if the NFS client really wants
+		(once the NFS client has the data blocks, it has the
+		data blocks).
+
+		 (put differently, under NFS, once a client has the
+		 file, it has the file. compare to Unix, where Unix
+		 really can execute a file for a user but not let the
+		 user read it.)
+
+
+	Areas of RPC non-transparency (a more general point than NFS)
+	  * Partial failure, network failure
+	  * Latency
+	  * Efficiency/semantics tradeoff
+	  * Security. You can rarely deal with it transparently (see
+	    below)
+	  * Pointers. Write-sharing. Portable object references is hard
+	    under RPC
+	  * Concurrency (if multiple clients)
+	  Solution 1: expose RPC to application
+	  Solution 2: work harder on transparent RPC
+
+    E. Security
+    
+	--Only security is via IP address
+
+	--Another case of non-transparency:
+
+	    --On local system: UNIX enforces read/write protections
+		Can't read my files w/o my password
+
+	    --On NFS:
+		--Server believes whatever UID appears in NFS request
+		--Anyone on the Internet can put whatever they like in the request
+		--Or you (on your workstation) can su to root, then su to me
+		  --2nd su requires no password
+		  --Then NFS will let you read/write my files
+
+	    --In other words, to steal data, just adopt the uid of the
+	    person whose files you're trying to read....or just spoof
+	    packets.
+
+	--So why aren't NFS servers ridiculously vulnerable?
+	    --Hard to guess correct file handles.
+	    --(Which rules out one class of attacks but not spoofed
+	    UIDs)
+
+	--Observe: the vulnerabilities are fixable
+	    --Other file systems do it
+	    --Require clients to authenticate themselves cryptographically.
+	    --But very hard to reconcile with statelessness.
+
+
+    F. Concluding note
+
+	--None of the above issues prevent NFS from being useful.
+	    --People fix their programs to handle new semantics.
+	    --Or install firewalls for security.
+	    --And get most advantages of transparent client/server.
+
+    References
+    --"RFC 1094": NFS v2
+    --"RFC 1813": NFS v3
+
+    Other distributed file systems (disconnected operation, etc.)
+
+        --disconnected operation: where have we seen this? (answer: git)
+
+        --long literature on this (Coda, Bayou, Andrew File System, etc.,
+        etc.)
+
+[thanks to Robert Morris for some of the NFS content.]

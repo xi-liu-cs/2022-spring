@@ -1,0 +1,4 @@
+https://cs.nyu.edu/~mwalfish/classes/
+
+assembly
+https://www.felixcloutier.com/x86/

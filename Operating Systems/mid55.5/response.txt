@@ -1,0 +1,27 @@
+as long as u 
+showed up to classes
+did the labs with no plagiarism
+and tried the exams
+u will pass
+
+do timed finals
+
+expected_grade
+depends on results of lab 4, lab 5, final prep
+
+
+
+if(expected_grade < B)
+{
+	request P/F before dec 4
+}
+
+mistake in midterm about deadlock
+is described in scribble 8
+
+做模拟期末时一定要记时
+平时练习时不记时就会在真正考试时死
+
+
+monitor(管程, 监视器)
+A monitor consists of a mutex (lock) object and condition variables

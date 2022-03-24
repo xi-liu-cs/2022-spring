@@ -1,0 +1,66 @@
+offsets of vpn and ppn need to have same bits
+ideal: tree have no depth
+VPN -> PPN U {null}
+vpn might not have a valid mapping in the table
+
+when address space is sparse, 
+multi-level page table saves memory
+
+x86-64
+64 bits or 8 bytes
+pointers are turning into 8 bytes
+word size default = 8 bytes
+
+virtual address VA
+64 bits total
+[-2^47, 2^47 - 1]
+address has 48 usable bits
+2^48 possible addresses, 2^8 ^40 = 256TB
+48 - 12 = 36 bits used for virtual page number
+
+physical address PA
+52 bits
+2^52 = 4PB
+
+
+mapping from 48 bit number (VA)
+to 52 bit number (PA)
+and granularity of 2^12 range
+
+36 bit -> 40 bit
+
+
+how does hardware find address of root dir?
+%cr3 controlled reg 3, user cannot modify (not like %rax)
+store the physical page number for that process
+(every process has their page table)
+
+context switch
+loading a diff value into %cr3
+entire address encapsulated into one 8 byte address
+
+const char * ... //read only
+
+handout page 3
+last 3 bits important:
+p: present, if p = 0, vpn maps to null
+
+translation and permission check
+
+
+rightmost 3 digits are ignored (a byte in page)
+map 
+VA 0x0202000
+PA 0x3000
+
+VA 202 shows up which slots we consult
+(VA tells which path through that tree)
+
+
+TLB caches the mappings between VA and PA
+
+
+TLB miss -> page fault (no)
+page fault -> TLB miss (no)  //illegal mem op
+
+

@@ -1,0 +1,173 @@
+Class 17
+CS 202
+8 November 2021
+
+On the board
+------------
+1. Last time
+2. Context switches (WeensyOS)
+3. User-level threading, intro
+4. Context switches (user-level threading)
+    -swtch()
+    -yield()
+    -I/O
+5. Cooperative multithreading
+6. Preemptive user-level multithreading
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    lab 4
+
+    I/O (CPU/device)
+
+    today, a mixture of topics
+
+
+2. Context switches in WeensyOS
+
+    - on interrupt, hardware saves "trapframe":
+        %rip/%rsp/%eflags and lots of other things
+        saves all of that on the *kernel's stack* at a well-known place in kernel memory
+    - %rdi set equal to stack pointer
+    - %rdi shows up, in C code, as the argument to exception()
+    - exception does a brute force struct copy into process-specific memory in kernel space
+    - now all of the process's registers just live in the PCB / struct proc.
+    - kernel does its thing.
+    - kernel gets ready to choose another process
+    - remember, that process had the same thing happen
+    - so all of *the new process's* registers are sitting in the same kind of memory mentioned above.
+    - now, exception_return (&p->p_registers)
+    - note: %rdi holds address of saved registers
+    - set the stack pointer equal to that address
+    - that means that popq will do the "right" thing
+    - pop the saved registers into the CPU's
+    - add 16 to skip past saved codes (error code if pg fault handler and int code in all cases).
+    - now stack pointer is pointing to the trapframe at the time of the trap
+    - that trapframe includes %rip and trap-time %rsp
+    - iretq brings us back into user space with the %rip,%rsp at the time of the trap
+
+3. User-level threading
+
+    Setting: there's a _threading package_
+
+    --Review: what *is* a kernel-managed thread? (We refer to that
+    as "kernel-level threading.")
+
+        --basically same as a process, except two threads in the same
+        process have the same value for %cr3 
+
+        --recall: kernel threads are always preemptive
+
+    --We can also have *user*-level threading, in which the kernel is
+    completely ignorant of the existence of threading.
+
+               [draw picture]
+
+            T1     T2     T3
+                thr package
+                   OS
+                   H/W
+
+
+    --in this case, the threading package is the layer of software that
+    maintains the array of TCBs (thread control blocks)
+
+    --threading package has other responsibilities as well:
+
+        --make a new stack for each new thread.
+
+        --scheduling!
+
+     --user-level threading can be non-preemptive (cooperative) or
+     preemptive. we'll look at both.
+
+     --but first, revisit context switches, this time for user-space.
+     
+4. Context switches in user-space
+
+    Note confusion: a "context switch" really is two things:
+        - switching the view of memory (%cr3)
+        - switching the registers
+
+    The first one isn't relevant for user-level threading.
+
+    Workhorse: swtch() switches registers
+
+        [draw pictures; see handout]
+
+    swtch() is called by yield()
+        
+        [see handout]
+
+    yield() is called by any thread that couldn't make further progress.
+
+    Good example of simultaneous use of synchronous and asynchronous
+    interface. 
+
+        [see handout]
+
+    (Kernels also need swtch(), to switch the *kernel* stack. 
+
+        [for those who want to learn more:
+        
+        here is an example in an instructional OS, see MIT's sv6
+
+        x86 version:
+            https://pdos.csail.mit.edu/6.828/2018/xv6.html
+            https://pdos.csail.mit.edu/6.828/2018/xv6/xv6-rev7.pdf
+
+        RISC version:
+            https://pdos.csail.mit.edu/6.828/2019/xv6.html
+
+        search for uses of swtch().
+        ]
+
+        WeensyOS doesn't use this mechanism because there is only a
+        single kernel stack.
+    )
+
+
+5. Cooperative multithreading
+
+    --This is also called *non-preemptive multithreading*.
+    
+    --It means that a context switch takes place only at well-defined
+    points: when the thread calls yield() and when the thread would
+    block on I/O.
+
+6. Preemptive multithreading in user-level
+
+    How can we build a user-level threading package that does
+    context switches at any time?
+
+    Need to arrange for the package to get interrupted.
+
+    How?
+
+    Signals!
+
+    Deliver a periodic timer interrupt or signal to a thread
+    scheduler [setitimer() ]. When it gets its interrupt, swap out
+    the thread, run another one
+
+    Makes programming with user-level threads more complex -- all the
+    complexity of programming with kernel-level threads, but few of the
+    advantages (except perhaps performance from fewer system calls).
+
+    in practice, systems aren't usually built this way, but sometimes it
+    is what you want (for example, if you're simulating some OS-like
+    thing inside a process, and you want to simulate the non-determinism
+    that arises from hardware timer interrupts).
+
+    A larger point: signals are instructive, and are used for many
+    things. What a signal is really doing is abstracting a key hardware
+    feature: interrupts.
+
+    So this is another example of the fact that the OS's job is to give
+    a user-space process the illusion that it's running on something
+    like a machine, by creating abstractions. In this example, the
+    abstraction is the signal, and the thing that it's abstracting is an
+    interrupt.
+

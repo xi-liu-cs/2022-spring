@@ -1,0 +1,41 @@
+ostep 
+309
+by calling mmap() on an already
+opened file descriptor, 
+a process is returned 
+a pointer to the beginning
+of a region of virtual memory
+where the contents of the file
+seem to be located
+
+csapp
+849
+This notion of mapping a set of contiguous
+virtual pages to an arbitrary
+location in an arbitrary file 
+is known as memory mapping
+mmap allows application 
+programs to do their own memory mapping
+
+csapp
+*875
+#include <unistd.h> //os api
+#include <sys/mman.h> //mem map files
+
+void *mmap(void *start,
+size_t length,
+int prot,
+int flags, 
+int fd,
+off_t offset);
+
+returns: pointer to mapped area if OK,
+MAP_FAILED (-1) on error
+
+
+The mmap function asks the kernel
+to create a new virtual memory area,
+preferably one that starts at address start,
+and to map a contiguous chunk of the
+object specified by the file descriptor fd
+to the new area

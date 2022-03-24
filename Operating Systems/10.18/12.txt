@@ -1,0 +1,295 @@
+Class 12
+CS 202
+18 October 2021
+
+On the board
+------------
+
+1. Last time
+2. x86-64: addresses
+    - virtual
+    - physical
+3. x86-64: page table structures
+4. TLBs
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    page table conceptually implements a map from 
+        VPN --> PPN
+
+        NOTE: VPN and PPN need not (and do not, in our case study) have
+        the same number of bits
+
+    review:
+
+        top bits index into page table. contents at that index are the
+        PPN.
+
+        bottom bits are the offset. not changed by the mapping
+
+    physical address = PPN + offset
+
+   
+2. x86-64: addresses
+
+    x86 architecture is 64-bits. registers and addresses are 64-bits
+    wide
+
+    VIRTUAL ADDRESSES
+
+    on currently-available x86-64 machines, only 48 bits "matter".
+    (conclusion: not all 64-bit patterns correspond to meaningful
+    virtual addresses)
+
+    Bit patterns that are valid addresses are called _canonical
+    addresses_. 
+
+    Canonical address has all 0s or all 1s in the upper 16 bits (bits
+    63 through 48). Has to match whatever bit 47 is.
+        [see 3.3.7.1 in the Intel software developer's manual]
+
+    Result: address space is 2^{48} = 256 TB
+        
+    [ Another way to look at it:
+
+        The x86-64 architecture divides canonical addresses into two
+        groups, low and high. 
+        
+        Low canonical addresses range from 
+            0x0000'0000'0000'0000 to
+            0x0000'7FFF'FFFF'FFFF.
+        
+        High canonical addresses range from
+            0xFFFF'8000'0000'0000 to
+            0xFFFF'FFFF'FFFF'FFFF.
+            
+        Considered as signed 64-bit numbers, all canonical addresses
+        range between -2^47 and 2^47-1.
+    ]
+
+    PHYSICAL ADDRESSES
+
+        52 bits
+
+        Means a single machine can address up to 4 PB of physical
+        memory.
+
+        of course, if the machine only has 16 GB (say), then physical
+        addresses will (roughly speaking) only have 34 bits that matter,
+        and thus the top 18 (=52-34) bits of physical addresses will
+        generally be zero 
+
+        [NOTE: this is a simplification, owing to the "physical memory
+        map"; however, we will not encounter that too much in this
+        class.]
+
+    MAPPING
+
+        have to map 48-bit number (virtual address) to 52-bit number
+        (physical address), at the granularity of ranges of 2^{12}
+
+3. x86-64: page table structures
+
+    walk through the handout
+
+    %cr3 is the address of the top-level directory (L1 page table)
+
+        is that address a physical address or virtual address?
+
+    	    [answer: it is a physical address. hardware needs to be
+	    able to follow the page table structure.]
+
+   bunch of bits includes 
+	    dirty (set by hardware)
+	    acccessed (set by hardware)
+	    cache disabled (set by OS)
+	    write through  (set by OS)
+
+
+    what do the U/S and R/W bits do?
+
+	--are these for the kernel, the hardware, what?
+
+	--who is setting them? what is the point?
+
+	(OS is setting them to indicate protection; hardware is
+	enforcing them)
+
+    What if OS wants to map a process's
+        
+        virtual address  0x0202000  to
+        physical address 0x3000
+       
+    and
+
+        make it accessible to user-level but read-only?
+
+    what do the page structures look like?
+
+    solution:
+        
+        take off the bottom 12 bits of offset
+            vpn = 0x0202.
+        write it out in bits:
+
+             0....0    000000001  000000010
+              18 0
+              bits
+
+        L1 (0th entry) --> L2 (0th entry) -->
+
+
+            L3
+         ...........
+         ...........
+         ...........
+         ........... [entry 1]
+         ...........
+
+
+                             PGTABLE
+                   <40 bits>
+                |0x00'0000'0003 | U=1,W=0,P=1|   [entry 2]
+                |               |            |   [entry 1]
+                |               |            |   [entry 0]
+                ______________________________
+
+
+
+
+    helpful reminders
+
+	--each entry in the L1 page table corresponds to 512GB of
+	virtual address space ("corresponds to" means "selects the
+	next-level page tables that actually govern the mapping").
+
+	--each entry in the L2 page table corresponds to 1 GB of virtual
+	address space
+
+	--each entry in the L3 page table corresponds to 2 MB of virtual
+	address space
+
+	--each entry in the L4 page table corresponds to 1 page (4 KB)
+	of virtual address space
+
+	--so how much virtual memory is each L4 page *table*
+	responsible for translating? 4KB? 2MB? 1GB? 
+
+	    [answer: 2MB]
+
+	--each page table itself consumes 4KB of physical memory,
+	i.e., each one of these fits on a page
+
+
+    [see Intel reference manual for more.
+        Intel 64 and IA-32 Architectures Software Developer's Manual,
+        Volume 3a
+
+        https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.pdf
+    ]
+
+
+    Large pages:
+
+        Can get 2MB (resp, 1 GB pages) on x86: each L3 (resp, L2) page
+        table now points to the page instead of another page table
+
+        + page tables smaller, less page table walking
+
+        - more wasted memory
+
+        to enable this, set bit 7 (PS) bit
+        
+        example: set bit PS in L3 table
+            result is 2MB pages
+            page walking is L1, L2, L3; no L4 page tables
+
+
+    [if time, exercises:
+
+    [from cs61, 2018]
+        https://cs61.seas.harvard.edu/site/2018/Section4/
+
+    What is the minimum number of physical pages required on x86-64 to
+    allocate the following allocations? Draw an example pagetable
+    mapping for each scenario (start from scratch each time).
+
+    1 byte of memory
+        = [5 phys pages]
+
+    1 allocation of size 2^12 bytes of memory
+        = [5 phys pages]
+
+    2^9 allocations of size of 2^12 bytes of memory each
+        = [512 + 4 = 516 phys pages]
+
+    2^9 + 1 allocations of size of 2^12 bytes of memory each
+        = [512 + 4 + (1 + 1) = 518 phys pages]
+
+    2^18 + 1 allocations of size 2^12 bytes of memory each
+        = [1 (L1) + 1 (L2) + 2 (L3) + (2^9 + 1) (L4) + (2^18 + 1) (the memory)]
+
+    ]
+
+
+4. TLB
+    
+    --so it looks like the CPU (specifically its MMU) has to go out
+    to memory on every memory reference?
+
+	--called "walking the page tables"
+
+    --to make this fast, we need a cache
+
+    --TLB: translation lookaside buffer
+
+	hardware that stores virtual address --> physical address;
+	the reason that all of this page table walking does not slow
+	down the process too much
+	
+	--hardware managed? (x86, ARM.) hardware populates TLB
+
+	--software managed? (MIPS. OS's job is to load the TLB when
+	the OS receives a "TLB miss". Not the same thing as a page
+	fault.)
+
+    --questions:
+
+	--does TLB miss imply page fault? (no!)
+
+	--does page fault imply TLB miss? (no!)
+	    (imagine a page that is mapped read-only. user-level
+	    process tries to write to it. TLB knows about the mapping,
+	    so no TLB miss. But this is still a protection violation.
+	    To cut down on terminology, we will lump this kind of
+	    violation in with "page fault".)
+
+
+    --x86:
+
+        --what happens to the TLB when %cr3 is loaded? [answer: flushed]
+
+        --can we flush individual entries in the TLB otherwise? 
+            INVLPG addr
+
+
+    -- Sizes
+
+    [The situation is more complicated than handout, so here are some
+    specifics for folks who are interested:
+
+    Instruction TLB:
+                  2M/4M pages, fully associative, 8 entries
+                  4KByte pages, 8-way, 64 entries
+
+    Data TLB:
+                  2M/4M pages, 4-way, 32 entries and a separate array with 1 GByte pages, 4-way, 4 entries
+                  4 KByte pages, 4-way, 64 entries
+
+    Shared 2nd-Level TLB:
+                  4 K/2M pages, 8-way, 1024 entries
+
+    ]
+

@@ -1,0 +1,542 @@
+Class 10
+CS 202
+12 October 2021
+
+On the board
+------------
+
+1. Last time
+2. Scheduling intro
+3. Scheduling disciplines
+    FIFO, first in first out
+    SJF, shortest job first
+    RR, round robin
+    I/O
+    Prio
+    MLFQ, multilevel feedback queue
+    Lottery
+4. Scheduling lessons and conclusions
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    Therac-25 discussion
+
+    Example of what can go wrong in concurrent programming (and, more
+    generally, with poor programming practice). 
+
+2. Scheduling intro
+
+    High-level problem: operating system has to decide which process (or
+    thread) to run.
+
+    A. When scheduling decisions happen:
+
+        [draw process transition diagram]
+
+
+                                                   exit (iv)
+                                                   |-------->[terminated]
+              admitted         (ii) interrupt      |
+	[new] -->   [ready]   <-------------- [running]
+	              ^        --------------->      |
+      completion of I/O \       scheduler dispatch   |
+     I/O or event (iii)   \                 _________|
+                           \               /
+			      [waiting] v  wait for I/O or event (i)
+
+
+	scheduling decisions take place when a process:
+
+	    (i) Switches from running to waiting state 
+	    (ii) Switches from running to ready state 
+	    (iii) Switches from waiting to ready 
+	    (iv) Exits 
+
+	preemptive scheduling: at all four points
+
+	nonpreemptive scheduling: at points (i), (iv), only (this is the
+	definition of nonpreemptive scheduling)
+
+
+
+    B. what are the metrics and criteria?
+
+	--turnaround time
+	    time for each process to complete
+
+        --waiting/response/output time. variations on this definition,
+        but they all capture the time spent waiting for something to
+        happen rather than the time from launch to exit.
+
+            --time between when job enters system and starts executing;
+            following the class's textbook, we will call this "response time"
+            [some texts call this "waiting time"]
+
+            --time from request to first response (e.g., key press to
+            character echo)
+            we will call this "output time" 
+            [some texts call this "response time"]
+
+
+	--system throughput
+	    # of processes that complete per unit time
+
+	--fairness
+
+	    different possible definitions:
+
+		--freedom from starvation
+
+		--all users get equal time on CPU
+
+		--highest priority jobs get most of CPU
+
+		--etc.
+
+	    [often conflicts with efficiency. true in life as well.]
+
+    C. context switching has a cost
+
+        --CPU time in kernel
+
+	    --save and restore registers
+
+	    --switch address spaces 
+
+	--indirect costs
+
+	    --TLB shootdowns, processor cache, OS caches (e.g., buffer
+	    caches)
+
+	--result: more frequent context switches will lead to worse
+	throughput (higher overhead)
+
+
+3. Scheduling disciplines
+
+    Assume first that processes/threads do not do I/O.
+
+        (Completely unrealistic but lets us build intuition, as a
+        warmup.)
+
+    A. FCFS/FIFO
+
+	--run each job until it's done
+
+	--P1 needs 24 seconds
+
+	--P2 needs 3 seconds
+
+	--P3 needs 3 seconds
+	
+	--[ P1         P2  P3 ] 
+
+	--throughput: 3 jobs / 30 seconds = .1 jobs/sec
+
+	--average turnaround time?
+	    1/3(24 + 27 + 30) = 27
+
+	--observe: scheduling P2,P3,P1 would drastically reduce average
+	turnaround time
+
+	--advantages to FCFS:
+	    --simple
+	    --no starvation
+	    --few context switches
+
+	--disadvantage:
+	    --short jobs get stuck behind long ones
+
+
+    B. SJF and STCF
+
+        --SJF
+            Schedule the job whose next CPU burst is the shortest
+
+        --STCF
+            preemptive version of SJF: if job arrives that has a shorter
+            time to completion than the remaining time on the current job,
+            immediately preempt CPU to give to new job
+
+        --idea:
+	    --get short jobs out of the system
+	    --big (positive) effect on short jobs, small
+	    (negative) effect on large jobs
+
+	--example:
+
+	    process     arrival time         burst time
+	    P1		0		7
+	    P2		2		4
+	    P3		4		1
+	    P4		5		4
+
+	    preemptive:
+	    0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15
+	    P1 P1 P2 P2 P3 P2 P2 P4 P4 P4 P4 P1 P1 P1 P1 P1
+
+        --defer advantages and disadvantages to after we introduce
+        relaxation of "no I/O" assumption
+
+    let's decide we also care about response time (as defined by our
+    book: duration between when a job arrives and when it is first
+    scheduled.)
+
+    C. Round-robin (RR)
+
+	--add timer
+
+	--preempt CPU from long-running jobs. per time slice or quantum
+
+	--after time slice, go to the back of the ready queue
+
+	--most OSes do something of this flavor (see MLFQ below)
+
+	--advantages:
+
+	    --fair allocation of CPU across jobs
+	    --low average response time when job lengths vary
+	    --good for output time if small number of jobs
+
+	--disadvantages:
+
+	    --what if jobs are same length?
+	    --example: 2 jobs of 50 time units each, quantum of 1
+	    --average turnaround time: 100 (vs. 75 for FCFS)
+
+	--how to choose the quantum size?
+	    
+	    --want much larger than context switch cost
+
+	    --majority of bursts should be less than quantum
+
+	    --pick too small, and spend too much time context switching
+
+	    --pick too large, and response time suffers (extreme case:
+	    system reverts to FCFS)
+
+	    --typical time slice is between 10-100 milliseconds. context
+	    switches are usually microseconds or tens of microseconds
+	    (maybe hundreds)
+
+    D. Incorporating I/O (relax assumption from before)
+
+        motivating example:
+
+       	    3 jobs
+	    A, B: both CPU bound, run for a week
+	    C: I/O bound, loop
+		1 ms of CPU
+		10 ms of disk I/O
+
+	    by itself, C uses 90% of disk
+	    By itself, A or B uses 100% of CPU
+
+	    what happens if we use FIFO?
+		--if A or B gets in, keeps CPU for 2 weeks
+
+	    what about RR with 100msec time slice?
+		--only get 5% disk utilization
+
+	    what about RR with 1msec time slice?
+		--get nearly 90% disk utilization
+		--but lots of preemptions
+
+        what about STCF? (applied to remaining burst time)
+                --would give us good disk utilization ... 
+
+        --advantages to STCF
+            --disk utilization (see above)
+            --optimal (minimum) waiting/response/output time (can prove this)
+            --low overhead (no needless preemptions)
+
+        --disadvantages to STCF
+            --long-running jobs can get starved
+	    --does not optimize turnaround time (only
+	    waiting/response/output time)
+            --requires predicting the future
+
+    
+	so useful as a yardstick for measuring other policies (good way
+	to do CS design and development: figure out what the absolute
+	best answer is, then figure out how to approximate it)
+
+	however, can attempt to estimate future based on past (another
+	thing that people do when designing systems):
+
+	    --Exponentially weighted average a good idea 
+
+	    --t_n: length of proc's nth CPU burst
+
+	    --\tao_{n+1}: estimate for n+1 burst
+
+	    --choose \alpha, 0 < \alpha <= 1
+
+	    --set \tao_{n+1} = \alpha * t_n + (1-\alpha)*\tao_n
+
+	    --this is called an exponential weighted moving average
+	    (EWMA)
+
+	    --reacts to changes, but smoothly
+
+	upshot: favor jobs that have been using CPU the least amount of
+	time; that ought to approximate STCF
+
+
+    E. Priority
+
+	--priority scheme: give every process a number (set by
+	administrator), and give the CPU to the process with the highest
+	priority (which might be the lowest or highest number, depending
+	on the scheme)
+
+	    --can be done preemptively or non-preemptively
+
+	--generally a bad idea to use strict priority because of
+	starvation of low priority tasks.
+	
+	    (--note: SJF is priority scheduling where priority is the
+	    predicted next CPU burst time )
+
+	--solution to this starvation is to increase a process's
+	priority as it waits
+
+    F. Multi-level feedback queue (MLFQ)
+
+        three ideas:
+
+	    --*multiple queues, each with different priority*. 32
+	    queues, for example.
+	    
+	    --round-robin within each queue (flush a priority level
+	    before moving onto the next one). 
+
+	    --feedback: process's priority changes, for example based on
+	    how little or much it's used the CPU
+
+        advantages:
+	    --approximates SRTCF
+
+	disadvantages:
+	    --can't donate priority
+	    --not very flexible
+	    --not good for real-time and multimedia
+	    --can be gameable: user puts in meaningless I/O to keep job's
+	    priority high
+
+	see textbook (chap 8) for details
+
+    G. Lottery and stride scheduling
+
+	[citations:
+	
+	C. A. Waldsburger and W. E. Weihl. Lottery
+	Scheduling: Flexible Proportional-Share Resource Management.
+	Proc. Usenix Symposium on Operating Systems Design and
+	Implementation, November, 1994.
+	http://www.usenix.org/publications/library/proceedings/osdi/full_papers/waldspurger.pdf]
+
+	C. A. Waldsburger and W. E. Weihl.  Stride Scheduling:
+	Deterministic Proportional-Share Resource Management.
+	Technical Memorandum MIT/LCS/TM-528, MIT Laboratory for
+	Computer Science, June 1995. 
+	http://www.psg.lcs.mit.edu/papers/stride-tm528.ps
+
+	Carl A. Waldspurger. Lottery and Stride Scheduling:
+	Flexible Proportional-Share Resource Management, Ph.D.
+	dissertation, Massachusetts Institute of Technology,
+	September 1995. Also appears as Technical Report
+	MIT/LCS/TR-667.
+	http://waldspurger.org/carl/papers/phd-mit-tr667.pdf
+	]
+
+	Issue lottery tickets to processes 
+	-- Let p_i have t_i tickets 
+	-- Let T be total # of tickets, T = \sum t_i
+	-- Chance of winning next quantum is t_i / T
+	-- Note lottery tickets not used up, more like season tickets
+
+	controls long-term average proportion of CPU for each
+	process
+
+	can also group processes hierarchically for control
+	    --subdivide lottery tickets
+	    --can model as currency, so there can be an exchange
+	    rate between real currencies (money) and lottery tickets
+
+	--lots of nice features
+
+	    --deals with starvation (have one ticket --> will make
+	    progress)
+
+	    --don't have to worry that adding one high priority job will
+	    starve all others
+
+	    --adding/deleting jobs affects all jobs proportionally (T
+	    gets bigger)
+
+	    --can transfer tickets between processes: highly useful if a
+	    client is waiting for a server. then client can donate
+	    tickets to server so it can run.
+
+		--note difference between donating tix and donating
+		priority. with donating tix, recipient amasses enough
+		until it runs. with donating priority, no difference
+		between one process donating and 1000 processes donating
+
+	--many other details
+
+	    --ticket inflation for processes that don't use their whole
+	    quantum
+
+	    --use fraction f of quantum; inflate tix by 1/f until it
+	    next gets CPU
+
+	--disadvantages
+
+	    --latency unpredictable
+
+	    --expected error somewhat high 
+
+		--for those comfortable with probability: this winds up
+		being a binomial distribution. variance n*p*(1-p) -->
+		standard deviation \proportional \sqrt(n),
+		    --where:
+			p is fraction of tickets owned
+			n is number of quanta
+
+	--in reaction to these disadvantages, Waldspurger and Weihl
+	proposed *Stride Scheduling*
+ 
+	    --basically, a deterministic version of lottery scheduling.
+	    less randomness --> less expected error.
+
+	    --see textbook (chap 9) for details
+	
+    H. What Linux does
+
+	--the current Linux scheduler (post 2.6.23), called CFS
+	(Completely Fair Scheduler), roughly reinvented the ideas of
+	Stride Scheduling
+
+
+4. Scheduling lessons and conclusions
+
+    --Scheduling comes up all over the place
+
+	--m requests share n resources
+
+	--disk arm: which read/write request to do next?
+
+	--memory: which process to take physical page from?
+
+    --This topic was popular in the days of time sharing, when there was
+    a shortage of resources all around, but many scheduling problems
+    become not very interesting when you can just buy a faster CPU or a
+    faster network.
+
+	--Exception 1: web sites and large-scale networks often cannot
+	be made fast enough to handle peak demand (flash crowds,
+	attacks) so scheduling becomes important again. For example may
+	want to prioritize paying customers, or address
+	denial-of-service attacks.
+
+	--Exception 2: some scheduling decisions have non-linear effects
+	on overall system behavior, not just different performance for
+	different users.
+
+	--Exception 3: real-time systems:
+	    soft real time: miss deadline and CD or MPEG decode will skip
+	    hard real time: miss deadline and plane will crash
+
+	    Plus, at some level, every system with a human at the other
+	    end is a real-time system. If a Web server delays too long,
+	    the user gives up. So the ultimate effect of the system may
+	    in fact depend on scheduling!
+
+
+	--the textbook mentions other exceptions (data center machines
+	under high subscription)
+	    
+    --In principle, scheduling decisions shouldn't affect program's
+    results
+
+	--This is good because it's rare to be able to calculate the
+	best schedule
+
+	--So instead, we build the kernel so that it's correct to do a
+	context switch and restore at any time, and then *any* schedule
+	will get the right answer for the program
+
+	--This is a case of a concept that comes up a fair bit in
+	computer systems: the policy/mechanism split. In this case, the
+	idea is that the *mechanism* allows the OS to switch any time
+	while the *policy* determines when to switch in order to meet
+	whatever goals are desired by the scheduling designer
+
+	    [[--In my view, the notion of "policy/mechanism split" is
+	    way overused in computer systems, for two reasons:
+	    
+		--when someone says they separated policy from mechanism
+		in some system, usually what's going on is that they
+		separated the hard problem from the easy problem and
+		solved the easy problem; or
+
+		--it's simply not the case that the two are separate.
+		*every* mechanism encodes a range of possible policies,
+		and by choice of mechanism you are usually constraining
+		what policies are possible. That point is obvious but
+		tends to be overlooked when people advertise that
+		they've "fully separated policy from mechanism"]]
+
+    --But there are cases when the schedule *can* affect correctness
+
+	--multimedia: delay too long, and the result looks or sounds
+	wrong
+
+	--Web server: delay too long, and users give up
+
+
+    --Three lessons (besides policy/mechanism split):
+
+	(i) Know your goals: write them down!
+
+	(ii) Compare against optimal, even if optimal can't be built. 
+
+	    --It's a useful benchmark. Don't waste your time improving
+	    something if it's already at 99% of optimal.
+
+	    --Provides helpful insight. (For example, we know from the
+	    fact that STCF is optimal that it's impossible to be optimal
+	    and fair, so don't spend time looking for an optimal
+	    algorithm that is also fair.)
+
+	(iii) There are actually many different schedulers in the
+	system that interact:
+
+	    --mutexes, etc. are implicitly making scheduling decisions
+
+	    --interrupts: likewise (by invoking handlers)
+
+	    --disk: the disk scheduler doesn't know to favor one
+	    process's I/O above another
+
+	    --network: same thing: how does the network code know which
+	    process's packets to favor? (it doesn't)
+
+	    --example of multiple interacting schedulers:
+
+		you can optimize the CPU's scheduler and still find it
+		does nothing (e.g., if you're getting interrupted
+		200,000 times per second, only the interrupt handler is
+		going to get the CPU, so you need to solve that problem
+		before you worry about how the main CPU scheduler
+		allocates the CPU to jobs)
+
+	    --Basically, the _existence_ of interrupts is bad for
+	    scheduling (also true in life)
+
+
+[Acknowledgments: Frans Kaashoek, David Mazieres, Mike Dahlin]

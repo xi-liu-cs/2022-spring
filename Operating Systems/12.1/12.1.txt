@@ -1,0 +1,103 @@
+bug incorrect thread model
+
+access control, ls
+
+a process
+1 user id, 1 or more group id
+
+info stored in inode
+directory layer of indirection on top of files
+
+uid 0, root
+a root owned process, still in user space
+
+root, checks are skipped
+only root can do
+
+to change password
+temporily raise process's privilege
+effective user id
+real user id
+
+launch time attack
+
+su
+substitute user
+
+when set break account, permission is vagrant
+
+break account also a binary ran
+
+type make grade in shell
+exec make
+
+
+weak
+
+stdin
+stdout
+stderr
+
+close(2);
+
+only 2 file descriptors
+
+2 is passed to fd
+
+password file is corrupted, no one can log in
+
+kernel check inside implementation of exec
+
+
+
+google doc
+never press save
+if not save periodically, lost data
+
+preserve is setuid root
+
+in background
+vi fork and exec preserve
+
+preserve:
+system("/bin/mail");
+
+internal field separator
+space or tab char
+demarcate 
+ifs = '/'   //forward slash
+
+bin
+real user id: bad user
+effective user id: root
+
+bin create a version of shell with setuid root
+
+
+chmod is the command 
+and system call used to change
+the access permissions of file system objects
+
+
+ptrace()
+a process to control another, gdb depends on
+
+privilege escalation
+p is written to only change password
+
+tocttou
+time-of-check to time-of-use
+lack of atomicity
+
+setuid program: p
+fd = open(logfile, O_CREATE|O_WRONLY|O_TRUNC, 0666);
+logfile is user input
+
+
+access: 
+check whether real id is allowed to access the file
+
+if(access < 0) ret error  //not atomic
+
+attacker runs "p/tmp/x"
+

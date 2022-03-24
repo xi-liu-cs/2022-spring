@@ -1,0 +1,42 @@
+HW10 Solutions
+CS202, fall 2021
+
+1.1
+
+200 words/min x 1 min/60 seconds x 7 letters/word x 1 interrupt/character = 
+23 interrupts/second.
+
+1.2
+
+It should use interrupts. Your interrupts cost the computer 23
+microseconds out of every second; this is a trivial fraction (23 parts
+in one million). If the computer used polling, you (the human) would
+notice the lag and get annoyed.
+
+
+2. Your friend forgot that contiguous virtual addresses may not be
+contiguous in physical memory. For example, if we have mappings:
+    va: 0x1000 --> pa: 0x8000
+    va: 0x2000 --> pa: 0x5000
+   then the scheme described would do the wrong thing for disk writes
+   larger than a page size: the disk would write pa 0x8000 through 0x9FFF.
+
+
+3. File systems
+ 3.1
+
+  The data pointed to by the direct block pointers can be as large as 1024 * 8 bytes. There is a single
+  indirect block pointer, and it can contain as many as 1024 / 4 pointers,
+  each of which points to 1024 bytes of data. Thus, the total is:
+    1024 * 8 + 1024 * (1024 / 4) = (2^13 + 2^18) = 270,336 B.
+
+ 3.2
+  Assume directories are implemented as files. Also, each directory entry is 16 bytes
+  (14 bytes for the file name and 2 bytes for the inode number, since there are 2^16 inodes).
+  Thus, we take our answer to the previous question and divide by 16 bytes:
+    2^13 + 2^18 / 2^4 = 2^9 + 2^14 = 16896.
+
+ Since there are 2^16 inodes on the disk, our answer is min{2^16, 16896} = 16896.
+
+
+

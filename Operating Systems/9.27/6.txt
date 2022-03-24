@@ -1,0 +1,309 @@
+Class 6
+CS 202
+27 September 2021
+
+On the board
+------------
+
+1. Last time
+2. Condition variables
+3. Monitors and standards
+
+---------------------------------------------------------------------------
+
+1. Last time
+
+    - critical sections
+    - mutexes
+
+2. Condition variables
+
+    A. Motivation
+
+        [see handout]
+
+        --producer/consumer queue 
+
+	    --very common paradigm. also called "bounded buffer":
+
+	        --producer puts things into a shared buffer
+	        --consumer takes them out
+	        --producer must wait if buffer is full; consumer must
+	          wait if buffer is empty
+	        --shows up everywhere
+		    --Soda machine: producer is delivery person, consumer
+		        is soda drinkers, shared buffer is the machine
+		    --OS implementation of pipe()
+		    --DMA buffers
+                
+	--producer/consumer queue using mutexes (see handout04, 2a)
+
+	    --what's the problem with that?
+
+	    --answer: a form of *busy waiting* 
+
+	--It is convenient to break synchronization into two types:
+
+	    --*mutual exclusion*: allow only one thread to access a given
+	    set of shared state at a time
+
+	    --*scheduling constraints*: wait for some other thread to do
+	    something (finish a job, produce work, consume work, accept
+	    a connection, get bytes off the disk, etc.)
+
+
+    B. Usage
+
+	--API
+
+	    --void cond_init (Cond *, ...); 
+		--Initialize
+
+	    --void cond_wait(Cond *c, Mutex* m);
+		--Atomically unlock m and sleep until c signaled 
+		--Then re-acquire m and resume executing 
+
+	    --void cond_signal(Cond* c);
+		--Wake one thread waiting on c
+
+		[in some pthreads implementations, the analogous
+		call wakes *at least* one thread waiting on c. Check the
+		the documentation (or source code) to be sure of the
+		semantics. But, actually, your implementation shouldn't
+		change since you need to be prepared to be "woken" at
+		any time, not just when another thread calls signal().
+		More on this below.]
+
+	    --void cond_broadcast(Cond* c);
+		--Wake all threads waiting on c
+
+    C. Important points
+
+        (1) We MUST use "while", not "if". Why?
+
+	    --Because we can get an interleaving like this:
+
+	        --The signal() puts the waiting thread on the ready list
+	        but doesn't run it
+
+	        --That now-ready thread is ready to acquire() the mutex
+	        (inside cond_wait()).
+
+	        --But a *different* thread (a third thread: not the
+	        signaler, not the now-ready thread) could acquire() the
+	        mutex, work in the critical section, and now invalidates
+	        whatever condition was being checked
+
+	        --Our now-ready thread eventually acquire()s the
+	        mutex...
+
+	        --...with no guarantees that the condition it was
+	        waiting for is still true
+	        
+	    --Solution is to use "while" when waiting on a condition
+	    variable
+
+	    --DO NOT VIOLATE THIS RULE; doing so will (almost always)
+	    lead to incorrect code
+
+            --NOTE: NOTE: NOTE: There are two ways to understand
+            while-versus-if:
+            (a) It's the 'while' condition that actually guards the program.
+            (b) There's simply no guarantee when the thread comes out of
+            wait that the condition holds. 
+        
+        (2) cond_wait releases the mutexes and goes into the waiting
+        state in one function call (see panel 2b of handout 04). 
+
+            --QUESTION: Why?
+
+	    --Answer: can get stuck waiting.
+
+	        Producer: while (count == BUFFER_SIZE)
+	        Producer: release()
+	        Consumer: acquire()
+	        Consumer: .....
+	        Consumer: cond_signal(&nonfull)
+	        Producer: cond_wait(&nonfull)
+
+	    --Producer will never hear the signal!
+
+3. Monitors and standards
+
+    Monitors = mutex + condition variables
+
+    --High-level idea: an object (as in object-oriented systems)
+	
+	--in which methods do not execute concurrently; and
+
+	--that has one or more condition variables
+
+    --More detail
+    
+	--Every method call starts with acquire(&mutex), and ends with
+	release(&mutex)
+
+	--Technically, these acquire()/release() are invisible to the
+	programmer because it is the programming language (i.e., the
+	compiler+run-time) that is implementing the monitor
+
+	    --So, technically, a monitor is a programming language
+	    concept
+
+	    --But technical definition isn't hugely useful because no
+	    programming languages in widespread usage have true monitors
+
+	    --Java has something close: a class in which every method is
+	    set by the programmer to be "synchronized" (i.e., implicitly
+	    protected by a mutex)
+
+		--Not exactly a monitor because there's nothing forcing
+		every method to be synchronized
+
+	    --And we can *use* mutexes and condition variables to
+	    implement our own manual versions of monitors, though we
+	    have to be careful
+	
+	--Given the above, we are going to use the term "monitor" more
+	loosely to refer to both the technical definition and also a
+	"manually constructed" monitor, wherein:
+	
+	    --all method calls are protected by a mutex (that is, the
+	    programmer inserts those acquire()/release() on entry and
+	    exit from every procedure *inside* the object)
+	    
+	    --synchronization happens with condition variables whose
+	    associated mutex is the mutex that protects the method calls
+
+	--In other words, we will use the term "monitor" to refer to the
+	programming conventions that you should follow when building
+	multithreaded applications
+
+	    --you must follow these conventions on lab 3
+
+    --Example: see handout05, item 1
+
+    --Different styles of monitors:
+
+	--Hoare-style: signal() immediately wakes the waiter
+
+	--Hansen-style and what we will use:
+	signal() eventually wakes the waiter. Not an immediate transfer
+
+
+    B. Standards: why?
+
+        --Mike Dahlin stands on the desk when proclaiming the standards
+
+        --see Mike D's "Programming With Threads", linked from lab 3
+
+	    --You are required to follow this document
+
+	    --You will lose points (potentially many!) on the lab and on
+	    the exam if you stray from these standards
+
+	    --Note that in his example in section 4, there needs to be
+	    another line:
+
+		--right before mutex->release(), he should have:
+		    assert(invariants hold)
+
+       --the primitives may seem strange, and the rules may seem
+	arbitrary: why one thing and not another?
+
+	    --there is no absolute answer here
+
+	    --**However**, history has tested the approach that we're
+	    using. If you use the recommended primitives and follow
+	    their suggested use, you will find it easier to write
+	    correct code
+
+	--For now, just take the recommended approaches as a given,
+	and use them for a while. If you can come up with something
+	better after that, by all means do so!
+
+	--But please remember three things:
+	
+	    a. lots of really smart people have thought really hard
+	    about the right abstractions, so a day or two of
+	    thinking about a new one or a new use is unlikely to
+	    yield an advance over the best practices.
+
+	    b. the consequences of getting code wrong can be
+	    atrocious. see for example:
+	    
+		http://www.nytimes.com/2010/01/24/health/24radiation.html
+		http://sunnyday.mit.edu/papers/therac.pdf
+		http://en.wikipedia.org/wiki/Therac-25
+
+	    c. people who tend to be confident about their abilities
+	    tend to perform *worse*, so if you are confident you are
+	    a Threading and Concurrency Ninja and/or you think you
+	    truly understand how these things work, then you may
+	    wish to reevaluate.....
+
+		--Dunning-Kruger effect
+		--http://www.nytimes.com/2000/01/23/weekinreview/january-16-22-i-m-no-doofus-i-m-a-genius.html
+
+    C. The Commandments
+
+        --RULE:
+        
+	    --acquire/release at beginning/end of methods
+
+        --RULE:
+
+	    --hold lock when doing condition variable operations
+
+	    --Some people
+	        [for example, Andrew Birrell in this paper:
+                http://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-35.pdf ]
+	    will say: "for experts only, no need to
+	    hold the lock when signaling". IGNORE THIS. Putting the signal
+	    outside the lock is only a small performance optimization, and
+	    it is likely to lead you to write incorrect code.
+	    
+	    --to get credit in Lab 3, you must hold the associated mutex
+	    when doing a condition variable operation
+
+        --RULE:
+
+	    --a thread that is in wait() must be prepared to be restarted at
+	    any time, not just when another thread calls "signal()".
+
+	    --why? because the implementor of the threads and condition
+	    variables package *assumes* that the user of the threads package
+	    is doing while(){wait()}.
+
+        --Can we replace SIGNAL with BROADCAST, given our monitor semantics?
+         (Answer: yes, always.) Why?
+
+	    --while() condition tests the needed invariant. program
+	    doesn't progress pass while() unless the needed invariant is
+	    true.
+
+	    --result: spurious wake-ups are acceptable....
+
+	    --...which implies you can always wakeup a thread at any
+	    moment with no loss of correctness....
+
+	    --....which implies you can replace SIGNAL with BROADCAST
+	    [though it may hurt performance to have a bunch of
+	    needlessly awake threads contending for a mutex that they
+	    will then acquire() and release().]
+
+
+        --Can we replace BROADCAST with SIGNAL?
+
+	    --Answer: not always. 
+
+	    --Example:
+	        --memory allocator
+	        --threads allocate and free memory in variable-sized chunks
+	        --if no memory free, wait on a condition variable
+	        --now posit:
+		    --two threads waiting to allocate chunks of memory
+		    --no memory free at all
+		    --then, a third thread frees 10,000 bytes
+	        --SIGNAL alone does the wrong thing: we need to awaken both
+	        threads

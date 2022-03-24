@@ -1,0 +1,114 @@
+waiting for events
+disk is i/o device
+
+switch to which process is active
+
+set of process control blocks
+state that the kernel maintains
+
+pid, reg, state, pagetable
+
+store physical page number 
+which the level 1 page table lives
+
+trap frame 
+trap: hardware interrupt
+
+hardware sets 
+1. %rsp to trap frame
+2. %rip set to be code address of interruption handler
+3. runs the kernel
+
+
+lab4
+generic_expection_handler:
+pushq ...
+pushq %rax        #end of all pushing, %rax poped first
+%rdi = first argument
+movq %rsp, %rdi
+call exception
+
+void exception(reg) //= prior stack pointer
+
+all state of a process recorded
+1. L1 page table 
+2. saved registers
+
+schedule(void)
+
+(INT instruction generates an interrupt)
+hardware saves the trapframe
+is the counterpart of iretq
+
+
+trapframe is pushed by the 
+hardware at the time of an interrupt
+
+
+where to put trapframe?
+interrupt descriptor table
+1. push on current stack
+2. place on an agreed place in memory
+
+
+
+
+trapframe is stored into per process state
+
+
+
+
+user-level threading
+{user-level, kernel-level} x {preemptive, nonpreemptive}
+
+kernel preemptive
+user nonpreemptive
+
+preemptive: a context switch can happen anytime
+mutex does not prevent context switches
+non-preemptive: context switches only happen in 
+well defined times
+
+
+
+
+
+context switch (user space)
+- switch registers active
+- not switch page tables (they share same memory)
+
+
+
+switch is a keyword
+A switch statement allows 
+a variable to be tested for equality against a list of values
+so void swtch
+
+
+rdi - 1st arg
+rsi - 2nd arg
+first data member of the struct
+
+
+set i timer instruction
+
+
+user level threading package:
+multiple threads in a process
+
+
+
+https://www.tutorialspoint.com/user-level-threads-and-kernel-level-threads
+
+
+USER-LEVEL THREADS:
+implemented by users and 
+the kernel is not aware of 
+the existence of these threads
+kernel handles them as if 
+they were single-threaded processes
+
+KERNEL-LEVEL THREADS:
+handled by the os directly
+thread management is done by the kernel
+
