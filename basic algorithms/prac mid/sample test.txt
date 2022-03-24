@@ -1,0 +1,11 @@
+1
+a
+
+f = O(g): f(n) <= cg(n) for all n >= n0
+h = O(g): h(n) <= cg(n) for all n >= n0
+
+g = n^3
+h = n^2
+f = n
+
+f < g; so f != Theta(g) 

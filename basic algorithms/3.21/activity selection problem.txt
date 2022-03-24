@@ -21,5 +21,23 @@ or s_j >= f_i
 S_{ij} = set of activities that start
 after a_i finishes and finish before
 activity a_j starts
-
  
+find a max set of mutually compatible 
+activities in S_{ij}
+
+max set is A_{ij}
+includes some activity a_k
+
+including a_k in an optimal solution
+left with 2 subproblems:
+
+1. set S_{ik} has activities that start
+after activity a_i finishes and 
+finish before activity a_k starts
+
+2. set S_{kj} has activities that start
+after activity a_k finishes and 
+finish before activity a_j starts
+
+A_{ik} = A_{ij} cap S_{ik}
+A_{kj} = A_{ij} cap S_{kj}
