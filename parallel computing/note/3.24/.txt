@@ -13,7 +13,11 @@ other and neither can run
 intro para 164
 small messages buffered by mpi_send
 larger messages, block
-
+If the MPI_Send executed 
+by each process blocks,
+no process will be able to start
+executing a call to MPI_Recv,
+and the program will hang or deadlock
 
 p1	p2
 send  send
