@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <mpi.h>
 
 int main()
@@ -12,7 +14,7 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank); 
 
     int start = 2, end = 100, n = end - start + 1, n_proc = 10, 
-    loc_n = (my_rank == comm_sz - 1) ? n % n_proc : n / n_proc; 
+    loc_n = (my_rank == comm_sz - 1) ? n % n_proc : ceil(n / n_proc); 
     int * a = 0;
     int recvbuf[loc_n];
 
@@ -28,7 +30,7 @@ int main()
     {
         MPI_Scatter(a, loc_n, MPI_INT, recvbuf, loc_n,
         MPI_INT, 0, MPI_COMM_WORLD);
-        for(int i = 0; i < n; ++i)
-            printf("%d ", a[i]);
+        for(int i = 0; i < loc_n; ++i)
+            printf("%d ", recvbuf[i]);
     }
 }
