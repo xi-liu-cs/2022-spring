@@ -66,8 +66,6 @@ for(int i = 0; i < comm_sz; ++i)
     displacements[i] = offset;
     offset += loc_n;
     sendcounts[i] = loc_n;
-    if(!my_rank)
-      printf("sc[%d] = %d\n", i, sendcounts[i]);
 }
 
 /* scatterv */
@@ -86,31 +84,28 @@ recvbuf, sendcounts[my_rank], MPI_INT, 0, MPI_COMM_WORLD);
 
 /* find numbers divisible by x */
 int * sendcounts2 = malloc(sz), * displacements2 = malloc(sz);
-int _loc_n = n / comm_sz;
-
 offset = 0;
-retcount = _loc_n / x;
-
+retcount = loc_n / x;
 if(my_rank)
   printf("r = %d, retc = %d\n", my_rank, retcount);
+for(int i = 0; i < comm_sz; ++i)
+{
+    if(i == comm_sz - 1) /* last process may do more work */
+      sendcounts2[i] = retcount + (n % (n / comm_sz) / x);
+      // sendcounts2[i] = (loc_n / x) + ((n % loc_n) / x);
+    else
+      sendcounts2[i] = retcount;
+    displacements2[i] = offset;
+    offset += sendcounts2[i];
+    printf("rank = %d\n", my_rank);
+    printf("i = %d, s = %d\n", i, sendcounts2[i]);
+}
 
 ret_buf = malloc(sendcounts2[my_rank] * sizeof(int));
 ret_i = 0;
 for(int i = 0; i < sendcounts[my_rank]; ++i)
   if(!(recvbuf[i] % x))
     ret_buf[ret_i++] = recvbuf[i];
-
-for(int i = 0; i < comm_sz; ++i)
-{
-  if(i == comm_sz - 1)
-    sendcounts2[i] = (_loc_n / x) + ((n % _loc_n) / x);
-  else
-    sendcounts2[i] = retcount;
-  displacements2[i] = offset;
-  offset += sendcounts2[i];
-  printf("rank = %d\n", my_rank);
-  printf("i = %d, s = %d\n", i, sendcounts2[i]);
-}
 
 /* gatherv */
 int * sendbuf2, * recvbuf2;
@@ -129,6 +124,7 @@ if(!my_rank)
     printf("i = %d, r = %d\n", i, recvbuf2[i]);
   printf("\n");
 }
+
   
 // end of the main compuation part
 end_p1 = MPI_Wtime();

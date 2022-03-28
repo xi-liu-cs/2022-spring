@@ -199,7 +199,7 @@ E[X] &= \int_{-\infty}^{\infty} x f_X(x) dx\\
 E[Y] &= \int_{-\infty}^{\infty} y f_Y(y) dy\\
 &= \int_{0}^{\infty} y (be^{-by}) dy\\
 &= b\int_{0}^{\infty} y e^{-by} dy\\
-&\text{/* } u:= y;\quad dv := e^{-by};\\
+&\text{/* } u:= y;\quad dv := e^{-by}dy;\\
 &du = dy;\quad v = -\frac{1}{b}e^{-by}\text{ */}\\
 &= b\left[-\frac{y}{b}e^{-by} - \frac{1}{b^2}e^{-by}\right]_0^{\infty}\\
 &= b\left(-\frac{1}{b^2}\right)\\\
@@ -225,39 +225,67 @@ P(X < Y) &= \int_{0}^{\infty} \int_{0}^{y} f_{X, Y}(x, y) dx dy\\
 Problem 5
 \begin{align*}
 f_X(a) &= \int_{-\infty}^{\infty} f_{X, Y}(a, y)dy\\
-&= \int_{0}^{\infty} e^{-y} dy\\
-&= -\left[e^{-y}\right]_0^{\infty}\\
-&= -(0 - 1)\\
-&= 1\\
+&= \int_{a}^{\infty} e^{-y} dy\\
+&= -\left[e^{-y}\right]_a^{\infty}\\
+&= -(0 - e^{-a})\\
+&= e^{-a}\\
 \end{align*}
 \begin{align*}
 F_X(a) &= \int_{-\infty}^{a} f_X(x) dx\\
-&= \int_{0}^{a} 1 dx\\
-&= a\\
+&= \int_{0}^{a} e^{-x} dx\\
+&= -[e^{-x}]_0^a\\
+&= -(e^{-a} - e^0)\\
+&= 1 - e^{-a}\\
 \end{align*}
 \begin{align*}
 f_Y(b) &= \int_{-\infty}^{\infty} f_{X, Y}(x, b)dx\\ 
-&= \int_{0}^{y} e^{-b} dx\\
-&= [xe^{-b}]_0^{y}\\
-&= ye^{-b}\\
+&= \int_{0}^{b} e^{-b} dx\\
+&= [xe^{-b}]_0^{b}\\
+&= be^{-b}\\
 \end{align*}
 \begin{align*}
 F_Y(b) &= \int_{-\infty}^{b} f_Y(y) dy\\
-&= \int_{0}^{b} ye^{-b} dy\\
-&= e^{-b}\left[\frac{y^2}{2}\right]_0^b\\
-&= \frac{b^2}{2}e^{-b}\\
+&= \int_{0}^{b} ye^{-y} dy\\
+&\text{/* } u:= y;\quad dv := e^{-y}dy;\\
+&du = dy;\quad v = -e^{-y}\text{ */}\\
+&= [-ye^{-y}]_0^b - \int_0^b (-e^{-y}) dy\\
+&= -be^{-b} + \int_0^b e^{-y} dy\\
+&= -be^{-b} - [e^{-y}]_0^b\\
+&= -be^{-b} - (e^{-b} - e^{0})\\
+&= -be^{-b} - e^{-b} + 1\\
 \end{align*}
+if $a < b$
 \begin{align*}
-F_{X, Y}(a, b) &= \int_{-\infty}^a \int_{-\infty}^b f_{X, Y}(x, y) dy dx\\
-&= \int_{0}^a \int_{0}^b e^{-y} dy dx\\
-&= \int_{0}^a -(e^{-b} - 1) dx\\
-&= -\int_{0}^a (e^{-b} + 1) dx\\
-&= -\int_{0}^a e^{-b}dx + \int_0^a 1 dx\\
-&= -ae^{-b} + a\\
+F_{X, Y}(a, b) &= \int_{0}^{a} \int_{x}^b f_{X, Y}(x, y) dy dx\\
+&= \int_{0}^{a} \int_{x}^b e^{-y} dy dx\\
+&= -\int_{0}^{a} [e^{-y}]_{y = x}^{y = b} dx\\
+&= -\int_{0}^{a} (e^{-b} - e^{-x}) dx\\
+&= -[xe^{-b} + e^{-x}]_0^a\\
+&= -(ae^{-b} + e^{-a} - 1)\\
+&= 1 - ae^{-b} - e^{-a}\\
 \end{align*}
+if $a \geq b$
 \begin{align*}
-P(X \leq a, Y \leq b) &= F(a, b) = -ae^{-b}\\
-P(X \leq a)P(Y \leq b) &= F_X(a)F_Y(b) = a\left(\frac{b^2}{2}e^{-b}\right)\\
+F_{X, Y}(a, b) &= \int_{0}^{b} \int_{x}^b f_{X, Y}(x, y) dy dx\\
+&= \int_{0}^{b} \int_{x}^b e^{-y} dy dx\\
+&= -\int_{0}^{b} [e^{-y}]_{y = x}^{y = b} dx\\
+&= -\int_{0}^{b} (e^{-b} - e^{-x}) dx\\
+&= -[xe^{-b} + e^{-x}]_0^b\\
+&= -(be^{-b} + e^{-b} - 1)\\
+&= 1 - be^{-b} - e^{-b}\\
+\end{align*}
+\begin{center}
+$P(X \leq a, Y \leq b) =
+F_{X, Y}(a, b) =
+\begin{cases}
+1 - ae^{-b} - e^{-a} & \text{if } a < b\\
+1 - be^{-b} - e^{-b} & \text{if } a \geq b\\
+\end{cases}$
+\end{center}
+\begin{align*}
+P(X \leq a)P(Y \leq b) &= F_X(a)F_Y(b) = (1 - e^{-a})(-be^{-b} - e^{-b} + 1)\\
+&= -be^{-b} - e^{-b} + 1 + be^{-a}e^{-b} + e^{-a}e^{-b} - e^{-a}\\
+\\
 P(X \leq a, Y \leq b) &\not= P(X \leq a)P(Y \leq b)\\
 \end{align*}
 so $X$ and $Y$ are not independent\\

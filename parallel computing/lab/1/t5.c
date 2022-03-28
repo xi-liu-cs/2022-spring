@@ -66,8 +66,6 @@ for(int i = 0; i < comm_sz; ++i)
     displacements[i] = offset;
     offset += loc_n;
     sendcounts[i] = loc_n;
-    if(!my_rank)
-      printf("sc[%d] = %d\n", i, sendcounts[i]);
 }
 
 /* scatterv */
@@ -94,12 +92,6 @@ retcount = _loc_n / x;
 if(my_rank)
   printf("r = %d, retc = %d\n", my_rank, retcount);
 
-ret_buf = malloc(sendcounts2[my_rank] * sizeof(int));
-ret_i = 0;
-for(int i = 0; i < sendcounts[my_rank]; ++i)
-  if(!(recvbuf[i] % x))
-    ret_buf[ret_i++] = recvbuf[i];
-
 for(int i = 0; i < comm_sz; ++i)
 {
   if(i == comm_sz - 1)
@@ -111,6 +103,12 @@ for(int i = 0; i < comm_sz; ++i)
   printf("rank = %d\n", my_rank);
   printf("i = %d, s = %d\n", i, sendcounts2[i]);
 }
+
+ret_buf = malloc(sendcounts2[my_rank] * sizeof(int));
+ret_i = 0;
+for(int i = 0; i < sendcounts[my_rank]; ++i)
+  if(!(recvbuf[i] % x))
+    ret_buf[ret_i++] = recvbuf[i];
 
 /* gatherv */
 int * sendbuf2, * recvbuf2;
@@ -129,6 +127,7 @@ if(!my_rank)
     printf("i = %d, r = %d\n", i, recvbuf2[i]);
   printf("\n");
 }
+
   
 // end of the main compuation part
 end_p1 = MPI_Wtime();

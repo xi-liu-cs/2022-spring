@@ -62,12 +62,10 @@ offset = 0;
 for(int i = 0; i < comm_sz; ++i)
 {
     if(i == comm_sz - 1)
-      loc_n = n / comm_sz + n % loc_n;
+        loc_n = n / comm_sz + n % comm_sz;
     displacements[i] = offset;
     offset += loc_n;
     sendcounts[i] = loc_n;
-    if(!my_rank)
-      printf("sc[%d] = %d\n", i, sendcounts[i]);
 }
 
 /* scatterv */
@@ -85,35 +83,28 @@ MPI_Scatterv(sendbuf, sendcounts, displacements, MPI_INT,
 recvbuf, sendcounts[my_rank], MPI_INT, 0, MPI_COMM_WORLD);
 
 /* find numbers divisible by x */
-int * sendcounts2 = malloc(sz), * displacements2 = malloc(sz);
-int _loc_n = n / comm_sz;
-
-offset = 0;
-retcount = _loc_n / x;
-
-if(my_rank)
-  printf("r = %d, retc = %d\n", my_rank, retcount);
-
-ret_buf = malloc(sendcounts2[my_rank] * sizeof(int));
+retcount = sendcounts[my_rank] / x;
+if(my_rank == comm_sz - 1) /* last process may do more work */
+  retcount = (sendcounts[my_rank] / x) + (n % comm_sz / x);
+ret_buf = malloc(retcount * sizeof(int));
 ret_i = 0;
 for(int i = 0; i < sendcounts[my_rank]; ++i)
   if(!(recvbuf[i] % x))
     ret_buf[ret_i++] = recvbuf[i];
 
+/* gatherv */
+int * sendbuf2, * recvbuf2,
+* sendcounts2 = malloc(sz), * displacements2 = malloc(sz);
+offset = 0;
 for(int i = 0; i < comm_sz; ++i)
 {
-  if(i == comm_sz - 1)
-    sendcounts2[i] = (_loc_n / x) + ((n % _loc_n) / x);
-  else
+    if(i == comm_sz - 1)
+      retcount = (sendcounts[my_rank] / x) + (n % comm_sz / x);
+    displacements2[i] = offset;
+    offset += retcount;
     sendcounts2[i] = retcount;
-  displacements2[i] = offset;
-  offset += sendcounts2[i];
-  printf("rank = %d\n", my_rank);
-  printf("i = %d, s = %d\n", i, sendcounts2[i]);
+    printf("i = %d\n", i, sendcounts2[i]);
 }
-
-/* gatherv */
-int * sendbuf2, * recvbuf2;
 
 if(!my_rank)
   recvbuf2 = malloc(sendcounts2[my_rank] * sizeof(int));
@@ -129,6 +120,7 @@ if(!my_rank)
     printf("i = %d, r = %d\n", i, recvbuf2[i]);
   printf("\n");
 }
+
   
 // end of the main compuation part
 end_p1 = MPI_Wtime();
@@ -173,4 +165,3 @@ printf("time of part1 = %lf s    part2 = %lf s\n",
        (double)(end_p2-start_p2) );
 return 0;
 }
-

@@ -1,0 +1,14 @@
+_id field is reserved for primary key in mongodb, 
+and that should be a unique value
+If you don't set anything to _id
+it will automatically fill it with "MongoDB Id Object"
+
+
+https://www.mongodb.com/docs/manual/reference/method/db.collection.update/
+
+multi
+Optional
+If set to true, 
+updates multiple documents that meet the query criteria
+If set to false, updates one document 
+The default value is false

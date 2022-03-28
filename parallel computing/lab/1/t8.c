@@ -85,42 +85,55 @@ MPI_Scatterv(sendbuf, sendcounts, displacements, MPI_INT,
 recvbuf, sendcounts[my_rank], MPI_INT, 0, MPI_COMM_WORLD);
 
 /* find numbers divisible by x */
-int * sendcounts2 = malloc(sz), * displacements2 = malloc(sz);
-int _loc_n = n / comm_sz;
+// int * sendcounts2 = malloc(sz), * displacements2 = malloc(sz);
+// int _loc_n = n / comm_sz;
 
-offset = 0;
-retcount = _loc_n / x;
+// offset = 0;
+// retcount = _loc_n / x;
+// if(!my_rank)
+// {
+//   printf("loc = %d\n", _loc_n);
+//   printf("rc = %d\n", retcount);
+// }
 
-if(my_rank)
-  printf("r = %d, retc = %d\n", my_rank, retcount);
+// for(int i = 0; i < comm_sz; ++i)
+// {
+//   if(i == comm_sz - 1)
+//     sendcounts2[i] = (_loc_n / x) + 1;
+//   else
+//     sendcounts2[i] = retcount;
+//   displacements2[i] = offset;
+//   offset += sendcounts2[i];
+  // if(!my_rank)
+  //   printf("i = %d, s = %d\n", i, sendcounts2[i]);
+// }
 
-ret_buf = malloc(sendcounts2[my_rank] * sizeof(int));
+  // printf("sc[%d] = %d\n",i, sendcounts[my_rank]);
+  // printf("locn = %d\n", loc_n);
+
+int buf_sz = loc_n / x + 1;
+printf("rk = %d, buf_sz = %d\n", my_rank, buf_sz);
+ret_buf = malloc(buf_sz * sizeof(int));
+if(!my_rank)
+  for(int i = 0; i < comm_sz; ++i)
+    printf("sendct[%d] / x = %d\n", i, sendcounts[i] / x);
 ret_i = 0;
 for(int i = 0; i < sendcounts[my_rank]; ++i)
   if(!(recvbuf[i] % x))
     ret_buf[ret_i++] = recvbuf[i];
-
-for(int i = 0; i < comm_sz; ++i)
-{
-  if(i == comm_sz - 1)
-    sendcounts2[i] = (_loc_n / x) + ((n % _loc_n) / x);
-  else
-    sendcounts2[i] = retcount;
-  displacements2[i] = offset;
-  offset += sendcounts2[i];
-  printf("rank = %d\n", my_rank);
-  printf("i = %d, s = %d\n", i, sendcounts2[i]);
-}
+printf("rk = %d, ret = %d\n", my_rank, ret_i);
 
 /* gatherv */
 int * sendbuf2, * recvbuf2;
 
 if(!my_rank)
-  recvbuf2 = malloc(sendcounts2[my_rank] * sizeof(int));
+  recvbuf2 = malloc((n / x + 1) * sizeof(int));
 sendbuf2 = ret_buf;
 
-MPI_Gatherv(sendbuf2, sendcounts2[my_rank], MPI_INT,
-recvbuf2, sendcounts2, displacements2, MPI_INT, 0, MPI_COMM_WORLD);
+if(!my_rank)
+printf("n / x = %d\n", n / x);
+
+MPI_Gather(sendbuf2, ret_i, MPI_INT, recvbuf2, ret_i, MPI_INT, 0, MPI_COMM_WORLD);
 MPI_Finalize();
 
 if(!my_rank)

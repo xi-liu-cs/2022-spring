@@ -85,42 +85,24 @@ MPI_Scatterv(sendbuf, sendcounts, displacements, MPI_INT,
 recvbuf, sendcounts[my_rank], MPI_INT, 0, MPI_COMM_WORLD);
 
 /* find numbers divisible by x */
-int * sendcounts2 = malloc(sz), * displacements2 = malloc(sz);
-int _loc_n = n / comm_sz;
 
-offset = 0;
-retcount = _loc_n / x;
-
-if(my_rank)
-  printf("r = %d, retc = %d\n", my_rank, retcount);
-
-ret_buf = malloc(sendcounts2[my_rank] * sizeof(int));
+retcount = loc_n / x;
+ret_buf = malloc(retcount * sizeof(int));
 ret_i = 0;
 for(int i = 0; i < sendcounts[my_rank]; ++i)
   if(!(recvbuf[i] % x))
     ret_buf[ret_i++] = recvbuf[i];
-
-for(int i = 0; i < comm_sz; ++i)
-{
-  if(i == comm_sz - 1)
-    sendcounts2[i] = (_loc_n / x) + ((n % _loc_n) / x);
-  else
-    sendcounts2[i] = retcount;
-  displacements2[i] = offset;
-  offset += sendcounts2[i];
-  printf("rank = %d\n", my_rank);
-  printf("i = %d, s = %d\n", i, sendcounts2[i]);
-}
+printf("rk = %d, ret = %d\n", my_rank, ret_i);
 
 /* gatherv */
 int * sendbuf2, * recvbuf2;
 
 if(!my_rank)
-  recvbuf2 = malloc(sendcounts2[my_rank] * sizeof(int));
+  recvbuf2 = malloc(n / x * sizeof(int));
 sendbuf2 = ret_buf;
 
-MPI_Gatherv(sendbuf2, sendcounts2[my_rank], MPI_INT,
-recvbuf2, sendcounts2, displacements2, MPI_INT, 0, MPI_COMM_WORLD);
+// MPI_Gather( const void* sendbuf , int sendcount , MPI_Datatype sendtype , void* recvbuf , int recvcount , MPI_Datatype recvtype , int root , MPI_Comm comm);
+MPI_Gather(sendbuf2, ret_i, MPI_INT, recvbuf2, retcount, MPI_INT, 0, MPI_COMM_WORLD);
 MPI_Finalize();
 
 if(!my_rank)
@@ -158,7 +140,8 @@ if(!my_rank)
   }
 
   for(int i = 0; i < n / x; ++i)
-    fprintf(fp, "%d\n", recvbuf2[i]);
+    if(recvbuf2[i])
+        fprintf(fp, "%d\n", recvbuf2[i]);
   //Write the numbers divisible by x in the file as indicated in the lab description.
 }
 fclose(fp);
