@@ -2,10 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>
 #include <mpi.h>
 
 // must compile with: mpicc  -std=c99 -Wall -o checkdiv 
+
+int _ceil(double a)
+{
+    int int_a = (int)a;
+    if(a == (double)int_a)
+        return int_a;
+    return int_a + 1;
+}
 
 int main(int argc, char *argv[]){
   
@@ -80,14 +87,14 @@ printf("rk = %d, loca = %d, locb = %d, ret = %d, retc = %d\n", my_rank, loc_a, l
 int * sendbuf, * recvbuf;
 
 if(!my_rank)
-  recvbuf = malloc((ceil(n / x)) * sizeof(int));
+  recvbuf = malloc((_ceil((double)n / x)) * sizeof(int));
 sendbuf = ret_buf;
 
 MPI_Gather(sendbuf, ret_i, MPI_INT, recvbuf, retcount, MPI_INT, 0, MPI_COMM_WORLD);
 
 if(!my_rank)
 {
-  for(int i = 0; i < ceil(n / x); ++i)
+  for(int i = 0; i < _ceil((double)n / x); ++i)
     printf("i = %d, r = %d\n", i, recvbuf[i]);
   printf("\n");
 }
@@ -121,7 +128,7 @@ if(!my_rank)
     exit(1);
   }
 
-  for(int i = 0; recvbuf[i]; ++i)
+  for(int i = 0; i < _ceil((double)n / x); ++i)
     if(recvbuf[i] <= B && recvbuf[i] > recvbuf[i - 1])
         fprintf(fp, "%d\n", recvbuf[i]);
   //Write the numbers divisible by x in the file as indicated in the lab description.
