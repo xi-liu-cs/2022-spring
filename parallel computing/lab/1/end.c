@@ -54,60 +54,66 @@ MPI_Init(NULL, NULL);
 MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 MPI_Comm_rank(MPI_COMM_WORLD, &my_rank); 
 
-int n = B - A + 1, loc_n,
-offset, retcount, ret_i;
-size_t sz = comm_sz * sizeof(int);
+unsigned int n = B - A + 1, loc_n = n / comm_sz, 
+loc_a, loc_b, retcount, send_i;
+unsigned int * sendbuf;
 
-/* scatterv */
-int * sendbuf, * recvbuf, * ret_buf;
-
-if(!my_rank)
+loc_a = A + my_rank * loc_n;
+loc_b = loc_a + loc_n - 1;
+if(my_rank == comm_sz - 1)
 {
-  sendbuf = malloc(n * sizeof(int));
-  for(int i = 0; i < n; ++i)
-    sendbuf[i] = A + i;
+    loc_b = B;
+    loc_n = loc_b - loc_a + 1;
 }
-
-loc_n = n / comm_sz;
-// if(my_rank == comm_sz - 1)
-  // loc_n = n / comm_sz + n % comm_sz;
-
-recvbuf = malloc(loc_n * sizeof(int));
-MPI_Scatter(sendbuf, loc_n, MPI_INT, recvbuf, loc_n, MPI_INT, 0, MPI_COMM_WORLD);
-
 /* find numbers divisible by x */
-retcount = loc_n / x;
-if(my_rank == comm_sz - 1) /* last process may do more work */
-  retcount = (loc_n / x) + (n % comm_sz / x);
-ret_buf = malloc(retcount * sizeof(int));
-ret_i = 0;
-for(int i = 0; i < loc_n; ++i)
-  if(!(recvbuf[i] % x))
-    ret_buf[ret_i++] = recvbuf[i];
+
+sendbuf = malloc(n * sizeof(unsigned int));
+send_i = 0;
+unsigned int start;
+for(unsigned int i = loc_a; i <= loc_b; ++i)
+{
+    if(!(i % x))
+    {
+        start = i;
+        break;
+    }
+}
+for(unsigned int i = start; i <= loc_b; i += x)
+    sendbuf[send_i++] = i;
 
 /* gatherv */
-int * sendbuf2, * recvbuf2;
+unsigned int * recvbuf;
 
 if(!my_rank)
-  recvbuf2 = malloc(n / x * sizeof(int));
-sendbuf2 = ret_buf;
+    recvbuf = malloc(n * sizeof(unsigned int));
 
-MPI_Gather(sendbuf2, retcount, MPI_INT, recvbuf2, retcount, MPI_INT, 0, MPI_COMM_WORLD);
-MPI_Finalize();
+unsigned recvcount = send_i + n % loc_n;
+MPI_Gather(sendbuf, send_i, MPI_UNSIGNED, recvbuf, recvcount, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 
+int end;
+for(int i = B; i >= 0; --i)
+{
+    if(!(i % x))
+    {
+        end = i;
+        break;
+    }
+}
 if(!my_rank)
 {
-  for(int i = 0; i < n / x; ++i)
-    printf("i = %d, r = %d\n", i, recvbuf2[i]);
+  for(int i = 0; i != end; ++i)
+    if(recvbuf[i])
+        printf("i = %d, r = %u\n", i, recvbuf[i]);
   printf("\n");
 }
-
   
 // end of the main compuation part
 end_p1 = MPI_Wtime();
 // Use reduction operation to get MAX of (end_p1 - start_p1) among processes 
 // and send it to process 0 as time_for_p1
-
+int loc_p1 = end_p1 - start_p1;
+MPI_Reduce(&loc_p1, &time_for_p1, 1,
+MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 //end of part 1
 /////////////////////////////////////////
 
@@ -130,13 +136,14 @@ if(!my_rank)
     exit(1);
   }
 
-  for(int i = 0; i < n / x; ++i)
-    fprintf(fp, "%d\n", recvbuf2[i]);
+  for(int i = 0; i != end; ++i)
+    if(recvbuf[i])
+        fprintf(fp, "%d\n", recvbuf[i]);
   //Write the numbers divisible by x in the file as indicated in the lab description.
 }
 fclose(fp);
-
 end_p2 = MPI_Wtime();
+MPI_Finalize();
 //end of part 2
 /////////////////////////////////////////
 
@@ -146,3 +153,4 @@ printf("time of part1 = %lf s    part2 = %lf s\n",
        (double)(end_p2-start_p2) );
 return 0;
 }
+
