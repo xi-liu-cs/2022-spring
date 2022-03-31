@@ -56,7 +56,7 @@ MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
 unsigned int n = B - A + 1, loc_n = n / comm_sz, 
 loc_a, loc_b, send_i, start, end = -1, loc_p1;
-unsigned int * sendbuf = malloc(n * sizeof(unsigned int));
+unsigned int * sendbuf;
 
 loc_a = A + my_rank * loc_n;
 loc_b = loc_a + loc_n - 1;
@@ -66,6 +66,7 @@ if(my_rank == comm_sz - 1)
     loc_n = loc_b - loc_a + 1;
 }
 
+sendbuf = malloc(loc_n * sizeof(unsigned int));
 /* find numbers divisible by x */
 send_i = 0;
 for(i = loc_a; i <= loc_b; ++i)
@@ -76,23 +77,26 @@ for(i = loc_a; i <= loc_b; ++i)
         break;
     }
 }
-printf("rk = %d\n", my_rank);
 for(i = start; i <= loc_b; i += x)
-{
     sendbuf[send_i++] = i;
-    printf("send_i - 1 = %d, sendbuf = %d\n", send_i - 1, sendbuf[send_i - 1]);
+MPI_Send(&send_i, 1, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD);
+unsigned int * sendcounts;
+if(!my_rank)
+{
+    sendcounts = malloc(comm_sz * sizeof(unsigned int));
+    for(i = 0; i < comm_sz; ++i)
+        MPI_Recv(sendcounts + i, 1, MPI_UNSIGNED, i,
+        0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 }
 /* gatherv */
 unsigned int * recvbuf;
 
 if(!my_rank)
-    recvbuf = malloc(n * sizeof(unsigned int));
+    recvbuf = malloc((n / x + 1) * sizeof(unsigned int));
 
 unsigned int max_send_i;
 MPI_Allreduce(&send_i, &max_send_i, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
-printf("rk = %d, send_i = %d\n, max_send_i = %d\n", my_rank, send_i, max_send_i);
-MPI_Gather(sendbuf, send_i, MPI_UNSIGNED, recvbuf, max_send_i + 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-
+MPI_Gather(sendbuf, send_i, MPI_UNSIGNED, recvbuf, max_send_i, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 if(!my_rank)
 {
     for(i = B; i >= A; --i)
@@ -100,13 +104,12 @@ if(!my_rank)
         if(!(i % x))
         {
             end = i;
-            printf("end = %d\n", end);
             break;
         }
     }
 }
   
-// end of the main compuation part
+// end of the main computation part
 end_p1 = MPI_Wtime();
 // Use reduction operation to get MAX of (end_p1 - start_p1) among processes 
 // and send it to process 0 as time_for_p1
@@ -135,12 +138,19 @@ if(!my_rank)
     exit(1);
   }
 
+  unsigned int tot_send = 0, num_written = 0;
+  for(i = 0; i < comm_sz; ++i)
+    tot_send += sendcounts[i];
   if(end != -1)
   {
-    for(i = 0; (recvbuf[i] != end) && (i <= max_send_i * comm_sz); ++i)
-        if(recvbuf[i])
+    for(i = 0; (recvbuf[i] != end) && (num_written < tot_send); ++i)
+        if(recvbuf[i] && (!i ||
+        (recvbuf[i] > recvbuf[i - 1] && recvbuf[i] < recvbuf[i + 1])))
+        {
             fprintf(fp, "%d\n", recvbuf[i]);
-    if(recvbuf[i - 1] != end && i >= max_send_i * comm_sz)
+            ++num_written;
+        }
+    if(recvbuf[i - 1] != end)
         fprintf(fp, "%d\n", end);
   }
 
@@ -148,7 +158,6 @@ if(!my_rank)
 }
 fclose(fp);
 end_p2 = MPI_Wtime();
-MPI_Finalize();
 //end of part 2
 /////////////////////////////////////////
 
@@ -156,5 +165,6 @@ MPI_Finalize();
 printf("time of part1 = %lf s    part2 = %lf s\n", 
        (double)(time_for_p1),
        (double)(end_p2-start_p2) );
+MPI_Finalize();
 return 0;
 }

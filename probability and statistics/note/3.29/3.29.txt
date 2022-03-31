@@ -1,0 +1,119 @@
+cov(x, y) = e[(x - e[x])(y - e[y])]
+= e[xy] - e[x]e[y]
+
+cov(x, y) != 0
+e[xy] = sum_i sum_j a_i b_j p_{X, Y}(a_i, b_j)
+if X, Y indep
+= sum_i sum_j a_i b_j p_{X}(a_i) p_{Y}(b_j)
+= sum_i a_i p_{X}(a_i) sum_j a_i b_j p_{Y}(b_j)
+= e[x] e[y]
+
+indep -> uncorrelated
+cov(x, y) = 0
+
+uncorrelated not imply indep
+
+worksheet 6
+case cov(x, y) = 0
+x & y are not indep
+
+
+
+x\y	-1 	2 
+0	1/6	0	1/6
+1	1/6 	1/2	2/3
+2	1/6	0 	1/6
+	1/2	1/2
+
+x & y not indep
+p_x p_y != p_{x,y}
+
+e[x] = 1
+e[y] = 1/2
+e[xy] = sum_i sum_j a_i b_j p_{X, Y}(a_i, b_j)
+= 1/2
+
+cov(x, y) = e[xy] - e[x]e[y] = 1/2 - 1/2 = 0
+x & y not indep, but they are uncorrelated
+
+
+
+covariance & change of units
+define T = aX + b
+V = cY + d
+
+cov(T, V) = ac cov(x, y)
+only the scaling affect
+shift do not affect 
+
+
+indep of unit
+correlation coefficient
+
+
+rho(x, y)
+= cov(x, y) / sqrt{var(x) var(y)}
+
+units cancel for the for numerator and denominator
+
+var(x) = 0
+means it is not a rand var
+a certain event, always happen
+
+if var(x) = 0 or var(y) = 0
+rho(x, y) = 0
+
+
+perfect correlation 
+Y = aX
+when correlation coefficient = 1
+plot of X vs Y is a straight line
+
+
+more correlation coefficient
+= more tight of the points to the least squares fit line
+
+
+
+emergency room at a hospital
+like a model of times 
+of arrival of successive patients
+expected number of patients in 
+any time window
+
+1. number of arrivals
+1) key hypotheses
+
+a. number of arrivals in
+2 distinct nonoverlapping time
+intervals are indep rand var
+
+b. rate of arrival is 
+constant over time
+(in an averaged sense)
+rate of arrival = lamda
+
+2) number of arrivals
+
+interval of interest [0, t]
+
+split the time interval 
+into subintervals 
+small enough that the number 
+of arrivals in each subinterval 
+if the interval is small enough (ex: 1 micro second)
+then the number of interval is either 0 or 1
+(since there is a line, not allow to step on 
+another person's shoulder)
+
+in each subinterval of t / n
+i have a bernoulli rand var with parameter p
+
+e[x_{bernoulli}] = p 
+= (rate of arrival)(length of time interval)
+= (lamda)(t / n)
+
+n_t = R_1 + R_2 + ... + R_n
+
+p_n_t(k) = binom(n, k) (lamda t / n)^k (1 - lamda t / n)^{n - k}
+

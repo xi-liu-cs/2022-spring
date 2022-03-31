@@ -1,0 +1,74 @@
+walk:
+1 -> 2 -> 3 -> 4 -> 2
+may have repeated walks
+
+path:
+a walk without repeated vertices
+1 -> 2: path from 1 to 2
+1 -> 2 -> 3 -> 4: path from 1 to 4
+
+closed walk :
+a walk with the same start 
+and end vertices
+2 -> 4 -> 3 -> 4 -> 2 (this is not a closed path,
+b/c is 4 is repeated)
+
+closed path (cycle): 
+a path with the same start & end
+vertices (only start & end can be repeated)
+2 -> 2
+
+connected graph:
+there is a walk (path) between 
+any 2 vertices
+all the vertices in the graph
+are reachable from
+any vertex
+
+claim
+if there is a walk from vertex u to 
+vertex v /* (u, v)-walk */ in graph g,
+then there is also a 
+path from u to v /* (u, v)-path */ in g
+
+(u, v)-walk -> (u, v)-path
+
+undirected tree: a connected graph with minimum
+number of edges
+a connected graph with no cycles
+
+claim
+every tree on n vertices has n - 1 edges
+
+claim
+a directed graph which is connected
+must have a cycle
+
+directed tree
+there is a "root vertex"
+from which all the vertices
+are reachable (all vertices only reachable from root)
+and there is no cycles
+
+
+
+graph algorithm
+graph traversal algorithm
+
+input: assume n is number of vertices
+n = |v|
+
+1
+adjacency list
+v[1...n]: v[i] is a linked list
+consisting of the vertices 
+to which there is an edge 
+from vertice i
+
+efficient for storage
+slow for deciding adjacencies:
+time to answer i -> j: O(n)
+a lot of time for searching
+
+
+(ii) adjacency matrix

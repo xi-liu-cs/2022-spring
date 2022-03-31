@@ -1,0 +1,72 @@
+show table
+show collection
+
+find({author: "name"})
+find({price: {$gt: 12}, 
+author: "name"})
+
+db.books.find({$or: 
+[{price: {$lt: 5}},
+{author: "name"}
+]
+})
+
+db.books.find({},
+{title: 1}) // show me the title fields
+not show the other fields
+
+second object is the projection
+which fields to see
+
+db.books.remove({_id: ObjectId("str")})
+
+multi: true 
+update all records
+
+host=class-mongodb.cims.nyu.edu
+db=netid
+
+db.collections.count()
+db.jobs.find(criteria).count()
+
+sort({ : 1}) //ascending order
+
+pretty() // more indentation
+
+if want compress, no pretty
+
+making a variable
+let fields = {...}
+
+let orderby = {"" : -1}
+sort in reverse order
+
+aggregate function call
+pipeline 
+an array containing stages
+
+
+
+db.jobs.aggregate([
+  { $match: { "Business Title": "Policy Analyst" } },
+  { $count: "countPolicyAnalysts" },
+]);
+
+
+let projection = {
+  _id: 0,
+  "Job ID": 1,
+  title: { $toUpper: "$Business Title" },
+};
+db.jobs.aggregate([{ $project: projection }]);
+
+
+"$Business Title"
+change the value at "Business Title" 
+(dereference a pointer)
+to be upper case
+
+"Business Title"
+every title have the upper case
+version of the string
+

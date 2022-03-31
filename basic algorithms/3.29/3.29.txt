@@ -1,0 +1,87 @@
+element which is inserted last
+is also removed first
+
+s = {}
+
+s.push(...)
+s.top()
+s.pop()
+
+
+graham's scan
+1. find initial point on convex hull
+extreme corner points
+
+2. sort out rest of points according
+to angles they form with vertical half_line
+emanated
+p_1, ..., p_{n - 1} sorted in counter_clockwise order
+
+3. define a stack s:
+s.push(p0)
+s.push(p1)
+s.push(p2)
+
+4. for k = 3 to n
+	while the 3 points {s.before_top(), s.top(), p_k}
+	form a clockwise direction
+		s.pop()
+	s.push(p_k)
+
+5. return s
+
+
+loop invariant:
+at the end of the for loop iteration for k,
+the stack s consists of the boundary points
+on the convex hull of {p_0, p_1, ..., p_k}
+in the counterclockwise order
+
+sketch of proof:
+induction
+assume that s is the points on the boundary 
+of the convex hull for {p_0, ..., p_k}
+now we add p_{k + 1}:
+p_{k + 1} must lie on the convex hull of {p_0, ..., p_k, p_{k + 1}}
+
+
+overrightarrow{pq} inner product overrightarrow{qr}
+
+
+
+tc of graham's scan
+1) O(n): finding the min point
+2) O(n lg n): sorting
+3) O(1)
+4) each point is inserted exactly 
+once to s
+O(n) pushes
+each point is popped at most once
+O(n) pops
+
+tc of (4)
+O(n) + O(n) = O(n)
+
+tot tc of algo = O(n lg n)
+
+tc = O(n) if can use 
+counting sort for (2)
+
+sc of graham's scan
+sc = O(n)	(the stack <= n elements)
+
+
+
+
+graph G = (V, E)
+V: vertex set
+vertices: object
+E: edge set
+edges: show existence 
+of relations between
+vertices (objects)
+
+V = {1, 2, 3, 4, 5}
+E = {(1, 4), (1, 3), (3, 4), (4, 5), (2, 4)}
+
+

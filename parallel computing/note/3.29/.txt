@@ -1,0 +1,95 @@
+min 35
+avg 70.5
+
+openmp: threads 
+
+omp_set_num_threads(16);
+
+#pragma
+extend language
+
+#pragma omp parallel{}
+//each thread alive until } 
+
+omp is embedded in gcc
+load module for highest gcc
+
+smallest performance gap with pthread
+
+cannot tackle with distributed mem
+
+#pragma omp parallel for{}
+divide the loop iterations
+using number of threads exist
+
+if not specified
+create number of threads equal
+to min(number of logical cores, 
+number of loop iterations)
+
+gcc always create 1 process
+1 executable file
+
+mpicc is a script built on top of gcc
+
+pthread
+p stand for posix
+
+black hole simulation: cuda, mpi
+
+high perf computing
+
+exe loaded into mem
+
+address 0
+heap
+stk
+text
+global, static data
+
+all threads access to same heap
+multiple stacks, 
+1 stk each thread
+1 thread can call diff functions
+
+16 physical cores
+more than 16 threads if some are i/o bound
+
+# hash sign
+preprocessor
+1. remove comments
+2. execute cmd after # (include)
+3. remove all the []
+
+set_num() set the number of thread
+for each # pragma parallel
+
+# pragma applies to following block of code
+
+
+create a thread is adding some entries
+to 
+
+each rip per thread
+
+risc vs cisc
+complex assembly instructions
+
+reduced instruction set computing
+
+open multi processesing
+
+every thread do
+read, modify, write
+error if interleaved
+
+number of threads increase
+queue of #pragma omp critical
+become longer
+
+
+p29
+#pragma omp parallel for
+more than 1 thread
+access the critical section 
+histogram[read_character]++; 
