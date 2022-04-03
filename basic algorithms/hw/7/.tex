@@ -1,0 +1,185 @@
+\documentclass[12pt,border=4pt,multi]{article} % \documentclass[tikz,border=4pt,multi]{article}
+\usepackage{lingmacros}
+\usepackage{tree-dvips}
+\usepackage{amssymb} % for mathbb{}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{forest}
+\usepackage{amsmath} % for matrices
+\usepackage{xeCJK}
+\usepackage{tikz}
+\usepackage[arrowdel]{physics}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{pgfplots, pgfplotstable}
+\usepackage{diagbox} % diagonal line in cell
+\usepackage[usestackEOL]{stackengine}
+\usepackage{multirow}
+\graphicspath{{./img}} % specify the graphics path to be relative to the main .tex file, denoting the main .tex file directory as ./
+\newcommand\Myperm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\Mycomb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+\definecolor{orchid}{rgb}{0.7, 0.4, 1.1}
+
+\begin{document}
+
+\section*{Xi Liu, xl3504, Homework 7}
+Problem 1\\
+(a)\\
+make\_change() is an algorithm that makes change for n cents using least number of coins. first, it uses qsort() to sort the choices[] array in increasing order, then traverse the choices[] array from back to front (from i = num\_choices - 1 to i $>=$ 0), select choices[i] each time when the remaining value is greater or equal to choices[i] since choices[i] will be the choice of the maximum coin available at this point, since maximum coins are always chosen each time, least number of coins will be used to make the change\\
+\begin{lstlisting}[language = c]
+#include <stdio.h>
+#include <stdlib.h>
+
+void print(int * a, int sz)
+{
+    for(int i = 0; i < sz; ++i)
+        printf("%d ", a[i]);
+    printf("\n");
+}
+
+int cmp(const void * p1, const void * p2)
+{
+    int * a1 = (int *)p1, * a2 = (int *)p2;
+    return *a1 - *a2;
+}
+
+int choices[] = {1, 5, 10, 25};
+int num_choices = sizeof(choices) / sizeof(*choices);
+
+int make_change(int n, int ** a)
+{
+    *a = malloc(n * sizeof(int));
+    int ret_sz = 0;
+    qsort(choices, sizeof(int), num_choices, cmp);
+    for(int i = num_choices - 1; i >= 0; --i)
+    {
+        while(n >= choices[i])
+        {
+            n -= choices[i];
+            (*a)[ret_sz++] = choices[i];
+        }
+    }
+    return ret_sz;
+}
+
+int main()
+{
+    int n = 91;
+    int * a;
+    int ret_sz = make_change(n, &a);
+    printf("make_change(%d) = %d\n", n, ret_sz);
+    printf("changes:\n");
+    print(a, ret_sz);
+}
+\end{lstlisting}
+\leavevmode
+\\
+\\
+\\
+\\
+\\
+(b)\\
+let $n'$ be the remaining value to be changed, $n'$ is initially set to be $n$, and $n'$ will be updated to be $n' - choices[i]$ if a coin with the value of $choices[i]$ is chosen to be in the result set of coin change\\
+\\
+if $n' \geq 25$, then the greedy algorithm will choose a coin with value of 25. \{25\} is the optimal choice at this point, since if \{25\} is not chosen, then the second-smallest-size set of coins to produce the same value is \{10, 10, 5\}, but $|\{25\}| = 1 < \{10, 10, 5\} = 3$, so for this choice, the greedy algorithm appends the minimum-size set of coin change to the result set of coin change\\
+\\
+if $25 > n' \geq 10$, then the greedy algorithm will choose a coin with value of 10. \{10\} is the optimal choice at this point, since if \{10\} is not chosen, then the second-smallest-size set of coins to produce the same value is \{5, 5\}, but $|\{10\}| = 1 < \{5, 5\} = 2$, so for this choice, the greedy algorithm appends the minimum-size set of coin change to the result set of coin change\\
+\\
+if $10 > n' \geq 5$, then the greedy algorithm will choose a coin with value of 5. \{5\} is the optimal choice at this point, since if \{5\} is not chosen, then the second-smallest-size set of coins to produce the same value is \{1, 1, 1, 1, 1\}, but $|\{5\}| = 1 < \{1, 1, 1, 1, 1\} = 5$, so for this choice, the greedy algorithm appends the minimum-size set of coin change to the result set of coin change\\
+\\
+\\
+\\
+\\
+\\
+(c)\\
+if the set of coin denominations is \{5, 4, 1\} and $n = 8$, then since the greedy algorithm always choose the maximum possible coin available, the greedy algorithm will produce a result set of coin choices as \{5, 1, 1, 1\} that uses 4 coins, but the optimal solution is \{4, 4\} which uses 2 coins\\
+\newpage
+\noindent
+Problem 2\\
+(a)
+\begin{lstlisting}[language = c, mathescape = true]
+bool can_reach(int * A, int n)
+{
+    int leftmost_i = n;
+    for(int i = n; i >= 1; -$\;$-i)
+    {
+        if(leftmost_i <= i)
+        {
+            leftmost_i = min(leftmost_i, i - A[i]);
+            if(leftmost_i <= 1)
+                return true;
+        }
+    }
+    return false;
+}
+\end{lstlisting}
+\leavevmode
+\\
+\\
+\\
+\\
+(b)\\
+call a position $i$ reachable if and only if the frog can reach position at index $i$ from position at the $n$th index through a series of jumps\\
+let $(i,\; j) \in \mathbb{N}^2,\; 1 \leq i \leq n,\; 1 \leq j \leq n$. for all reachable positions $i$, it will make positions $i - j$ (such that $1 \leq j \leq A[i]$) to also be reachable\\
+so, traverse every position of the array A from the last index to the first index, and update the variable leftmost\_i as the index of the current leftmost or farthest (dependent on the currently visiting position) position reachable from the last index of the array A\\
+for a currently visiting position $i$, if $leftmost\_i \leq i$, it means that position $i$ is within the range of the leftmost reachable position, so the frog can start from the last index to reach position $i$ through a series of jumps, so the program can update $leftmost\_i$ by $i - A[i]$ (if $i - A[i] < leftmost\_i$)\\
+in the process of traversal, if $leftmost\_i \leq 1$, it means that the position at the first index is within the range of the leftmost reachable position, so the frog can start from the last index to reach the first index through a series of jumps, so the program can return true; otherwise, if the traversal finished but the if($leftmost\_i \leq 1$) test always evaluated to be false, then it means that the position at the first index is outside the range of the ultimate leftmost reachable position, so the frog cannot start from the last index to reach the first index through a series of jumps, so the program can return false\\
+\\
+\\
+\\
+\\
+(c)\\
+time complexity $T(n)$ of can\_reach() is $\Theta(n)$, because the length of array $A$ is $n$. in the worst case, can\_reach() visits $n$ position in the array, and perform constant time operations for each iteration of the for loop, so $T(n) = \Theta(n) \cdot \Theta(1) = \Theta(n)$
+\newpage
+\noindent
+Problem 3\\
+(a)\\
+color\_interval() is an algorithm that computes the number of maximum overlapping intervals, this number is equal to the minimum number of colors needed to color the set $\mathcal{I}$ so that overlapping intervals are given different colors
+\begin{lstlisting}[language = c, mathescape = true]
+#include <stdlib.h>
+
+int cmp(const void * p1, const void * p2)
+{
+    int * a1 = (int *)p1, * a2 = (int *)p2;
+    return *a1 - *a2;
+}
+
+int color_interval(int * s, int * f, int n)
+{
+    qsort(s, n, sizeof(int), cmp);
+    qsort(f, n, sizeof(int), cmp);
+    int i = 1, j = 1, 
+    max_overlap = 0, overlap = 0;
+    for(int i = 1, j = 1; i <= n && j <= n; )
+    {
+        if(s[i] < f[j])
+        {
+            ++overlap;
+            if(max_overlap < overlap)
+                max_overlap = overlap;
+            ++i;
+        }
+        else
+        {
+            -$\;$-overlap;
+            ++j;
+        }
+    }
+    return max_overlap;
+}
+\end{lstlisting}
+\leavevmode
+\\
+\\
+\\
+\\
+(b)\\
+$\forall (a,\; b) \in \mathbb{N}^2,\; 1 \leq a \leq n,\; 1 \leq b \leq n$, let $[s_a, f_a),\; [s_b, f_b)$ be 2 intervals in set $\mathcal{I}$ such that interval $[s_a, f_a)$ starts before interval $[s_b, f_b)$\\
+for any pair of 2 overlapping activities, the color will be different, since the if condition within the for loop checks that $if(s[i] < f[j])$, the if test evaluates to true when $s_b < f_a$, in this case the interval $[s_a, f_a)$ overlaps with $[s_b, f_b)$, so the counter $overlap$ can be incremented by 1\\
+\\
+suppose that $s[i] < f[j]$, $s[i]$ is the smallest element or earliest time instant not yet handled, so the program need to handle $s[i]$ at the current for loop iteration. $s[i]$ has the smallest starting time not yet handled, and the smallest finishing time not yet handled is $f[j]$, and since the smallest starting time not yet handled is less than the smallest finishing time not yet handled, the interval that has the starting time of $s[i]$ must overlap with the interval that has a finishing time of $f[j]$, $s[i]$ represents that a interval just started at the time instant handled by the current for loop iteration, so it is correct to increment the counter $overlap$ by 1\\
+\\
+otherwise, if instead $f[j] \leq s[i]$, $f[j]$ is the smallest element or earliest time instant not yet handled, so the program need to handle $f[j]$ at the current for loop iteration. $f[j]$ has the smallest finishing time not yet handled, and the smallest starting time not yet handled is $s[i]$, and since the smallest finishing time not yet handled is less than or equal to the smallest starting time not yet handled, the interval that has the finishing time of $f[j]$ must not overlap with the interval that has a starting time of $s[j]$, $f[j]$ represents that a interval just finished at the time instant handled by the current for loop iteration, so it is correct to decrement the counter $overlap$ by 1\\
+\\
+expected running time = time of qsort + time of for loop = $O(n \lg n) + O(n) = O(n \lg n)$\\
+\end{document}

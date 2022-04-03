@@ -1,0 +1,107 @@
+3
+1)
+f_T_1(t_1) = 
+{
+	lamda e^{-lamda t_1}, t_1 >= 0
+	0, otherwise
+}
+
+f_T_2(t_2) = 
+{
+	lamda e^{-lamda t_2}, t_2 >= 0
+	0, otherwise
+}
+
+X = T_1 + T_2
+
+f_X(x) = int_{-inf}^{inf} f_T_1(t) f_T_2(x - t) dt
+= int_{0}^{inf} lamda e^{-lamda t} lamda e^{-lamda(x - t)} dt
+= lamda^2 int_0^{x} e^{-lamda t - lamda x + lamda t}
+= lamda^2 e^{- lamda x} int_0^x dt
+=
+{ 
+	lamda^2 x e^{-lamda x}, x >= 0
+	0,	otherwise
+}
+
+
+
+2)
+Y = X + T_3
+f_y(y) = int_{-inf}^{inf} f_x(x) f_T_3(y - x) dx
+= int_0^y lamda^2 x e^{-lamda x} lamda e^{-lamda(y - x)} dx
+= lamda^3 e^{-lamda y} int_0^y x dx
+= 
+{
+	lamda^3 e^{-lamda y} y^2 / 2,	y >= 0
+	0,	otherwise
+}
+
+
+
+/*
+	Z = T_1 + T_2 + ... + T_n
+	T_i ~ exp(lamda)
+	Z -> gamma(n, lamda)
+	interarrival times
+	individual is exponential, overall is gamma distri
+	f_z(z) = 
+{
+lamda (lamda z)^{n - 1} e^{-lamda z} / (n - 1)!,	z >= 0
+0,	otherwise
+}
+*/
+
+
+
+
+
+
+4
+F_{M, T}(m, t) = P(M <= m, T <= t)
+= P(min(X_1, X_2) <= m, max(X_1, X_2) <= t)
+= P((X_1 <= m \cup X_2 <= m) \cap (X_1 <= t \cap X_2 <= t))
+= P(X_1 <= t \cap X_2 <= t) - P((m < X_1 <= t) \cap (m < X_2 <= t))
+= P(X_1 <= t) P(X_2 <= t) - P(m < X_1 <= t)P(m < X_2 <= t)
+= 
+{
+F_X_1(t) F_X_2(t) - (F_X_1(t) - F_X_1(m))(F_X_2(t) - F_X_1(m)), m <= t
+F_X_1(t) F_X_2(t),	m > t
+}
+
+
+F_X_1(t)
+= 
+{
+	0, x < 0
+	x / l, x in [0, l]
+	1, x > l
+}
+
+F_{M, T}(m, t)
+=
+{
+	0, m < 0, t < 0
+	1, m > l, t > l
+	t / l * t / l, m > l, t in (0, l)
+	1 - (1 - m / l)^2, t > l, m in (0, l)
+	t^2 / l^2 - (t / l - m / l)^2,	0 <= m <= t <= l
+	(t / l)^2,	0 < t < m < l
+}
+
+
+
+5
+0 <= X_1 <= X_2 <= t
+P(X_1 <= x_1, X_2 <= x_2 | N_t = 2)
+= P(X_1 <= x_1, X_2 <= x_2, N_t = 2) / P(N_t = 2)
+= P(X_2 <= x_2, N_t = 2) - P(X_1 > x_1, X_2 <= x_2, N_t = 2)
+= P(N_[0, X_2] = 2, N_[X_2, t] = 0) 
+- P(N_[0, X_1] = 0, N_[X_1, X_2] = 2, N_[x, t] = 0)
+= P(N_[0, X_2] = 2) P(N_[X_2, t] = 0) 
+- P(N_[0, X_1] = 0) P(N_[X_1, X_2] = 2) P(N_[x, t] = 0)
+~ poisson(lamda X_2) 
+~ poisson(lamda (t - X_2))
+
+P(X_1 <= x_1, X_2 <= x_2 | N_t = 2)
+= (x_2^2 - (x_2^2 - x_1^2)^2) / t^2  

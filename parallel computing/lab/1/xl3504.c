@@ -81,14 +81,22 @@ for(i = loc_a; i <= loc_b; ++i)
 }
 
 if(start != -1)
+{
   for(i = start; i <= loc_b; i += x)
+  {
     sendbuf[send_i++] = i;
+  }
+}
 
 unsigned int max_send_i;
 MPI_Allreduce(&send_i, &max_send_i, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
+
+while(send_i < max_send_i)
+    sendbuf[send_i++] = -1;
+
 if(!my_rank)
 {
-  recvbuf = (unsigned int *)malloc(comm_sz * max_send_i * sizeof(unsigned int));
+  recvbuf = (unsigned int *)malloc((comm_sz * max_send_i + 10) * sizeof(unsigned int));
   if(!recvbuf)
     printf("cannot malloc\n");
 }
@@ -130,11 +138,21 @@ if(!my_rank)
 
   if(end != -1)
   {
-    for(i = 0; recvbuf[i] != end && i < comm_sz * max_send_i; ++i) 
-        if(recvbuf[i] && recvbuf[i] >= A && recvbuf[i] <= B)
+    i = 0;
+    for(; (i < comm_sz * max_send_i) && (recvbuf[i] != end); ++i) 
+    {
+        if(recvbuf[i] != -1)
             fprintf(fp, "%u\n", recvbuf[i]);
-    if(recvbuf[i - 1] != end)
-        fprintf(fp, "%u\n", end);
+    }
+    if(!i)
+    {
+        fprintf(fp, "%d\n", end);
+    }
+    else if(i - 1 >= 0)
+    {
+      if(recvbuf[i - 1] != end)
+        fprintf(fp, "%d\n", end);
+    }
   }
 
   fclose(fp);
@@ -148,7 +166,6 @@ if(!my_rank)
   printf("time of part1 = %lf s    part2 = %lf s\n", 
         (double)(time_for_p1),
         (double)(end_p2-start_p2) );
-  // fprintf(fp, "time of part1 = %lf s\n", (double)(time_for_p1));
 }
 MPI_Finalize();
 return 0;

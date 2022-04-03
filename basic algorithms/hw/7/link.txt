@@ -1,0 +1,27 @@
+https://www.youtube.com/watch?v=cu7TMYj0dBg
+
+https://math.stackexchange.com/questions/2433735/proving-that-greedy-coin-change-algorithm-gives-optimal-solution-under-certain-c
+
+https://www.geeksforgeeks.org/minimum-number-of-jumps-to-reach-end-of-a-given-array/
+
+https://www.geeksforgeeks.org/minimum-number-jumps-reach-endset-2on-solution/
+
+https://towardsdatascience.com/tackling-jump-game-problems-leetcode-e0a718e7dfba
+
+https://www.cnblogs.com/JJCHEHEDA/p/4674293.html
+
+https://www.youtube.com/watch?v=0RHXjBKY9EM&t=460s
+
+https://www.youtube.com/watch?v=Zb4eRjuPHbM
+
+https://www.coursehero.com/file/p342a03n/32-37-Case-Study-Frog-Jumping-Analysis-Optimality-Theorem-Let-J-be-the-series-of/
+
+https://www.geeksforgeeks.org/maximum-number-of-overlapping-intervals/
+
+https://www.techiedelight.com/maximum-overlapping-intervals-problem/
+
+frog jump
+leet 55, 403
+
+color interval
+leet 435

@@ -1,0 +1,43 @@
+atomic 
+critical
+locks
+
+everything before
+#pragma omp parallel
+is shared
+
+everything inside {}
+is local
+
+implicit barrier
+in #for, if no nowait, wait for 
+other processes to reach
+
+if not specified
+create num threads
+= min(# logical cores,
+# iterations)
+
+static variables
+are stored in data part
+when a function called
+again
+old static var is still there
+
+int x
+#pragma omp parallel
+{
+
+}
+
+x is shared
+
+float is too slow
+
+openmp2
+p21
+factor is positive or negative
+
+default(none)
+more readability
+

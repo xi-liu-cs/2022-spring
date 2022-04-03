@@ -1,0 +1,32 @@
+437
+S_{ij} = set of activities start after activity a_i finishes
+and that finish before activity a_j starts
+
+A_{ik} = A_{ij} cap S_[ik}
+A_{kj} = A_{ij} cap S_[kj}
+
+
+438
+choose an activity that leaves the resource available
+for as many other activities as possible
+
+choose the activity in S with the earliest finish time
+since that would leave the resource available
+for as many of the activities that follow it as possible
+
+activities are sorted in monotonically increasing
+order by finish time
+
+S_k = {a_i in S: s_i >= f_k}
+be the set of activities that
+start after activity ak finishes
+
+
+439
+greedy algorithms typically have this top-down design:
+make a choice and then solve a subproblem,
+rather than the bottom-up technique of solving
+subproblems before making a choice
+
+claim: consider a nonempty subproblem $S_k$, let $c_i$ be the maximum value coin in $S_k$ among the remaining available choices and value remaining to be changed is greater than or equal to $c_i$. then $c_i$ is included in some mimimum-size set of coin changes of $S_k$\\
+proof: let $C_k$ be a minimum-size subset of coin changes of $S_k$, and let $c_j$ be the coin in $C_k$ with the maximum value. if $c_i = c_j$, the proof is done, since it is shown that $c_i$ is in some minimum-size subset of coin changes of $S_k$. if $c_i \not= c_j$, let the set $C_k' = (C_k \setminus \{c_j\}) \cup \{c_i\}$ be $C_k$ but substituting $c_i$ for $c_j$.\\

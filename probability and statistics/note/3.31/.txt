@@ -1,0 +1,157 @@
+hypothesis
+
+1. arrivals at a fixed rate lamda
+per unit of time
+indep of the time of the day
+
+2. # of arrivals in separate/
+disjoint time intervals (nonoverlapping time spans)
+are indep rand var
+
+
+i) 2)
+number of arrivals in interval [0, t]: N_t
+if interval is small enough
+then number of arrivals in 1st, 2nd, 3rd,...
+R_i can only take values 0 or 1
+R_i bernoulli rand var with parameter
+E[R_i] = (rate of arrival)(length of time)
+= lamda t / n
+
+N_t = total # of arrivals in [0, t]
+= R_1 + R_2 + ... R_n
+
+N_t is sum of n bernoulli 
+rand var 
+N_t ~ binomial(lamda t / n, n)
+
+p_n_t(k) = binom(n, k) (lamda t / n)^k (1 - lamda t / n)^{n - k}
+= binom(n, k) p^k (1 - p)^{n - k}
+
+E[R_i] = lamda t / n = p
+
+idea:
+take limit n -> +infty
+to have infinite measurement precision
+
+
+limit n -> +infty p_n_t(k) 
+= limit n -> +infty binom(n, k)
+* limit n -> +infty (lamda t / n)^k
+* limit n -> +infty binom(1 - lamda t / n)^{n - k}
+= limit n -> +infty binom(n, k)(lamda t / n)^k
+* limit n -> +infty binom(1 - lamda t / n)^{n - k}
+= limit n -> +infty n! / k!(n - k)!
+* (lamda t)^k / (n) 
+= (lamda t / k!) lim n -> +inf e^{n ln(1 - lamda t /n)}
+
+for x small, ln(1 - x) approx - x + small stuff
+
+lim n->inf (1 - lamda t /n) 
+= lim n->inf (-lamda t /n) 
+= (lamda t / k!) lim n -> +inf e^{n (-lamda t /n)}
+= (lamda t / k!) e^{n (-lamda t /n)}
+
+N_{s, t + s}
+is # of arrivals in time interval [s, t + s]
+
+
+by the homogeneous assumption
+time interval length is same
+p_n_{[s, t + s]}(k)
+= (lamda t)^k / k! e^{-lamda t}
+
+
+poisson process
+interarrival times
+
+X_1, X_2, X_3, ...
+conti rand var
+corresponding to time of arrival
+of 1st, 2nd, 3rd, ...
+t_1 = x_1
+t_2 = x_2 - x_1
+t_3 = x_3 - x_2
+
+
+
+forall t in R^+
+F_{T_1}(t) = P(T_1 <= t)
+= 1 - P(T_1 > t)
+= 1 - P(N_t = 0)
+= 1 - (lamda t)^0 / 0! e^{-lamda t}
+= 1 - e^{-lamda t}
+
+F_{T_1}(t) = 1 - e^{-lamda t}
+T_1 ~ exp(lamda)
+
+find distri of T_2
+F_{T_2}(t) = P(T_2 <= t)
+= 1 - P(T_2 > t)
+= 1 - P(N_{s + t} = 1 | N_s = 1)
+
+make sure 1st patient arrive
+T_2 is the time i have to wait 
+between the arrival of 1st patient
+and 2nd patient
+
+P(N_{s + t} = 1, N_s = 1)
+= P(N_[0, s] = 1, N_[s, s + t] = 0)
+= P(N_[0, s] = 1) P(N_[s, s + t] = 0)
+indep hypothesis
+= e^{-lamda t} lamda s / 1! e^{-lamda s} 
+
+F_{T_1}(t) = 1 - P(N_{s + t} = 1, N_s = 1) / P(N_s = 1)
+= 1 - e^{lamda t} (lamda s) e^{-lamda s} / (lamda s e^{-lamda s})
+
+T_2 ~ exp(lamda)
+
+
+
+definition
+1 dimensional poisson process with intensity lamda
+is a sequence X_1, X_2, X_3, ... of r.v. with property
+that the interarrival times X_1, X_2, X_3, ...
+are indep rand var each with exponential distr
+exp(lamda)
+
+number of arrivals follow poisson
+interarrival times follow exponential
+
+T_i's are memoryless
+as showed in pset 5
+
+P(T_2 > s + t | T_2 > s)
+= P(T_2 > t)
+
+it does not know that in the past
+that i already waited
+
+
+
+3)
+arrival times
+X_1, X_2, X_3, ...
+X_1 = T_1
+X_2 = X_1 + X_2 - X_1 = T_1 + T_2
+X_2 = X_1 + X_2 - X_1 + X_3 - X_2 
+= T_1 + T_2 + T_3
+
+
+gamma distri
+f_X_i(t) = lamda (lamda t)^{i - 1} e^{-lamda t} / (i - 1)!
+
+
+
+location of arrival times
+know (conditional prob)
+there are p arrivals in interval [0, t]
+want to know where X_1, X_2, ..., X_p located in [0, t]
+
+N_t = 1 what is distri of X_1
+P(X_1 <= x | N_t = 1) 
+= P(X_1 <= x, N_t = 1) / P(N_t = 1) 
+= P(N_x = 1, N_[x, t] = 0) / P(N_t = 1)
+= P(N_x = 1)P(N_[x, t] = 0) / P(N_t = 1)
+plug in poisson for each item
+= x / t // uniform distri
