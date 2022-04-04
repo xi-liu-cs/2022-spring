@@ -182,4 +182,198 @@ suppose that $s[i] < f[j]$, $s[i]$ is the smallest element or earliest time inst
 otherwise, if instead $f[j] \leq s[i]$, $f[j]$ is the smallest element or earliest time instant not yet handled, so the program need to handle $f[j]$ at the current for loop iteration. $f[j]$ has the smallest finishing time not yet handled, and the smallest starting time not yet handled is $s[i]$, and since the smallest finishing time not yet handled is less than or equal to the smallest starting time not yet handled, the interval that has the finishing time of $f[j]$ must not overlap with the interval that has a starting time of $s[j]$, $f[j]$ represents that a interval just finished at the time instant handled by the current for loop iteration, so it is correct to decrement the counter $overlap$ by 1\\
 \\
 expected running time = time of qsort + time of for loop = $O(n \lg n) + O(n) = O(n \lg n)$\\
+\\
+\\
+\\
+\\
+Problem 4\\
+(a)\\
+convex\_hull() is an $O(n^2 \lg n)$ algorithm 
+to compute the convex hull 
+after receiving each point
+by running graham\_scan() n times 
+after receiving each point\\
+\begin{lstlisting}[language = c]
+#include <stdio.h>
+#include <stdlib.h>
+
+int block = 128;
+
+typedef struct point
+{ int x, y; } point;
+
+point p0;
+
+void swap(point * p, int i, int j)
+{
+    point t = p[i];
+    p[i] = p[j];
+    p[j] = t;
+}
+
+/* distance squared 
+= (sqrt{(x2 - x1)^2 + (y2 - y1)^2})^2 */
+int dist_sq(point a, point b)
+{
+    return (b.x - a.x) * (b.x - a.x)
+         + (b.y - a.y) * (b.y - a.y);
+}
+
+/* slope1 = (y2 - y1) / (x2 - x1)
+slope2 = (y3 - y2) / (x3 - x2)
+if(slope1 == slope2)
+    collinear
+else if(slope1 < slope2)
+    slope1 - slope2 < 0
+    orientation is counterclockwise
+else if(slope1 > slope2)
+    slope1 - slope2 > 0
+    orientation is clockwise
+    
+slope1 - slope2 will have
+the same sign with 
+(x2 - x1)(x3 - x2)(slope1 - slope2)
+= (y2 - y1)(x3 - x2) - (y3 - y2)(x2 - x1) 
+
+orient() returns an integer indicating
+the orientation of points (a, b, c):
+    0, if a, b, and c are collinear
+    a negative value if orientation is counterclockwise
+    a positive value if orientation is clockwise */
+int orient(point a, point b, point c)
+{
+    return (b.y - a.y) * (c.x - b.x)
+         - (c.y - b.y) * (b.x - a.x);
+}
+
+/* compare distance to p0 */
+int cmp(const void * a1, const void * a2)
+{
+    point * p1 = (point *)a1;
+    point * p2 = (point *)a2;
+    int ori;
+    if(!(ori = orient(p0, *p1, *p2)))
+        return dist_sq(p0, *p1) - dist_sq(p0, *p2);
+    return ori;
+}
+
+point * graham_scan(point * p, int n, int * top)
+{
+    int y_min = (*p).y, min_i = 0;
+    for(int i = 1; i < n; ++i)
+    {
+        int y = p[i].y;
+        if((y < y_min) 
+        || (y == y_min && p[i].x < p[min_i].x))
+        {
+            y_min = p[i].y;
+            min_i = i;
+        }
+    }
+    swap(p, 0, min_i);
+    p0 = *p;
+    
+    qsort(p + 1, n - 1, sizeof(point), cmp);
+    int sz = 1;
+    for(int i = 1; i < n; ++i)
+    {
+        while(i < n - 1 && !orient(p0, p[i], p[i + 1]))
+            ++i;
+        p[sz++] = p[i];
+    }
+    if(sz < 3) return 0;
+    
+    point * s = malloc(sz * sizeof(point));
+    *top = 0;
+    s[(*top)++] = *p;
+    s[(*top)++] = p[1];
+    s[(*top)++] = p[2];
+    
+    for(int i = 3; i < sz; ++i)
+    {
+        while(*top && orient(s[*top - 2], s[*top - 1], p[i]) >= 0)
+            --(*top);
+        s[(*top)++] = p[i];
+    }
+    return s;
+}
+
+void print_stack(point * s, int top)
+{
+    for(int i = top - 1; i >= 0; --i)
+        printf("{%d, %d}\n", s[i].x, s[i].y);
+    printf("\n");
+}
+
+point recv_point(point * input, int i)
+{/* or can return a point from user input */
+    return input[i];
+}
+
+void convex_hull(point * input, int n)
+{
+    int cur_sz = block;
+    point * p = malloc(cur_sz * sizeof(point));
+    for(int i = 0; i < n; ++i)
+    {
+        if(i >= cur_sz)
+        {
+            cur_sz += block;
+            p = realloc(p, cur_sz * sizeof(point));
+        }
+        p[i] = recv_point(input, i); /* receive a point */
+        int top = 0;
+        point * s = graham_scan(p, i + 1, &top);
+        printf("after receive point %d, convex hull is\n", i);
+        print_stack(s, top);
+    }
+}
+\end{lstlisting}
+\newpage
+\noindent
+(b)\\
+convex\_hull\_jarvis\_march() is an $O(n^2)$ algorithm
+to compute the convex hull 
+after receiving each point
+by running n times 
+after receiving each point, convex\_hull\_jarvis\_march() calls some functions defined in Problem 4 (a)\\
+convex\_hull\_jarvis\_march()'s time complexity $T(n) = O(n^2)$ since to account for receiving only 1 point at a time, a point will be added to the array pointed to by pointer p within the while loop using the assignment ``p[recv\_i] = recv\_point(p, recv\_i);", and then using the         ``if(p[recv\_i].x < p[left\_i].x) left\_i = recv\_i;" statement to update the current leftmost point if the added point has a smaller $x$ value than the $x$ value of the current leftmost point. it is correct to do this since Jarvis's march algorithm maintains the most counterclockwise point. the modifications on Jarvis's march algorithm will not have an effect on the original asymptotic time complexity of Jarvis's march algorithm, which is $O(n^2)$\\
+\begin{lstlisting}[language = c, mathescape = true]
+void print(point * s, int n)
+{
+    for(int i = 0; i < n; ++i)
+        printf("{%d, %d}\n", s[i].x, s[i].y);
+    printf("\n");
+}
+
+point * convex_hull_jarvis_march(point * p, int n, int * ret_sz)
+{
+    if(n < 3) return 0;
+    point * ret = malloc(n * sizeof(point));
+    *ret_sz = 0;
+    
+    int left_i = 0;
+    
+    int cur_p = left_i, c, recv_i = -1;
+    while(1)
+    {
+        ++recv_i;
+        p[recv_i] = recv_point(p, recv_i);
+        if(p[recv_i].x < p[left_i].x)
+            left_i = recv_i;
+        ret[(*ret_sz)++] = p[cur_p];
+        c = (cur_p + 1) % n;
+        for(int i = 0; i < n; ++i)
+            if(orient(p[cur_p], p[i], p[c]) < 0)
+                c = i;
+        cur_p = c;
+        printf("after receive point {%d, %d}, convex hull is\n",
+        ret[recv_i].x, ret[recv_i].y);
+        print(ret, recv_i + 1);
+        if(cur_p == left_i)
+            break;
+    }
+    return ret;
+}
+\end{lstlisting}
 \end{document}

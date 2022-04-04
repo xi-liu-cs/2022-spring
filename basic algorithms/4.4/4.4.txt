@@ -1,0 +1,63 @@
+adjacency list:
+space: O(|V| + |E|)
+good
+in the worst case: complete graph, O(n^2 + n) 
+
+check if a vertex[i] is connect with another vertex
+must search the linked list stored at vertex[i], O(|E|)
+
+adjacency matrix
+2d array
+space: O(n^2)
+
+v[1...n][1...n] 
+
+v[i][j] = 
+{
+	1,	if there is an edge i -> j
+	0,	otherwise
+}
+
+efficient for deciding adjacencies:
+time needed to check i -> j: O(1)
+
+a graph on n vertices satisfies
+0 <= |E| <= Theta(n^2)
+
+assume graph is simple
+no cycle (no edge to itself)
+
+complete graph
+directed: max |E| = n(n - 1)
+undirected: max |E| = binomial(n, 2) = n(n - 1) / 2
+
+breadth first search
+input: g = (v, e): directed graph (adjacency list)
+source vertex s
+output: all vertices in g reachable from s
+
+layer 0: all vertices reachable from
+vertex 1 using 0 edges
+layer 1: all vertices reachable from
+vertex 1 using 1 edge
+...
+
+
+output is sorted according
+to distance from source vertex
+
+
+bfs tree from src vertex
+store parent vertex
+for constructing shortest path
+
+preprocessing
+struct vertex u
+{
+	parent = u.null
+	label: u.l = seen /* each vertex output only once */
+}
+
+initially u.l is undiscovered,
+once visit a vertex
+its label become seen
