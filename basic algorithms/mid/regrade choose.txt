@@ -1,0 +1,35 @@
+Hi, my algorithm is correct, you can compile
+and execute the below implementation of my algorithm
+to verify. in the below program, k = 2, so the boxes
+chosen must be more than 2 apart, so the answer
+is c[2] + c[5] = 6 + 12 = 18
+and the program correctly returns the answer
+so can you regrade?
+Thank you.
+
+
+#include <stdio.h>
+#include <math.h>
+
+int choose(int * c, int n, int k)
+{
+    int memo[n];
+    for(int i = 0; i < n; ++i)
+    {
+    	memo[i] = c[i];
+        for(int j = 0; j < i; ++j)
+        {
+    	    if(i - j > k) /* boxes must be more than k distance apart */
+    		    memo[i] = fmax(memo[i], c[i] + memo[j]);
+        }
+    }
+    return memo[n - 1];
+}
+
+int main()
+{
+    int c[] = {-7, -3, 6, 8, 11, 12};
+    int n = sizeof(c) / sizeof(*c);
+    int k = 2;
+    printf("choose_box = %d\n", choose(c, n, k));
+}

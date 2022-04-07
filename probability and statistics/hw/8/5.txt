@@ -1,0 +1,19 @@
+\begin{align*}
+P(N_{t_1} = k) = \frac{(\lambda t_1)^k}{k!} e^{-\lambda t_1}\\
+P(N_{t_2} = k) = \frac{(\lambda t_2)^k}{k!} e^{-\lambda t_2}\\
+\end{align*}
+\begin{align*}
+E[g(N_{t_1}, N_{t_2})] &= \sum_{k_1 = 0}^{\infty} \sum_{k_2 = 0}^{\infty} g(k_1, k_2) P(N_{t_1} = k_1, N_{t_2} = k_2)\\
+E[N_{t_1}N_{t_2}] &=  \sum_{k_1 = 0}^{\infty} \sum_{k_2 = 0}^{\infty} k_1 k_2 P(N_{t_1} = k_1, N_{t_2} = k_2)\\
+\end{align*}
+\begin{align*}
+P(N_{t_1} = k_1,\; N_{t_2} = k_2) &= P(N_{t_1} = k_1,\; N_{t_2} - N_{t_1} = k_2 - k_1)\\
+&\text{/* since $(0, t_1]$ and $(t_1, t_2]$ are disjoint time intervals,}\\
+&\text{$N_{t_1}$ and $N_{t_2} - N_{t_1}$ are independent random variables */}\\
+&= P(N_{t_1} = k_1)P(N_{t_2} - N_{t_1} = k_2 - k_1)\\
+&= \frac{(\lambda t_1)^{k_1}}{k_1!} e^{-\lambda t_1} \frac{(\lambda (t_2 - t_1))^{k_2 - k_1}}{(k_2 - k_1)!} e^{-\lambda (t_2 - t_1)}
+\end{align*}
+\begin{align*}
+E[N_{t_1}N_{t_2}] &=  \sum_{k_1 = 0}^{\infty} \sum_{k_2 = 0}^{\infty} k_1 k_2 P(N_{t_1} = k_1, N_{t_2} = k_2)\\
+&= \sum_{k_1 = 0}^{\infty} \sum_{k_2 = 0}^{\infty} k_1 k_2 \frac{(\lambda t_1)^{k_1}}{k_1!} e^{-\lambda t_1} \frac{(\lambda (t_2 - t_1))^{k_2 - k_1}}{(k_2 - k_1)!} e^{-\lambda (t_2 - t_1)}\\
+\end{align*}

@@ -1,0 +1,95 @@
+local, global network
+
+fiber optic cables 
+
+central hub computer
+a star network is an 
+implementation of a 
+spoke–hub distribution
+paradigm in computer networks. 
+in a star network, 
+every host is connected
+to a central hub
+
+agreement that
+a data can transfer
+to another network
+
+hypertext:
+can click a link to jump to another
+
+world wide web
+- use of a web browser to
+browse hypertext documents
+on the internet
+- use of the http protocol
+by clients and servers
+to request and receive information
+
+
+
+a client is any machine 
+on a network that is requesting data 
+from a server
+(when clicking a web link)
+
+a server is any machine
+that is responding to a 
+request for data from a client machine
+(when hosting an own web link)
+
+when a browser ask a
+server a request
+is plain text (get request) send
+to another computer
+
+web server
+return a status code
+
+browser send to
+a server using post
+ex: fill in username field
+on a webpage
+
+every web browser
+speak html, css, javascript
+
+Hypertext Markup Language (HTML) - controls the content present on the web page
+Cascading Style Sheets (CSS) - controls the visual style of the content on the web page
+Javascript (JS) - controls the iteractive behavior of the web page (how does the page change when a user clicks, types, moves them mouse, etc)
+
+html
+<p id = "p1"> paragraph
+
+css
+#p1{display: none}
+
+jquery dollar sign function
+$ sign is nothing but an identifier of jQuery() function
+
+value is what seen after click button
+
+css
+selector:
+which things to apply set of styles
+
+padding: space
+
+class: an identifier that 
+can be shared
+
+dot operator: class
+p.classname
+
+number sign: id
+p#idname
+
+
+client: front end
+make a request
+
+server: back end
+process request
+
+@app.route('/save', methods=['POST'])
+flask function

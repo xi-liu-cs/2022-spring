@@ -1,0 +1,110 @@
+if want to construct shortest
+path from source to a vertex
+
+every vertex put in the 
+seen list only once
+
+put into seen list
+
+vertex u attribute:
+parent: only needed to construct shortest path
+status: change from undiscovered to discovered
+
+/* traversal of all vertices reachable
+from source vertex s */
+bfs(g, s)
+	queue q: = {s}	/* q: seen list */
+	s.status = seen
+	while(q is not empty)
+		u = q.front()
+		print(u)
+		q.pop()
+		for each vertex v in adj[u]
+			if v.status == unseen
+				q.push(v)
+				v.status = seen
+				v.parent = u
+			
+
+/* traversal of all vertices 
+without source vertex */
+input: directed graph g = (v, e)
+output: all vertices in g
+bfs(g)
+	for each vertex s in v(g)	/* vertex set of g */
+		if(s.status == unseen)
+			bfs(g, s)
+
+
+split the set of output vertices
+each set is sorted with respect 
+to the distance to the source vertex
+
+
+tc of bfs(g)
+depend on number of vertices, edges
+- each vertex in for loop
+of bfs(g) is visited once
+tc of "for each vertex s in v(g)" 
+= Theta(|V|) = Theta(n)
+
+- bfs(g, s): once the vertex 
+is seen, then the vertex will not
+be pushed again into queue 
+tc of aux calls to bfs(g, s):
+each edge is visited exactly once 
+during all calls to bfs(g, s) 
+for all potential bfs(g, s)
+tc of all possible calls to
+bfs(g, s): Theta(|E|)
+
+=> tc of bfs(g)
+= Theta(|V|) + Theta(|E|)
+= Theta(|V| + |E|)
+
+properties of bfs
+- bfs(g, s) gives the shortest
+path (and also the distance)
+from s to any vertex reachable from s
+
+- bfs(g, s) outputs the vertices 
+based on their distance from s
+
+spanning tree
+given a connected graph g input, a spanning tree
+of g is a tree whose edges are from g
+remove some unnecessary edges of g
+and g is still connected and no cycles
+
+if g is an undirected & connected graph,
+then bfs(g) gives a spanning tree 
+
+ex: find the minimum number of flight routes
+so that cities are still connected
+
+(if the graph is connected,
+then can find a spanning tree)
+
+
+
+
+
+dfs
+input: "directed" graph g = (v, e): adjacency lists
+	 source vertex s
+output: all vertices in g reachable from s
+
+preprocessing
+for every vertex in g:
+(i) parent: v.parent := void /* construct dfs tree */
+(ii) label: v.status in {undiscovered, active, seen or dead}
+avoid repetitions & indefinite running time
+(iii) v.d: discovery time of v
+(iv) v.f: finish or seen time of v
+
+
+vertex v:
+undiscovered, until visit v for the first time (v.d)
+=> active, until all vertices reachable from v become seen or dead (v.f)
+=> seen
+

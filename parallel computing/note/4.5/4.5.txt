@@ -1,0 +1,85 @@
+transposition sort
+critical section a[i]
+
+outer loop is sequential
+
+no nowait means implicit barrier
+
+default(none) requires
+variable scope specified 
+(shared or private)
+
+omp odd-even sort
+for each iteration:
+	pragma omp for: create threads
+	kill threads
+
+	pragma omp for: create threads
+	kill threads
+
+pragma omp parallel num_threads
+create thread once
+
+no keyword parallel
+means no creation of threads
+
+cannot put nowait
+since then a thread can finish
+1st for loop, then go to 2nd for loop
+but 2nd for loop assumes the completion 
+of 1st for loop 
+
+2 parallel for directives
+longer than 2 for directives
+even if 0 threads are created
+syscall
+
+some time cyclic partitioning
+is better than block partitioning
+
+result speedup only take account of for loop
+
+– static: the iterations can be assigned to the 
+threads before the loop is executed
+– dynamic or guided: the iterations are assigned 
+to the threads while the loop is executing 
+– auto: the compiler and/or the run-time system 
+determine the schedule 
+– runtime: the schedule is determined at runtime
+
+
+schedule(static, 1) //default
+1 is the number of iterations
+if num threads = 3
+then
+thread 1: 0, 3, 6, 9
+
+chunk size require trial and error
+
+default() is faster than schedule()
+
+divide for iteration into sections
+if computation (vertical) vs iteration (horizontal)
+is a constant horizontal line, then use default
+if linear relationship, use schedule
+
+if assign work to a thread finish fastest
+if a thread finishing faster and always 
+receive more work, core become hot
+
+give smaller number of threads
+n / threads
+
+dynamic: penalizing thread that finish fastest
+guided more expensive: division is slow
+when a lot of threads asking for new chunksize
+
+when industry level, compile time is slow
+instead of recompile 
+every time 
+export OMP_SCHEDULE = "static,1"
+
+omp_set_schedule will be assigned to all pragma
+
+chuncksize increase if superlinear
+chuncksize decrease if sublinear

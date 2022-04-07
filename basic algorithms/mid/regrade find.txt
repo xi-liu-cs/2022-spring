@@ -1,0 +1,35 @@
+Hi, my algorithm does not call the function
+on both left and right subarrays, since it
+only recursively calls the function again once
+in each case, only when the condition is satisfied
+if a[mid] > 0, call the function 
+for a[left...mid - 1]; if a[mid] < 0, call
+the function for a[mid + 1...right].
+you can refer to the below implementation 
+to see why the recursion is not on both subarrays.
+so can you regrade?
+Thank you.
+
+#include <stdio.h>
+
+int find(int * a, int left, int right)
+{/* find i s.t. a[i - 1] < 0, a[i] > 0 */
+    if(left > right)
+        return 1 << 31; /* not find */
+    int i = (left + right) / 2;
+    if(!i && a[i] > 0)
+        return a[i];
+    else if(a[i - 1] < 0 && a[i] > 0)
+        return a[i];
+    else if(a[i] > 0)
+        return find(a, left, i - 1);
+    else if(a[i] < 0)
+        return find(a, i + 1, right);
+}
+
+int main()
+{
+    int a[] = {-7, -3, 6, 8, 11, 12};
+    int n = sizeof(a) / sizeof(*a);
+    printf("%d\n", find(a, 0, n - 1));
+}
