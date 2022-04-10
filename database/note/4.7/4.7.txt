@@ -1,0 +1,44 @@
+flask: detect requests
+
+virtual environment
+control modules available for different 
+memory spaces
+
+.venv /* a hidden directory */
+
+a new document is a python dictionary
+
+insert_many() insert a list of dict
+
+docs = db.jobs.find({
+    "Agency":"DEPT OF PARKS & RECREATION",
+    "Salary Range To": { "$gt": 30000 } /* subdictionary */
+})
+
+python dict key require ""
+
+route: stuff after domain name
+
+@app.route('/')
+decorator
+call the function automatically
+when user ask about the root route
+
+in html
+{% %} is delimiter of code
+
+generalized route
+@app.route('/show/<something>')
+def show_it(something):
+    return render_template('bar.html', title=something, paragraph_text=something)
+
+
+<a> link tag
+href: hyperlink reference
+
+<a href="{{ url_for('/show_foo') }}"> click me </a>
+
+https://stackoverflow.com/questions/7478366/create-dynamic-urls-in-flask-with-url-for
+
+https://i6.cims.nyu.edu/~ab1258/flask-mongodb-example/flask.cgi
+

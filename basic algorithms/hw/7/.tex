@@ -337,7 +337,7 @@ to compute the convex hull
 after receiving each point
 by running n times 
 after receiving each point, convex\_hull\_jarvis\_march() calls some functions defined in Problem 4 (a)\\
-convex\_hull\_jarvis\_march()'s time complexity $T(n) = O(n^2)$ since to account for receiving only 1 point at a time, a point will be added to the array pointed to by pointer p within the while loop using the assignment ``p[recv\_i] = recv\_point(p, recv\_i);", and then using the         ``if(p[recv\_i].x < p[left\_i].x) left\_i = recv\_i;" statement to update the current leftmost point if the added point has a smaller $x$ value than the $x$ value of the current leftmost point. it is correct to do this since Jarvis's march algorithm maintains the most counterclockwise point. the modifications on Jarvis's march algorithm will not have an effect on the original asymptotic time complexity of Jarvis's march algorithm, which is $O(n^2)$\\
+convex\_hull\_jarvis\_march()'s time complexity $T(n) = O(n^2)$ since to account for receiving only 1 point at a time, a point will be added to the array pointed to by pointer p within the while loop using the assignment ``p[recv\_i] = recv\_point(p, recv\_i);", and then using the         ``if(p[recv\_i].x $<$ p[left\_i].x) left\_i = recv\_i;" statement to update the current leftmost point if the added point has a smaller $x$ value than the $x$ value of the current leftmost point. it is correct to do this since Jarvis's march algorithm maintains the most counterclockwise point. the modifications on Jarvis's march algorithm will not have an effect on the original asymptotic time complexity of Jarvis's march algorithm, which is $O(n^2)$\\
 \begin{lstlisting}[language = c, mathescape = true]
 void print(point * s, int n)
 {

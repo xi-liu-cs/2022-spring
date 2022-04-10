@@ -1,0 +1,197 @@
+\documentclass[12pt,border=4pt,multi]{article} % \documentclass[tikz,border=4pt,multi]{article}
+\usepackage{lingmacros}
+\usepackage{tree-dvips}
+\usepackage{amssymb} % for mathbb{}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{forest}
+\usepackage{amsmath} % for matrices
+\usepackage{xeCJK}
+\usepackage{tikz}
+\usepackage[arrowdel]{physics}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{pgfplots, pgfplotstable}
+\usepackage{diagbox} % diagonal line in cell
+\usepackage[usestackEOL]{stackengine}
+\usepackage{multirow}
+\graphicspath{{./img}} % specify the graphics path to be relative to the main .tex file, denoting the main .tex file directory as ./
+\definecolor{orchid}{rgb}{0.7, 0.4, 1.1}
+
+\begin{document}
+
+\section*{Xi Liu, xl3504, Problem Set 9}
+Problem 1\\
+let $N_{(t_1, t_2]}$ be the total number of arrivals in the time interval $(t_1, t_2]$ for the Poisson process
+\begin{align*}
+P(N_{(t_1, t_2]} = i) = \frac{(\lambda (t_2 - t_1))^i}{i!} e^{-\lambda (t_2 - t_1)}\\
+\end{align*}
+\begin{align*}
+&P(N_{(0, 2]} = 2,\; N_{(1, 4]} = 3)\\ 
+&= P(N_{(0, 1]} = 0,\; N_{(1, 2]} = 2,\; N_{(2, 4]} = 1)\\
+&+ P(N_{(0, 1]} = 1,\; N_{(1, 2]} = 1,\; N_{(2, 4]} = 2)\\
+&+ P(N_{(0, 1]} = 2,\; N_{(1, 2]} = 0,\; N_{(2, 4]} = 3)\\
+&\text{/* since $(0, 1]$, $(1, 2]$, and $(2, 4]$ are disjoint time intervals,}\\
+&\text{$N_{(0, 1]}$, $N_{(1, 2]}$, and $N_{(2, 4]}$ are independent random variables */}\\
+&= P(N_{(0, 1]} = 0)P(N_{(1, 2]} = 2)P(N_{(2, 4]} = 1)\\
+&+ P(N_{(0, 1]} = 1)P(N_{(1, 2]} = 1)P(N_{(2, 4]} = 2)\\
+&+ P(N_{(0, 1]} = 2)P(N_{(1, 2]} = 0)P(N_{(2, 4]} = 3)\\
+&= \frac{(\lambda (1 - 0))^0}{0!} e^{-\lambda (1 - 0)}\frac{(\lambda (2 - 1))^2}{2!} e^{-\lambda (2 - 1)}\frac{(\lambda (4 - 2))^1}{1!} e^{-\lambda (4 - 2)}\\
+&+ \frac{(\lambda (1 - 0))^1}{1!} e^{-\lambda (1 - 0)}\frac{(\lambda (2 - 1))^1}{1!} e^{-\lambda (2 - 1)}\frac{(\lambda (4 - 2))^2}{2!} e^{-\lambda (4 - 2)}\\
+&+ \frac{(\lambda (1 - 0))^2}{2!} e^{-\lambda (1 - 0)}\frac{(\lambda (2 - 1))^0}{0!} e^{-\lambda (2 - 1)}\frac{(\lambda (4 - 2))^3}{3!} e^{-\lambda (4 - 2)}\\
+&= e^{-\lambda}\lambda^2 e^{-\lambda}2\lambda e^{-2\lambda} + \lambda e^{-\lambda}2\lambda e^{-\lambda}2\lambda^2 e^{-2\lambda} + \frac{\lambda}{2} e^{-\lambda} e^{-\lambda}\frac{4\lambda^3}{3} e^{-2\lambda}\\
+&= 2\lambda^3 e^{-4\lambda} + 4\lambda^4 e^{-4\lambda} + \frac{2\lambda^4}{3}e^{-4\lambda}\\
+&= \boxed{2\lambda^3 e^{-4\lambda}\left(1 + 2\lambda + \frac{\lambda}{3}\right)}\\
+\end{align*}
+\newpage
+\noindent
+Problem 2\\
+part 1\\
+if $X$ follows a Poisson distribution with parameter $\lambda$, then
+\begin{align*}
+\forall i \in \mathbb{N}, \; p_X(i) = P(X = i) = \frac{\lambda^i}{i!}e^{-\lambda}\\
+\end{align*}
+if $Y$ follows a Poisson distribution with parameter $\mu$, then
+\begin{align*}
+\forall i \in \mathbb{N}, \; p_Y(i) = P(Y = i) = \frac{\lambda^i}{i!}e^{-\mu}\\
+\end{align*}
+\begin{align*}
+&\forall (x, y) \in \mathbb{R}^2,\; p_{X, Y}(x, y) = p_{X}(x)p_{Y}(y)\\
+&\forall z \in \mathbb{R}\\
+p_Z(z) &= P(Z = z)\\
+&= \sum_x P(X = x,\; Y = z - x)\\
+&= \sum_x p_{X, Y}(x, z - x)\\
+&= \sum_x p_{X}(x)p_{Y}(z - x)\\
+&= \sum_{x = 0}^{z} \left(\frac{\lambda^x}{x!}e^{-\lambda}\right)\left(\frac{\mu^{z - x}}{(z - x)!}e^{-\mu}\right)\\
+&= \sum_{x = 0}^{z} \frac{\lambda^x \mu^{z - x}}{x!(z - x)!}e^{-(\lambda + \mu)}\\
+&= e^{-(\lambda + \mu)}\sum_{x = 0}^{z} \frac{\lambda^x \mu^{z - x}}{x!(z - x)!}\\
+&= \frac{e^{-(\lambda + \mu)}}{z!}\sum_{x = 0}^{z} \frac{z!\lambda^x \mu^{z - x}}{x!(z - x)!}\\
+&= \frac{e^{-(\lambda + \mu)}}{z!}\sum_{x = 0}^{z} \frac{z!}{x!(z - x)!}\lambda^x \mu^{z - x}\\
+\end{align*}
+\begin{align*}
+&= \frac{e^{-(\lambda + \mu)}}{z!}\sum_{x = 0}^{z} \binom{z}{x}\lambda^x \mu^{z - x}\\
+\end{align*}
+since the binomial theorem says
+\begin{align*}
+(x + y)^n = \sum_{i = 0}^n \binom{n}{i} x^i y^{n - i} = \sum_{i = 0}^n \binom{n}{i} x^{n - i} y^{i}
+\end{align*}
+so
+\begin{align*}
+p_Z(z) &= \frac{e^{-(\lambda + \mu)}}{z!}\sum_{x = 0}^{z} \binom{z}{x}\lambda^x \mu^{z - x}\\
+&= \boxed{\frac{e^{-(\lambda + \mu)}}{z!}(\lambda + \mu)^z}\\
+\end{align*}
+\newpage
+\noindent
+part 2\\
+application:
+\begin{align*}
+P_Z(z) &= \sum_{x = 0}^{z} \frac{\lambda^x \mu^{z - x}}{x!(z - x)!}e^{-\lambda - \mu}\\
+&= \frac{e^{-(\lambda + \mu)}}{z!}(\lambda + \mu)^z\\
+p_Z(10) &= \sum_{x = 0}^{10} \frac{(8.392)^x (7.854)^{10 - x}}{x!(10 - x)!}e^{-8.392 - 7.854}\\
+&= \boxed{\frac{e^{-(8.392 + 7.854)}}{10!}(8.392 + 7.854)^{10}}\\
+&\approx \boxed{0.0310566}\\
+\end{align*}
+\newpage
+\noindent
+Problem 3\\
+a binomial distribution with parameters $n$, $p$, and $k$ has a probability mass function
+\begin{align*}
+&\forall k \in \mathbb{N}\\
+&p_X(k) = P(X = k) = \binom{n}{k}p^k (1 - p)^{n - k}\\
+&E[X] = np\\
+&Var(X) = np(1 - p)\\
+\end{align*}
+1.\\
+Markov's inequality says $\forall a \in \mathbb{R},\; a \geq 0$  
+\begin{align*}
+E[X] &\geq aP(X \geq a)\\
+a &:= kn\\
+E[X] &\geq knP(X \geq kn)\\
+P(X \geq kn) &\leq \frac{E[X]}{kn} = \frac{np}{kn} = \boxed{\frac{p}{k}}\\
+\end{align*}
+\\
+\\
+\\
+\\
+2.\\
+Chebyshev's inequality says
+\begin{align*}
+P(|X - E[X]| \geq |a|) &\leq \frac{1}{a^2} Var(X)
+\end{align*}
+\begin{align*}
+P(X \geq kn) &= P(X - np \geq kn - np)\\
+&\leq P(|X - np| \geq kn - np)\\
+&\leq \frac{1}{(kn - np)^2} Var(X)\\
+&= \frac{n(1 - p)}{(n(k - p))^2}\\
+&= \frac{n(1 - p)}{n^2(k - p)^2}\\
+&= \boxed{\frac{1 - p}{n(k - p)^2}}\\
+\end{align*}
+\\
+\\
+\\
+\\
+3.\\
+Markov's inequality:
+\begin{align*}
+P(X \geq kn) &\leq \frac{p}{k} = \frac{1 / 2}{3 / 4} = \frac{2}{3}\\
+\end{align*}
+Chebyshev's inequality: 
+\begin{align*}
+P(X \geq kn) &\leq \frac{1 - p}{n(k - p)^2} = \frac{1 - 1 / 2}{n(3 / 4 - 1 / 2)^2} = \frac{1 / 2}{n(1 / 16)} = \frac{8}{n}
+\end{align*}
+the smaller upper bound is the tighter upper bound
+\begin{align*}
+\lim_{n \rightarrow \infty} \frac{2 / 3}{8 / n} = \lim_{n \rightarrow \infty} \frac{n}{12} = \infty
+\end{align*}
+so the Chebyshev's inequality's upper bound ($8 / n$) is the tighter bound\\
+\newpage
+\noindent
+Problem 4\\
+apply Chebyshev's inequality:
+\begin{align*}
+&\forall \epsilon > 0\\
+&P(|\overline{X_n} - \mu| > \epsilon) \leq \frac{1}{\epsilon^2} Var(\overline{X_n}) = \frac{\sigma^2}{n\epsilon^2}
+\end{align*}
+90\% sure that the average of the measurements is within half a degree Kelvin of T:
+\[E[U_i] = \mu = 0\]
+\begin{align*}
+P\left(|\overline{X_n} - 0| \leq \frac{1}{2}\right) &\geq 0.9\\
+- P\left(|\overline{X_n} - 0| \leq \frac{1}{2}\right) &\leq - 0.9\\
+1 - P\left(|\overline{X_n} - 0| \leq \frac{1}{2}\right) &\leq 1 - 0.9\\
+P\left(|\overline{X_n} - 0| > \frac{1}{2}\right) &\leq 0.1\\
+\end{align*}
+Chebyshev's inequality gives
+\begin{align*}
+P\left(|\overline{X_n} - 0| > \frac{1}{2}\right) \leq \frac{3}{n(1 / 2)^2} = \frac{12}{n}
+\end{align*}
+so, to be 90\% sure that the average of the measurements is within half a degree Kelvin of T, number of measurements $n$ should be such that
+\begin{align*}
+\frac{12}{n} \leq 0.1\\
+\boxed{n \geq 120}\\
+\end{align*}
+\newpage
+\noindent
+Problem 5\\
+apply Chebyshev's inequality:
+\begin{align*}
+&\forall \epsilon > 0\\
+&P(|\overline{X_n} - \mu| > \epsilon) \leq \frac{1}{\epsilon^2} Var(\overline{X_n}) = \frac{\sigma^2}{n\epsilon^2}
+\end{align*}
+let $X$ correspond to the result of rolling a fair die
+\begin{align*}
+n &:= 100\\
+E[X] &= \sum_{a_i} a_i p_X(a_i) = \sum_{a_i = 1}^6 a_i\frac{1}{6} = 3.5 = \frac{7}{2}\\
+E[X^2] &= \sum_{a_i} a_i^2 p_X(a_i) = \sum_{a_i = 1}^6 a_i^2\frac{1}{6} = \frac{91}{6}\\
+\sigma^2 &= Var(X) = E[X^2] - E[X]^2 = \frac{91}{6} - \left(\frac{7}{2}\right)^2 = \frac{35}{12}\\
+\end{align*}
+\begin{align*}
+P(3.2 \leq \overline{X_{100}} \leq 3.8) &= P(-0.3 \leq \overline{X_{100}} - 3.5 \leq 0.3)\\
+&= P(|\overline{X_{100}} - 3.5| \leq 0.3)\\
+&= 1 - P(|\overline{X_{100}} - 3.5| > 0.3)\\
+&\text{/* since } P(|\overline{X_{100}} - 3.5| > 0.3) \leq \frac{\sigma^2}{n\epsilon^2} \text{ */}\\
+&\geq 1 - \frac{\sigma^2}{n\epsilon^2}\\
+&= 1 - \frac{35 / 12}{(100)(0.3)^2}\\
+&= 1 - \frac{35}{108}\\
+&= \boxed{\frac{73}{108}}\\
+\end{align*}
+\end{document}

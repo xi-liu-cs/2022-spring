@@ -1,0 +1,118 @@
+1
+p(x >= a) <= e[x] / a
+
+p(|x - e[x]| >= a) <= var(x) / a^2
+p(|x - e[x]| >= k sigma) <= sigma^2 / k^2 sigma^2 = 1 / k^2
+
+
+2
+e[x] = 20
+var(x) = 20
+p(0 < x < 40) >= ?
+subtract 20
+p(-20 < x - 20 < 20)
+= p(|x - 20| < 20)
+= 1 - p(|x - 20| >= 20)
+using chebyshev
+p(|x - 20| >= 20) = var(x) / 20^2
+= 20 / 20^2 = 1 / 20
+
+negate both sides
+-p(|x - 20| >= 20) >= -1 / 20
+
+add 1 to both sides
+1 - p(|x - 20| >= 20) >= 1 - 1 / 20
+
+p(0 < x < 40) >= 19 / 20
+
+
+3
+e[x] = var(x) = 20
+(1)
+p(x >= 26) <= e[x] / 26 = 20 / 26 = 10 / 13
+(2)
+p(x >= 26)
+= p(x - 20 >= 6)
+<= p((x - 20)^2 >= 36)
+= p(|x - 20| >= 6)
+
+/* p(a^2 > b^2) 
+= 
+{	
+	if a > b, a, b > 0 /* a - b > 0, a subset */
+	if a < b, a, b < 0
+} */
+
+<= var(x) / 6^2
+= 20 / 36
+= 5 / 9
+chebyshev is tighter bound than markov
+
+
+4
+e[r]
+bar{r_n} = 1 / n sum_{i = 1}^n r_i
+
+p(|bar{r_n} - e[r]| < 0.005) >= 0.98
+1 - p(|bar{r_n} - e[r]| >= 0.005) >= 0.98
+subtract 1
+-p(|bar{r_n} - e[r]| >= 0.005) >= -0.02
+multiply -1
+p(|bar{r_n} - e[r]| >= 0.005) <= 0.02 (eq 1)
+
+chebyshev
+p(|bar{r_n} - e[r]| >= 0.005) <= var(bar{r_n}) / (0.005)^2
+if var(r) = sigma^2
+var(bar{r_n}) = var(1 / n sum_{i = 1}^n r_i) 
+= 1 / n^2 sum_{i = 1}^n var(r_i) = 1 / n^2 n sigma^2 = sigma^2 / n
+
+var(bar{r_n}) = sigma^2 / n <= 1 / n
+p(|bar{r_n} - e[r]| >= 0.005) <= 1 / (n (0.005)^2) (eq 2)
+
+ 
+combine (eq 1) and (eq 2):
+1 / (n (0.005)^2) <= 0.02
+n > 1 / (0.02(0.005)^2) = 2 * 10^6
+
+
+5
+var(x) = p(1 - p) if x ~ bernoulli(p)
+(1)
+p(0.4 <= bar{x_n} <= 0.6)
+= e[bar{x_n}] = e[1 / n sum_{i = 1}^n x_i]
+= 1 / n sum_{i = 1}^n e[x_i]
+= 1 / n (n) 1 / 2 
+= 1 / 2
+
+= p(0.4 - 0.5 <= bar{x_n} - 0.5 <= 0.6 - 0.5)
+= p(-0.1 <= bar{x_n} - 0.5 <= 0.1)
+= p(|bar{x_n} - 0.5| <= 0.1)
+= 1 - p(|bar{x_n} - 0.5| > 0.1)
+
+chebyshev
+p(|bar{x_n} - 0.5| > 0.1) <= var(bar{x_n}) / (0.1)^2
+var(bar{x_n}) = var(1 / n sum_{i = 1}^n x_i)
+= 1 / n^2 var(sum_{i = 1}^n x_i)
+= 1 / n^2 sum_{i = 1}^n var(x_i)
+/* var = p(1 - p) */
+= 1 / n^2 sum_{i = 1}^n 1 / 2 (1 - 1 / 2)
+= 1 / n^2 1 / 4 n
+= n / 4 	/* sigma^2 / n */
+
+p(|bar{x_n} - 0.5| > 0.1) <= 1 / (4n(0.1)^2)
+
+1 - p(|bar{x_n} - 0.5| <= 0.1) = 1 - 1 / (4n(0.1)^2)
+/* p(0.4 <= bar{x_n} <= 0.6) */
+1 / (4n(0.1)^2) >= 0.7
+n >= 84
+
+(2)
+p(0.4 <= bar{x_n} <= 0.6)
+= p(0.4 <= 1 / 20 sum_{i = 1}^20 x_i <= 0.6)
+= p(8 <= sum_{i = 1}^20 x_i <= 12)
+= p(8 <= y <= 12)		/* y ~ bin(20, 1 / 2) */
+= p(y = 8) + ... + p(y = 12)
+= 0.737
+
+chebyshev does not hold assumption
+about the distribution, so bound is not tight

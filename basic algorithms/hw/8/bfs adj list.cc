@@ -38,13 +38,13 @@ void add_edge(graph * g, int node_id, node * n)
     g->adj[node_id].push_back(n);   
 }
 
-void bfs(graph * g, int src_id)
+void bfs(graph * g, int src_id, bool ** visited)
 {
-    bool visited[g->num_node];
-    memset(visited, false, sizeof(visited));
+    *visited = (bool *)malloc(g->num_node * sizeof(node));
+    memset(*visited, false, g->num_node * sizeof(node));
     
     list<int> queue;
-    visited[src_id] = true;
+    (*visited)[src_id] = true;
     queue.push_back(src_id);
     
     list<node *>::iterator i;
@@ -55,13 +55,23 @@ void bfs(graph * g, int src_id)
         queue.pop_front();
         for(i = g->adj[cur_id].begin(); i != g->adj[cur_id].end(); ++i)
         {
-            if(!visited[(*i)->node_id])
+            if(!(*visited)[(*i)->node_id])
             {
                 queue.push_back((*i)->node_id);
-                visited[(*i)->node_id] = true;
+                (*visited)[(*i)->node_id] = true;
             }
         }
     }
+}
+
+bool check_connect(graph * g)
+{
+    bool * visited;
+    bfs(g, 0, &visited);
+    for(int i = 0; i < g->num_node; ++i)
+        if(!visited[i])
+            return false;
+    return true;
 }
 
 int main()
@@ -77,5 +87,8 @@ int main()
     add_edge(g, 2, n0);
     add_edge(g, 2, n3);
     add_edge(g, 3, n3);
-    bfs(g, 2);
+    bool * visited;
+    bfs(g, 2, &visited);
+    printf("\n");
+    printf("\ncheck_connect(g) = %d\n", check_connect(g));
 }

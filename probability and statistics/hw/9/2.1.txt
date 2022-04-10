@@ -1,0 +1,38 @@
+Problem 2\\
+part 1\\
+if $X$ follows a Poisson distribution with parameter $\lambda$, then
+\begin{align*}
+\forall i \in \mathbb{N}, \; p_X(i) = P(X = i) = \frac{\lambda^i}{i!}e^{-\lambda}\\
+\end{align*}
+if $Y$ follows a Poisson distribution with parameter $\mu$, then
+\begin{align*}
+\forall i \in \mathbb{N}, \; p_Y(i) = P(Y = i) = \frac{\lambda^i}{i!}e^{-\mu}\\
+\end{align*}
+\begin{align*}
+&\forall (x, y) \in \mathbb{R}^2,\; p_{X, Y}(x, y) = p_{X}(x)p_{Y}(y)\\
+&\forall z \in \mathbb{R}\\
+p_Z(z) &= P(Z = z)\\
+&= \sum_x P(X = x,\; Y = z - x)\\
+&= \sum_x p_{X, Y}(x, z - x)\\
+&= \sum_x p_{X}(x)p_{Y}(z - x)\\
+&= \sum_{x = 0}^{z} \left(\frac{\lambda^x}{x!}e^{-\lambda}\right)\left(\frac{\mu^{z - x}}{(z - x)!}e^{-\mu}\right)\\
+&= \sum_{x = 0}^{z} \frac{\lambda^x \mu^{z - x}}{x!(z - x)!}e^{-(\lambda + \mu)}\\
+&= e^{-(\lambda + \mu)}\sum_{x = 0}^{z} \frac{\lambda^x \mu^{z - x}}{x!(z - x)!}\\
+&= \frac{e^{-(\lambda + \mu)}}{z!}\sum_{x = 0}^{z} \frac{z!\lambda^x \mu^{z - x}}{x!(z - x)!}\\
+&= \frac{e^{-(\lambda + \mu)}}{z!}\sum_{x = 0}^{z} \frac{z!}{x!(z - x)!}\lambda^x \mu^{z - x}\\
+\end{align*}
+\begin{align*}
+p_Z(z) &= \frac{e^{-(\lambda + \mu)}}{z!}\sum_{x = 0}^{z} \binom{z}{x}\lambda^x \mu^{z - x}\\
+&= \frac{(\lambda + \mu)^z}{z!}e^{-(\lambda + \mu)}\sum_{x = 0}^{z} \binom{z}{x}\frac{\lambda^x \mu^{z - x}}{(\lambda + \mu)^z}
+\end{align*}
+since
+\begin{align*}
+\frac{\lambda^x \mu^{z - x}}{(\lambda + \mu)^z} &= \left(\frac{\lambda}{\lambda + \mu}\right)^x \left(\frac{\mu}{\lambda + \mu}\right)^{z - x} = \left(\frac{\lambda}{\lambda + \mu}\right)^x \left(\frac{(\lambda + \mu) - \lambda}{\lambda + \mu}\right)^{z - x}\\
+&= \left(\frac{\lambda}{\lambda + \mu}\right)^x \left(1 - \frac{\lambda}{\lambda + \mu}\right)^{z - x} = p^x(1 - p)^{z - x}
+\end{align*}
+in which $p = \lambda / (\lambda + \mu)$
+\begin{align*}
+p_Z(z) &= \frac{(\lambda + \mu)^z}{z!}e^{-(\lambda + \mu)}\sum_{x = 0}^{z} \binom{z}{x}p^x(1 - p)^{z - x}\\
+&= \boxed{\frac{(\lambda + \mu)^z}{z!}e^{-(\lambda + \mu)}}
+\end{align*}
+since $\sum_{x = 0}^{z} \binom{z}{x}p^x(1 - p)^{z - x} = 1$\\

@@ -777,7 +777,7 @@ def read():
 
 --
 
-- this assumes that `app` has alrady been [defined as a Flask app](#flask-instantiation) and `db` has been defined as a [connection to a database](#pymongo-connection).
+- this assumes that `app` has already been [defined as a Flask app](#flask-instantiation) and `db` has been defined as a [connection to a database](#pymongo-connection).
 
 --
 

@@ -1,0 +1,6 @@
+problem 2
+ptr = first course in prob: p259
+prob & stat: p174, p455, 11.2 b
+
+problem 3
+https://www.probabilitycourse.com/chapter6/6_2_2_markov_chebyshev_inequalities.php

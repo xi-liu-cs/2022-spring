@@ -1,0 +1,59 @@
+x threads
+each thread has a queue
+every queue is shared
+
+so every thread can 
+enqueue at another
+thread's queue
+
+only owner can dequeue
+
+
+multiple threads are trying 
+to modify the tail at once
+
+
+only the owner can dequeue
+
+if queue_size == 1
+head and tail point to the
+same location
+so problem can happen if
+another thread enqueue
+and this thread dequeue
+
+array of message queues
+
+several threads calls malloc 
+
+both atomic and critical
+do mutual exclusion
+
+performance
+atomic: translated to 1 assembly instruction
+(1 c assignment)
+critical is slower
+
+give name to a critical section
+
+not know how many queues
+we have
+so cannot use name of critical sections
+
+a lock per queue
+
+
+locks slower than critical, critical slower than atomic
+locks involve more syscalls
+
+
+no fairness
+a thread can be blocked forever
+
+omp single:
+only 1 thread can execute code
+
+
+24
+use 1 thread to create all tasks
+then can execute in parallel

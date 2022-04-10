@@ -1,0 +1,117 @@
+law of large numbers
+
+useful inequalities
+1) markov inequality
+today, derive it for discrete r.v.
+
+X discrete r.v. that takes positive values
+a1, a2, ...
+let a > 0
+e[x] = sum_i a_i p_X(a_i)
+>= sum_{i, a_i >= a} a_i p_X(a_i) /* sum of fewer terms */
+>= sum_{i, a_i >= a} a p_X(a_i) /* a_i >= a */
+>= a sum_{i, a_i >= a} p_X(a_i)
+= a P(X >= a)
+
+markov inequality
+e[x] >= a P(X >= a)
+
+let c be a country
+where average income e[x] = 50000$ / year
+what is upper bound on proportion of people
+earning more than 200000$ / year
+
+a = 200000
+P(X >= a) <= e[x] / a 
+P(X >= 200000) <= 50000 / 200000 = 1 / 4
+
+
+2) chebyshev inequality
+plus as compared to markov
+is that it does not require
+X to only take positive values
+however, it requires knowledge 
+of Var(X)
+
+E[X] = mu
+forall a in R
+Var(X) = E[(X - mu)^2] >= a^2 P((X - mu)^2 >= a^2)
+Var(X) >= a^2 P(|X - mu| >= a^2)
+
+P(|X - mu| >= a) <= Var(X) / a^2
+
+if variance is big,
+big chance to be far from the mean
+
+let sigma be std deviation of X
+a = 3sigma
+P(|X - mu| >= 3sigma) <= sigma^2 / (9sigma^2) = 1 / 9
+
+
+law of large numbers
+averages vary less
+X1, X2, ..., Xn indep, identically distri (same distri) (iid)
+
+bar{X_n} = (X_1 + ... + X_n) / n
+E[(X_1 + ... + X_n) / n] = 1 / n (E[X_1] + ... + E[X_n]) = mu
+
+Var(bar{X_n}) = 1 / n^2 (Var(X_1) + ... + Var(X_n))
+= sigma^2 / n
+
+lim_{n -> inf} Var(bar{X_n}) = 0
+
+use chebyshev
+lim_{n -> +inf} P(|bar{X_n} - mu| > epsilon) <= 1 / epsilon^2 Var(bar{X_n})
+=  sigma^2 / (n epsilon^2)
+
+since epsilon is fixed
+lim_{n -> +inf} sigma^2 / (n epsilon^2) = 0
+
+lim_{n -> +inf} P(|bar{X_n} - mu| > epsilon) = 0
+law of large number
+sample mean converges to the mean in 
+the limit of infinite many samples
+
+
+ 
+3) if e[x] does not exist
+law of large numbers does not apply
+
+
+4) practical chebyshev
+work for polling company
+estimate turnout at upcoming election
+
+actual turnout is e[bar{x_n}] = mu
+
+sigma^2 = Var(X1) = p(1 - p) /* var of bernoulli */ = mu(1 - mu)
+maximum when mu = 1 / 2, then mu(1 - mu) = 1 / 4
+
+P(|bar{X_n} - mu| > epsilon) < 1 / (4sigma^2 n)
+
+
+person paying polling company
+wants to make sure to be
+95% certain that she
+will have an error of less
+than 1% for estimate of mu
+
+/* P(|bar{X_n} - mu| <= 0.01) >= 0.95 */
+P(|bar{X_n} - mu| > 0.01) = 1 - 0.95 = 0.05
+// 0.01 = accuracy
+// 0.95 = confidence level
+
+want n s.t.
+1 / (4(0.01)^2 n) <= 0.05
+n >= 50000
+
+
+
+central lim
+X1, X2, ..., X_n iid r.v. with mean mu, var = sigma^2
+S_n = X1 + X2 + ... + X_n
+E[S_n] = n mu
+Var(S_n) = n sigma^2
+
+T_n = (X1 + X2 + ... + X_n) / sqrt{n}
+

@@ -1,3 +1,15 @@
 https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/
 
 https://www.geeksforgeeks.org/implementation-of-bfs-using-adjacency-matrix/
+
+https://algorithms.tutorialhorizon.com/check-if-given-undirected-graph-is-connected-or-not/
+
+https://www.geeksforgeeks.org/check-if-a-directed-graph-is-connected-or-not/
+
+https://www.geeksforgeeks.org/determine-whether-universal-sink-exists-directed-graph/
+
+https://iq.opengenus.org/divide-and-conquer-convex-hull/
+
+https://algorithmtutor.com/Computational-Geometry/An-efficient-way-of-merging-two-convex-hull/
+
+https://algorithmtutor.com/Computational-Geometry/Convex-Hull-Algorithms-Divide-and-Conquer/
