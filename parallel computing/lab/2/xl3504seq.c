@@ -1,11 +1,25 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <math.h>
+#include <time.h>
 #define file FILE
 int block = 128;
 float max = 100.0;
+float range;
+int b; /* number of bins */
+clock_t start_time, end_time;
+float tot_time;
+
+int int_ceil(float a)
+{
+    int int_a = (int)a;
+    if(a == (float)int_a)
+        return int_a;
+    else
+        return int_a + 1;
+}
 
 void * alloc(size_t size)
 {
@@ -85,7 +99,6 @@ int num_float(char ** lines, int num_line)
 /* convert the array of character pointers to array of numbers */
 float * separate(char ** lines, int num_line, int num_float)
 {
-    int cur_sz = block;
     float * num_ary = (float *)alloc((num_float + 1) * sizeof(float));
     int num_ary_i = 0;
     for(int i = 0; i < num_line; ++i)
@@ -96,7 +109,7 @@ float * separate(char ** lines, int num_line, int num_float)
         while(num_ary_i < num_float + 1)
         {
             num_ary[num_ary_i++] = strtof(end_ptr, &end_ptr);
-            if(isspace(end_ptr[1]))
+            if(isspace((int)end_ptr[1]))
                 break;
         }
     }
@@ -123,7 +136,7 @@ int find_idx(float target, float range, float max)
     for(i = 0; i < max; i += range)
     {
         if(i <= target && target < i + range)
-            return ceil(i / range);
+            return int_ceil(i / range);
     }
     return -1;
 }
@@ -132,15 +145,14 @@ int find_idx(float target, float range, float max)
 flt: array of floating point numbers
 n_f: number of floating point numbers
 b: number of bins */
-int * fill_bin(float * flt, int n_f, int b)
+int * fill_bin(float * flt, int n_f)
 {
-    int * bin = (int *)alloc(n_f * sizeof(int));
-    memset(bin, 0, sizeof(int));
-    float range = max / b;
-    for(int i = 0; i < n_f; i++)
+    int * bin = (int *)alloc(b * sizeof(int));
+    memset(bin, 0, b * sizeof(int));
+    for(int i = 0; i < n_f; ++i)
     {
-        float target = flt[i + 1];
-        bin[find_idx(target, range, max)]++;
+        float target = flt[i + 1]; /* i + 1 since *flt is number of floats */
+        ++bin[find_idx(target, range, max)];
     }
     return bin;
 }
@@ -156,9 +168,10 @@ int main(int argc, char ** argv)
  	    exit(1);
     }
 
-    int b = atoi(argv[1]),
-        t = atoi(argv[2]);
+    b = atoi(argv[1]);
+    // int t = atoi(argv[2]);
     char * filename = argv[3];
+    range = max / b;
 
     file * fp;
     if(!(fp = fopen(filename, "r")))
@@ -174,8 +187,13 @@ int main(int argc, char ** argv)
     float * flt = separate(lines, num_line, n_f);
     // print_floats(flt, n_f + 1);
 
-    int * bin = fill_bin(flt, n_f, b);
+    start_time = clock();
+    int * bin = fill_bin(flt, n_f);
+    end_time = clock();
+    tot_time = (float)(end_time - start_time) / CLOCKS_PER_SEC;
     for(int i = 0; i < b; ++i)
         printf("b[%d] = %d\n", i, bin[i]);
     fclose(fp);
+    printf("%f seconds\n", tot_time);
+    return 0;
 } 

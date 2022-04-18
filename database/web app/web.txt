@@ -1,0 +1,10 @@
+support for password authentication was removed:
+
+https://stackoverflow.com/questions/68775869/support-for-password-authentication-was-removed-please-use-a-personal-access-to
+
+token:
+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
+repo means full access
+
+app should now be live on the web at:
+https://i6.cims.nyu.edu/~xl3504/web-app-xi-liu-cs/flask.cgi

@@ -1,0 +1,64 @@
+z_n = (s_n - n mu) / sqrt{n} sigma
+mean 0, var 1
+var(z_n)
+= var((s_n - n mu) / sqrt{n} sigma)
+= 1 / (n sigma^2) var(s_n)
+= n sigma^2 / n sigma^2
+= 1
+
+general recipe:
+z = (x - e[x]) / sqrt{var(x)}
+always has mean 0, var 1
+
+central limit theorem
+lim n -> inf for z_n
+clt says z_n -> normal(0, 1)
+
+lim_{n -> +inf} F_[z_n}(x) = phi(x)
+
+n = O(10) is a big number
+
+z_n = (n bar{x_n} - n mu) / (sqrt{n} sigma)
+= sqrt{n} (bar{x_n} - mu) / sigma
+
+solved a problem for z_n
+but care about bar{x_n}
+bar{x_n} = sigma / sqrt{n} z_n + mu
+
+
+apply clt
+polling problem
+x1, x2, ..., xn bernoulli r.v. iid
+p(|bar{x_n} - mu| >= 0.01) <= 0.05
+chebyshev poll >~ 50000 people
+
+|bar{x_n} - mu| >= 0.01 
+|sigma z_n / sqrt{n} - mu| >= 0.01 
+|z_n| >= 0.01 sqrt{n} / sigma
+
+p(|z_n| >= 0.01 sqrt{n} / sigma)
+
+since sigma <= 1 / 2
+0.01 sqrt{n} / sigma > 0.02 sqrt{n}
+
+find n s.t.
+/* wrong
+p(|z_n| >= 0.02 sqrt{n}) <= 0.05
+1 - p(|z_n| <= 0.02 sqrt{n}) >= 1 - 0.05 = 0.95
+if z_n is normal(0, 1), symmetric even funct
+p(|z_n| <= 0.02 sqrt{n})
+= 2 p(z_n <= 0.02 sqrt{n}) 
+
+1 - 2 p(z_n <= 0.02 sqrt{n}) >= 0.95
+*/
+
+p(|z_n| >= 0.02 sqrt{n}) <= 0.05
+2 p(z_n >= 0.02 sqrt{n}) <= 0.05
+2(1 - p(z_n <= 0.02 sqrt{n})) <= 0.05
+p(z_n <= 0.02 sqrt{n}) >= 0.975
+
+look table s.t. p(z_n <= sigma) >= 0.975
+a = 1.96
+0.02 sqrt{n} = 1.96
+n ~= 9604
+

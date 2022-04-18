@@ -39,9 +39,9 @@ P(N_{(t_1, t_2]} = i) = \frac{(\lambda (t_2 - t_1))^i}{i!} e^{-\lambda (t_2 - t_
 &= \frac{(\lambda (1 - 0))^0}{0!} e^{-\lambda (1 - 0)}\frac{(\lambda (2 - 1))^2}{2!} e^{-\lambda (2 - 1)}\frac{(\lambda (4 - 2))^1}{1!} e^{-\lambda (4 - 2)}\\
 &+ \frac{(\lambda (1 - 0))^1}{1!} e^{-\lambda (1 - 0)}\frac{(\lambda (2 - 1))^1}{1!} e^{-\lambda (2 - 1)}\frac{(\lambda (4 - 2))^2}{2!} e^{-\lambda (4 - 2)}\\
 &+ \frac{(\lambda (1 - 0))^2}{2!} e^{-\lambda (1 - 0)}\frac{(\lambda (2 - 1))^0}{0!} e^{-\lambda (2 - 1)}\frac{(\lambda (4 - 2))^3}{3!} e^{-\lambda (4 - 2)}\\
-&= e^{-\lambda}\lambda^2 e^{-\lambda}2\lambda e^{-2\lambda} + \lambda e^{-\lambda}2\lambda e^{-\lambda}2\lambda^2 e^{-2\lambda} + \frac{\lambda}{2} e^{-\lambda} e^{-\lambda}\frac{4\lambda^3}{3} e^{-2\lambda}\\
-&= 2\lambda^3 e^{-4\lambda} + 4\lambda^4 e^{-4\lambda} + \frac{2\lambda^4}{3}e^{-4\lambda}\\
-&= \boxed{2\lambda^3 e^{-4\lambda}\left(1 + 2\lambda + \frac{\lambda}{3}\right)}\\
+&= e^{-\lambda}\lambda^2 e^{-\lambda}\lambda e^{-2\lambda} + 2\lambda e^{-\lambda}\lambda e^{-\lambda}\lambda^2 e^{-2\lambda} + \frac{\lambda^2}{2} e^{-\lambda} e^{-\lambda}\frac{4\lambda^3}{3} e^{-2\lambda}\\
+&= \lambda^3 e^{-4\lambda} + 2\lambda^4 e^{-4\lambda} + \frac{2\lambda^5}{3}e^{-4\lambda}\\
+&= \boxed{\lambda^3 e^{-4\lambda}\left(1 + 2\lambda + \frac{2\lambda^2}{3}\right)}\\
 \end{align*}
 \newpage
 \noindent
@@ -122,9 +122,9 @@ P(|X - E[X]| \geq |a|) &\leq \frac{1}{a^2} Var(X)
 P(X \geq kn) &= P(X - np \geq kn - np)\\
 &\leq P(|X - np| \geq kn - np)\\
 &\leq \frac{1}{(kn - np)^2} Var(X)\\
-&= \frac{n(1 - p)}{(n(k - p))^2}\\
-&= \frac{n(1 - p)}{n^2(k - p)^2}\\
-&= \boxed{\frac{1 - p}{n(k - p)^2}}\\
+&= \frac{np(1 - p)}{(n(k - p))^2}\\
+&= \frac{np(1 - p)}{n^2(k - p)^2}\\
+&= \boxed{\frac{p(1 - p)}{n(k - p)^2}}\\
 \end{align*}
 \\
 \\
@@ -137,13 +137,13 @@ P(X \geq kn) &\leq \frac{p}{k} = \frac{1 / 2}{3 / 4} = \frac{2}{3}\\
 \end{align*}
 Chebyshev's inequality: 
 \begin{align*}
-P(X \geq kn) &\leq \frac{1 - p}{n(k - p)^2} = \frac{1 - 1 / 2}{n(3 / 4 - 1 / 2)^2} = \frac{1 / 2}{n(1 / 16)} = \frac{8}{n}
+P(X \geq kn) &\leq \frac{p(1 - p)}{n(k - p)^2} = \frac{1 /2 (1 - 1 / 2)}{n(3 / 4 - 1 / 2)^2} = \frac{1 / 4}{n(1 / 16)} = \frac{4}{n}
 \end{align*}
 the smaller upper bound is the tighter upper bound
 \begin{align*}
-\lim_{n \rightarrow \infty} \frac{2 / 3}{8 / n} = \lim_{n \rightarrow \infty} \frac{n}{12} = \infty
+\lim_{n \rightarrow \infty} \frac{2 / 3}{4 / n} = \lim_{n \rightarrow \infty} \frac{n}{6} = \infty
 \end{align*}
-so the Chebyshev's inequality's upper bound ($8 / n$) is the tighter bound\\
+so the Chebyshev's inequality's upper bound ($4 / n$) is the tighter bound\\
 \newpage
 \noindent
 Problem 4\\

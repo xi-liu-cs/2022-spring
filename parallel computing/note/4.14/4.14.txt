@@ -1,0 +1,82 @@
+memory of cpu is optimized for speed
+memory of gpu is optimized for bandwidth
+
+cuda, openmp, openacc, opencl
+
+discrete graphics card
+
+Field Programmable Gate Arrays (FPGAs) 
+are semiconductor devices that are based 
+around a matrix of configurable logic blocks (CLBs) 
+connected via programmable interconnects
+
+application-specific integrated circuit
+is an integrated circuit chip customized for a particular use
+
+gpu do not go to disk directly
+so mostly computation
+
+simd
+adding 2 vector registers same time 
+with adding 2 registers
+
+PCI (peripheral component interconnect) Express, PCIe or PCI-e,
+is a high-speed serial computer expansion bus standard
+
+# GT/s
+T = transfer = bytes with header and other overheads
+
+host: cpu
+device: gpu
+
+if no connection between execution units
+then need to go to global mem whenever
+2 exe units need to talk to each other
+
+
+if fully connected between execution units
+then too much cost, heat
+
+so exe units are grouped into clusters (streaming multiprocessors)
+
+exe unit = streaming processor
+
+each streaming processor 
+within the same streaming multiprocessor
+can communicate to each other
+since shared memory
+
+1 thread per streaming processor
+
+block of threads assigmed to streaming processor
+
+kernel: piece of code that will execute on gpu
+
+every group of threads is called a block
+
+
+1. kernel
+2. # thread
+3. # groups
+4. how in index (a[i][j])
+
+geometry of size within block
+
+bunch of blocks called grid 
+
+
+hardware: sp -> sm
+software: kernel, threads -> block -> grid
+(threads <-> sp)
+(block <-> sm)
+
+32 sp per sm
+warp: 32 threads
+better to have # threads multiple of 32 for each block
+
+every same 32 sp
+have same fetch and decode
+
+# blocks more than # sm
+
+

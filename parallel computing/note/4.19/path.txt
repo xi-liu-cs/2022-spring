@@ -1,0 +1,6 @@
+https://stackoverflow.com/questions/12843846/problems-when-running-nvcc-from-command-line
+
+i added x86 path to environment variable first
+then error: invalid redeclaration of type name "size_t"
+should add x64
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.31.31103\bin\Hostx64\x64

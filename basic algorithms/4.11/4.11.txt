@@ -1,0 +1,47 @@
+useful for dfs application
+edge clarification, finding cycles, topological sort
+v.d: discovery time of v
+v.f: seen time of v
+
+
+
+dfs(g, s)
+	time += 1
+	s.d = time
+	s.color = gray
+	for u in v[s]
+		if u.color == white
+			u.parent = s
+			dfs(g, u)
+	s.color = black /* after all adjacent vertices are visited */
+	time += 1
+	s.f = time
+
+decreasing finishing time
+topological sorting of vertices
+
+if g is connected & undirected
+then dfs tree of g is spanning tree for g
+
+bfs, dfs tree not unique
+
+dfs(g)
+	input: directed graph g
+	output: all vertices in g
+	for each s in g.vertex_set
+		if(s.color == white)
+			dfs(g, s)
+
+tc of dfs(g)
+- iterate through all vertices of g: Theta(|v|)
+- all possible calls to dfs(g, s) for potential s
+each edge u->v is visited exactly once during 
+all the possible calls: it is visited when u
+becomes active
+tc = Theta(|e|)
+tc of dfs(g) = Theta(|v|) + Theta(|e|) = Theta(|v + e|)
+
+edge classification of g:
+- dfs tree edges: e: u->v tree edge if v is undiscovered
+when visiting e
+- forward edge: edge to a descendent in the tree

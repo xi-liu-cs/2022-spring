@@ -1,0 +1,74 @@
+out of chip
+low bandwidth
+
+bandwidth is the maximum rate of
+data transfer across a given path
+
+
+write allocate
+bring block to cache
+write miss:
+read miss, write hit
+
+write no-allocate
+
+write back
+do not write to lower levels of
+that copy until variable is kicked out
+
+a lot more write than read statistically
+so read miss more cost
+
+data affinity
+bring data close to threads
+
+thread on one core closer to a bank 
+
+os put page closer to a thread
+
+sychronization point punish fastest thread
+
+barrier:
+all threads must reach this point 
+then can proceed
+
+1 thread parallel is a little bit slower
+than sequential
+
+use extern to access global var in another file
+
+correct, then optimize
+bad at multitasking
+
+real > user + sys
+since time slice and os can execute 
+other programs in between
+
+do not create and destroy 
+threads in each loop
+
+every motherboard has its own memory
+so mpi to across motherboards
+
+mpi:
+large granularity
+msg expensive, so big msg
+low bandwidth (cross motherboard)
+
+smp
+symmetric multi processing
+
+mpicc -fopenmp
+
+on gpu
+cuda
+openmp
+opencl
+openacc
+
+gpu friendly must satisfy 4 conditions
+
+gpu not allowed to access disk
+
+latency: when issue an access to an address
+how long it takes to receive msge

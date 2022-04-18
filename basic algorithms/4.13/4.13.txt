@@ -1,0 +1,63 @@
+undiscovered -> active -> seen
+white -> gray -> black
+
+forest: union of disjoint trees
+trees do not share any vertices or edges
+
+u -> v
+
+forward edges: edge from a ancestor 
+to a descendent 
+v is seen, u.d < v.d
+
+backward edges: edge from a descendent 
+to an ancestor
+v is active, (v.d < u.d not necessary)
+
+crossing edge: edge not between a descendent 
+and ancestor
+v is seen, v.d < u.d
+
+
+finding cycles undirected graphs
+claim: each edge of an undirected graph
+are either tree edges or backward edges
+
+proof: edge u <-> v
+when discovering edge u <-> v,
+at least 1 of u, v must be active (gray)
+
+if v is seen when discovering the edge
+(forward/crossing), then all vertices 
+from v (all descendents of v) are already seen
+
+u is also a descendent of v, 
+so must be seen
+
+conclusion: both u & v are seen
+contradiction: v cannot be seen
+
+no possible forward/crossing edges
+
+
+claim: an undirected graph has no cycles (acyclic)
+iff it has no backward edge
+
+proof: if no backward edges -> all edges of the 
+graph are tree edges
+-> graph itself is a tree
+-> graph has no cycles
+
+if the graph has a backward edge -> then graph has a cycle
+
+
+finding cycles: directed graphs
+
+claim: a directed graph g is acyclic iff
+g has no backward edges
+
+proof: if g has a backward edge -> g has a cycle
+(similar to previous)
+
+if g has a cycle -> g has a backward edge
+
