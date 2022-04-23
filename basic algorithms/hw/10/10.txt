@@ -1,0 +1,21 @@
+https://www.youtube.com/watch?v=tKwnms5iRBU
+
+tree = connected acyclic graph
+spanning tree = contain all vertices
+spanning tree of graph g 
+= subset of edges of g
+that form a tree 
+& hit all vertices of g
+
+mst: given graph g = (v, e)
+& edge weights w: E -> R
+find a spanning tree T of 
+minimum weigt total weight
+
+cut (s, v-s) of an undirected
+graph g = (v, e) is a partition 
+of v
+
+light edge:
+weight is minimum of any edge 
+crossing the cut

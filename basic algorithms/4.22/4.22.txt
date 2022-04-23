@@ -1,0 +1,44 @@
+mst: spanning tree with min total weight
+
+q: set of unchosen vertices
+t: set of chosen vertices of tree
+
+q := v(g)
+find running edge between t and q
+of min weight
+and all end vertex in q to t
+
+v.key: weight of min weight edge
+from v (in set q) to vertices in t
+v.key = inf
+
+v.parent: vertex in t defining 
+min weight edge of v
+v.parent = null
+
+in each step, add a vertex from
+q to t which is of min key
+
+que = v(g)
+que is min heap, min priority queue
+
+tc of 
+que.insert()
+que.remove_min()
+is lg n
+
+prim
+mst_prim(g, s)
+	s.key = 0
+	min heap que := v
+	array t := null
+	
+	while que is not empty
+		r = que.remove_min()
+		add (v, v.parent) to t
+			for each vertex u in adj[v] /* O(|E|) */
+				if u is in que & u.key > w(u, v)
+					u.key = w(u, v)
+					u.parent = v
+	return t
+

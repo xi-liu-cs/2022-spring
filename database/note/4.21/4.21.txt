@@ -1,0 +1,22 @@
+https://github.com/nyu-database-design/pandas-examples
+
+axis = 0: a column at a time
+
+df.shape
+
+df.loc[[row_filter], [col_filter]]
+df.loc[row_filter][col_filter]
+
+sort_values(by = "")
+
+df[df.isnull().any(axis = 1)]
+# rows that contain null values
+
+df.groupby("agency")
+returns a object
+
+df.groupby("agency")["agency"].count()
+
+inplace = true
+then do not need to reassign df
+

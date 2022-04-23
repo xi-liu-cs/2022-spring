@@ -1,0 +1,226 @@
+\documentclass[12pt,border=4pt,multi]{article} % \documentclass[tikz,border=4pt,multi]{article}
+\usepackage{lingmacros}
+\usepackage{tree-dvips}
+\usepackage{amssymb} % for mathbb{}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{forest}
+\usepackage{amsmath} % for matrices
+\usepackage{xeCJK}
+\usepackage{tikz}
+\usepackage[arrowdel]{physics}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{pgfplots, pgfplotstable}
+\usepackage{diagbox} % diagonal line in cell
+\usepackage[usestackEOL]{stackengine}
+\usepackage{multirow}
+\graphicspath{{./img}} % specify the graphics path to be relative to the main .tex file, denoting the main .tex file directory as ./
+\definecolor{orchid}{rgb}{0.7, 0.4, 1.1}
+
+\begin{document}
+\section*{liu xi}
+2020\\
+multi choice\\
+1
+\begin{align*}
+P(N_{[0, 5]} = 3, N_{(5, 10]} = 1) &= P(N_{[0, 5]} = 3)P(N_{(5, 10]} = 1)\\
+&= \left(\frac{(\lambda (5 - 0))^3}{3!}e^{-\lambda(5 - 0)}\right)\left(\frac{(\lambda (10 - 5))^1}{1!}e^{-\lambda(10 - 5)}\right)\\
+&= \left(\frac{(5\lambda)^3}{6}e^{-5\lambda}\right)\left(5\lambda e^{-5\lambda}\right)\\
+&= \left(\frac{125\lambda^3}{6}e^{-5\lambda}\right)\left(5\lambda e^{-5\lambda}\right)\\
+\lambda &= 2 / 5\\
+&= (4 / 3 e^{-2})(2e^{-2})\\
+&= \frac{8}{3}e^{-4}\\
+&= \frac{8 \cdot 2}{3 \cdot 2}e^{-4}\\
+&= \boxed{\frac{16}{3!}e^{-4}}\\
+\end{align*}
+\newpage
+\noindent
+3\\
+/* lec 4\\
+$p^{th}$ quantile 分位数 is smallest number $q_p$ s.t.
+\[F(q_p) = P(X \leq q_p) = p\]
+*/
+\begin{align*}
+normal(\mu = 30,&\; \sigma^2 = 25)\\
+p &= 0.25\\
+P(X \leq q_{0.25}) &= 0.25\\
+P\left(\frac{X - \mu}{\sigma} \leq \frac{q_{0.25} - \mu}{\sigma}\right) &= 0.25\\
+P\left(\frac{X - 30}{25} \leq \frac{q_{0.25} - 30}{25}\right) &= 0.25\\
+P\left(z \leq \frac{q_{0.25} - 30}{25}\right) &= 0.25\\
+\Phi\left(\frac{q_{0.25} - 30}{25}\right) &= 0.25 = area = table\;value\\
+\frac{q_{0.25} - 30}{25} &= -0.67\\ 
+q_{0.25} &= (-0.67)(25) + 30\\
+&= 13.25\\
+&\approx 15.25\\
+\end{align*}
+/* $X$ follows normal distribution $N(30, 25)$\\
+$(X - 30) / 25$ follows normal distribution $N(0, 1)$\\
+lec 11: $\Phi$ is cdf of normal distribution $N(0, 1)$ */
+\newpage
+\noindent
+5\\
+\begin{align*}
+E[X] &= 1\\
+Var(X) &= 3\\
+&chebyshev:\\
+E[(X - \mu)^2] &\geq a^2 P(|X - \mu| \geq |a|)\\
+P(|X - \mu| \geq |a|) &\leq \frac{Var(X)}{a^2}\\
+P(|X - 1| \geq 0.2) &\leq \frac{3}{(0.2)^2} = 75\\
+\end{align*}
+\newpage
+\noindent
+true or false\\
+2\\
+false\\
+p182\\
+$X_i$ time of $i$th arrival follow $gamma(\lambda, i)$ distribution\\
+interarrival time $T_i$ has exponential distribution\\
+\newpage
+\noindent
+free resp\\
+1\\
+$X_i = \begin{cases}
+1 & \text{if employee $i$ is on the phone}\\
+0 & \text{else}\\
+\end{cases}\\
+p_{X_i}(x) = \begin{cases}
+\frac{1}{10} & \text{if } x = 1\\ 
+\frac{9}{10} & \text{if } x = 0\\
+\end{cases}$\\
+$S_n$ = num phones used at same time\\
+\begin{align*}
+S_n &= \sum_{i = 1}^{300} X_i\\
+E[X_i] &= 1 \cdot p + 0 \cdot (1 - p) = p\\
+Var(X_i) &= p(1 - p)\\
+E[S_n] &= E\left[\sum_{i = 1}^{300} X_i\right] = 300p = 300(1/10) = 30\\
+Var(S_n) &= \sum_{i = 1}^n Var(X_i) = \sum_{i = 1}^n p(1 - p)\\
+&= np(1 - p) = 300(1/10)(9/10) = 27\\
+P(S_n \geq k) &\leq 0.025\\
+-P(S_n \geq k) &\geq -0.025\\
+1 - P(S_n \geq k) &\geq 1 - 0.025\\
+P(S_n < k) &\geq 1 - 0.025 = 0.975\\
+P\left(\frac{S_n - E[S_n]}{\sqrt{Var(S_n)}} < \frac{k - E[S_n]}{\sqrt{Var(S_n)}}\right) &\geq 0.975\\
+S_n &\sim normal(E[S_n] = 30, Var(S_n) = 27)\\
+\frac{S_n - E[S_n]}{\sqrt{Var(S_n)}} &\sim normal(30 - 30 = 0, 27 / 27 = 1)\\
+\Phi\left(\frac{S_n - E[S_n]}{\sqrt{Var(S_n)}}\right) &\geq 0.975 = \text{table value}\\
+\end{align*}
+\begin{align*}
+\frac{k - E[S_n]}{\sqrt{Var(S_n)}} &\geq 1.96\\
+\frac{k - 30}{\sqrt{27}} &\geq 1.96\\
+k &\geq 1.96\sqrt{27} + 30\\
+&\approx 40.184\\
+\end{align*}
+\\
+\\
+\\
+\\
+2018\\
+multi choice\\
+1\\
+\begin{align*}
+P(X > 0.8) &= 1 - P(X \leq 0.8)\\
+&= 1 - F_{X}(0.8)\\
+&\text{/* $X$ follows normal(0, 1) */}\\
+&= 1 - \Phi(0.8)\\
+&\text{/* find area when $Z = 0.8$ */}\\
+&= 1 - 0.78814\\
+&= 0.21186\\
+\end{align*}
+\\
+\\
+\\
+\\
+true or false\\
+3
+\begin{align*}
+F_X(x) &= F_{X, Y}(x, \infty) = \lim_{y \rightarrow \infty} F_{X, Y}(x, y)
+\end{align*}
+since $y \rightarrow \infty$, cases that require $y \leq 1$ can be ignored\\
+\newpage
+\noindent
+free resp\\
+2
+\begin{align*}
+X_i &= \text{num sandwiches each guest need}\\
+E[X_i] &= 0 \cdot \frac{1}{4} + 1 \cdot \frac{1}{2} + 2 \cdot \frac{1}{4} = \frac{1}{2} + \frac{1}{2} = 1\\
+Var(X_i) &= E[(X - E[X])^2] = E[X^2] - E[X]^2\\
+E[X^2] &= 0^2 \cdot \frac{1}{4} + 1^2 \cdot \frac{1}{2} + 2^2 \cdot \frac{1}{4} = \frac{1}{2} + 1 = \frac{3}{2}\\
+Var(X_i) &= \frac{3}{2} - 1^2 = \frac{1}{2}\\
+S_n &= \sum_{i = 1}^{64} X_i\\
+E[S_n] &= E\left[\sum_{i = 1}^{64} X_i\right] = \sum_{i = 1}^{64}E[X_i] = 64(1) = 64\\
+Var(S_n) &= Var\left(\sum_{i = 1}^{64} X_i\right) = \sum_{i = 1}^{64}Var(X_i) = \frac{64}{2} = 32\\
+P(S_n \leq k) &\geq 0.95\\
+P\left(\frac{S_n - E[S_n]}{\sqrt{Var(S_n)}} \leq \frac{k - E[S_n]}{\sqrt{Var(S_n)}}\right) &\geq 0.95\\
+\Phi\left(\frac{k - E[S_n]}{\sqrt{Var(S_n)}}\right) &\geq 0.95\\
+\Phi\left(\frac{k - 64}{\sqrt{32}}\right) &\geq 0.95 = \text{table value}\\
+\frac{k - 64}{\sqrt{32}} &\geq 1.65\\
+k &\geq 1.65\sqrt{32} + 64\\
+&\geq 73.33381\\
+\end{align*}
+\newpage
+\noindent
+3\\
+a\\
+uniform\\
+$f_X(x) = \begin{cases}
+0 & \text{if } x \not\in [a, b]\\
+\frac{1}{b - a} & \text{if } x \in [a, b]\\
+\end{cases}\\
+\\
+f_X(x) = \begin{cases}
+0 & \text{if } x \not\in [0, 1]\\
+\frac{1}{1 - 0} = 1 & \text{if } x \in [0, 1]\\
+\end{cases}\\
+f_Y(y) = \begin{cases}
+0 & \text{if } y \not\in [0, 1]\\
+\frac{1}{1 - 0} = 1 & \text{if } y \in [0, 1]\\
+\end{cases}\\
+P(X \leq a) = F(a) = \int_{-\infty}^a f(x) dx\\
+F_X(x) = \begin{cases}
+0 & \text{if } x \leq 0\\
+\int_0^x f(x) dx = \int_0^x 1 dx = x & \text{if } 0 < x < 1\\
+1 & \text{if } x \geq 1\\
+\end{cases}\\
+F_Y(y) = \begin{cases}
+0 & \text{if } y \leq 0\\
+\int_0^y f(y) dy = \int_0^y 1 dy = y & \text{if } 0 < y < 1\\
+1 & \text{if } y \geq 1\\
+\end{cases}\\$
+\\
+\\
+\\
+\\
+b
+\begin{align*}
+F_W(w) &= P(W \leq w) = P(min(X, Y) \leq w) = 1 - P(min(X, Y) > w)\\
+&= 1 - P(X > w, Y > w) = 1 - P(X > w)P(Y > w)\\
+&= 1 - (1 - P(X \leq w))(1 - P(Y \leq w))\\
+&= 1 - (1 - F_X(w))(1 - F_Y(w))\\
+&= 1 - (1 - w)(1 - w)\\
+&= 1 - (1 - w)^2\\
+\end{align*}
+$F_W(w) = \begin{cases}
+0 & \text{if } w \leq 0\\
+1 - (1 - w)^2 = 1 - (1 - 2w + w^2) = 2w - w^2& \text{if } 0 < w < 1\\
+1 & \text{if } w \geq 1\\
+\end{cases}$
+\\
+\\
+\\
+\\
+c
+\begin{align*}
+F_Z(z) &= P(Z \leq z)\\
+&= P(max(X, Y) \leq z)\\
+&= P(X \leq z, Y \leq z)\\
+&= P(X \leq z)P(Y \leq z)\\
+&= F_X(z) F_Y(z)\\ 
+&= z^2\\
+\end{align*}
+$F_Z(z) &= \begin{cases}
+0 & \text{if } z \leq 0\\
+z^2 & \text{if } 0 < z < 1\\
+1 & \text{if } z \geq 1\\
+\end{cases}$
+\end{document}

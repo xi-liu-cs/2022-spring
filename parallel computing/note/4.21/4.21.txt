@@ -1,0 +1,58 @@
+__global__ called by host executed on device
+
+warp is subset of block
+
+within warp
+90% in order
+10% out of order
+
+grid: bunch of blocks
+block: bunch of threads
+
+barrier synchronization only
+among threads within 1 block
+
+entire block go to 1 streaming multiprocessor
+
+5 memory:
+global
+share
+texture
+local
+constant: readonly, fast
+
+shared mem is hardware
+
+2 blocks assigned to same sm
+can communicate through shared mem
+
+thousands of reg per sm
+any local var inside kernel
+assigned to reg not mem
+
+1024 threads divided among 4 blocks 
+
+each reg is for 1 thread
+
+max blocks per sm 32
+
+if local var do not fit into a reg
+
+local:
+int x // reg
+int a[10] // global memory: local mem
+
+stored in global memory area as local memory
+only accessed by 1 thread
+
+cudaMemcpy
+host to host (only same gpu)
+data in global mem
+
+asychronous transfer
+nonblocking
+control go back to host while transfering
+
+all kernels return int for error handling
+
+<<< #blocks, #threads / blocks >>>

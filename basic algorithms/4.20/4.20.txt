@@ -1,0 +1,58 @@
+running dfs(g) can be interpreted as running dfs(g^{scc})
+1. a component vertex in g^{scc} becomes discovered 
+once a vertex in that component in dfs(g) becomes discovered
+2. ... becomes seen once all vertices
+in that component in dfs(g) become seen
+
+topological sorting of g^{scc}
+
+algo for finding scc
+1. run dfs(g) to find finishing time for all
+vertices in g (sort vertices with respect to their
+decreasing finishing time)
+2. run dfs(g^t)
+	dfs_scc(g^t)
+		for each vertex s in g^t visit
+		on topological sort
+			if(s.color == undiscovered)
+				dfs(g^t, s)
+				output vertices found as 1 scc
+			
+
+minimum spanning tree (mst), minimum total weight
+input: graph g
+undirected
+connected
+weighted: a weight w(u, v) is assigned
+to each edge {u, v} of g
+source vertex s
+
+output mst: a spanning tree of g
+with min total weight:
+w(t) = weight of tree t
+w(t) := sum_{(u, v) is on edge of T} w(u, v)
+
+prim's algo (greedy)
+idea: construct tree t step by step
+by adding vertices one by one
+in each step: 
+q: set of unchosen vertices 
+t: set of chosen vertices of tree
+
+q := v(g) /* vertex set of graph */
+t := null
+
+all edges running between t and q
+
+edge with min weight among running edges
+
+find running edge between t and q
+of min weight and add its end vertex in q to t
+
+implement
+preprocessing:
+for each vertex v: 
+	1. v.key: weight of min weight edge from v to vertices in t
+	   v.key = infty
+	2. v.parent: vertex in t defining min weight edge of v
+	   v.key = null

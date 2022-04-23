@@ -1,0 +1,60 @@
+algo:
+1. run dfs(g)
+2. output vertices based on decreasing finishing time (topo sort)
+
+v1.f > v2.f > ... > vn.f
+
+proof:
+need to show any edge u -> v satisfies v.f < u.f
+1. tree edge: v.f < u.f (a vertex becomes seen after all its descendant become seen)
+2. forward edge: v.f < u.f (an edge from a vertex to its descendant)
+3. backward edge: v.f > u.f (no backward or cycle in dag)
+4. crossing edge: v.f < u.f (connect current branch to a branch that is already dead,
+not between ancestors to descendants, connecting unrelated vertices)
+
+finding connected components: undirected graphs
+
+def: given a graph g, a connected component of g
+is a maximal connected subgraph of g 
+
+problem
+input: undirected graph g
+output: find all connected components of g
+
+algo: dfs/bfs
+cc = connected component
+dfs_cc(g)
+	for every vertex s in v(g)
+		if(s.color == undiscovered)
+			dfs(g, s) /* output all vertices visited as 1 connected component */
+
+finding strongly connected components: directed graphs
+
+problem
+input: directed graph g
+output: find all scc (strongly connected components) of g
+remark: previous algo for undirected graphs
+does not work here
+if run dfs(g, 1) here, then we visited
+1. all vertices in scc of 1: 1, 2, 5
+2. other vertices not in scc of 1: 3, 6, 4, 7, 8
+
+def: transposed graph g^t, rows become columns, columns become rows
+adj(g^t) = (adj(g))^t
+transpose of adjacency matrix
+reverse direction of every edge
+
+remark: scc of g and g^t are the same
+
+def: component graph
+g^{scc}: vertices are scc of original g
+
+component graph are dag's (no cycles)
+
+contrary assumption: there is cycle,
+then all vertices can reach all vertices 
+then all the scc's can be 
+merged to form only 1 scc
+
+remark
+running dfs(g) can be interpreted as running dfs(g^{scc})

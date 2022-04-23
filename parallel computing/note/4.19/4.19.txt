@@ -1,0 +1,56 @@
+which part is gpu friendly
+num threads
+how might threads distributed on hardware
+how many blocks
+how to index thread within block
+
+grid: group of blocks
+block: group of threads
+
+sm: streaming multiprocessor
+sp: streaming processor
+
+every sm is multiple sp
+
+warp is a set of threads with consecutive ranks belonging to a thread
+block. The number of threads in a warp is currently 32
+
+every 32 sp within 1 sm have 1 front end (fetch, decode, execute)
+
+index threads with 1, 2, or 3 dimensions
+for readibility (1 dimensional indicing will
+be awkward for matrix multiplication)
+
+core is sm
+massive parallelism
+
+host: cpu
+device: gpu
+
+kernel: gpu code
+
+assignment of thread to warp is deterministic
+threads 0 to 31 are assigned to warp 0 and so on
+
+2 blocks assigned to same sm
+cannot see each other's shared memory
+
+gpu optimized for bandwidth (wide datapath) (not speed or latency)
+
+capacitor dissipate
+
+dram: recharge capacitor (refresh 1's)
+
+sram: cache
+
+6GHz memory and 256-bit interface (256 wires)
+= 6 * 256 / 8 = 192.2 GB / s
+
+spmd
+single program multipe data
+
+
+<<< num_blocks, num_thread_per_block>>>
+
+
+__global__ called by host to execute on device

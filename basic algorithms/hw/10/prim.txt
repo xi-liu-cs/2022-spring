@@ -1,0 +1,24 @@
+now the weight of the edges are not all the same, so run mst\_prim() which is Prim's algorithm to find the minimum spanning tree of $G$. 
+\begin{lstlisting}[language = c++, numbers = left, mathescape = true]
+struct vertex
+{
+    float key
+    vertex parent
+}
+
+vertex extract_min(q) /* removes and returns the vertex
+in q with the minimum key */
+
+mst_prim(graph g, weights w, vertex root)
+    for each u $\in$ g.vertex_set
+        u.key = $\infty$
+        u.parent = null
+    root.key = 0
+    priority_queue q = g.vertex_set
+    while(!q.empty())
+        cur = extract_min(q)
+            for each v $\in$ g.adjacency_list[cur]
+                if v $\in$ q and w(cur, v) < v.key
+                    v.parent = cur
+                    v.key = w(u, v)
+\end{lstlisting}

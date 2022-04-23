@@ -1,0 +1,7 @@
+Hi,
+why is my algorithm "partially correct"? what part of it is incorrect?
+explanation is written clearly as code within the graham_scan() function,
+and the comments also adds a lot more explanation. 
+Can you regrade?
+
+compile and execute below C program to verify (keep in mind that faulty Gradescope might act weird when showing the asterisk character within the below program with the driver code, consult my program written in the problem if such a case happens):
