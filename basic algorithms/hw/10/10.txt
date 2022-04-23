@@ -19,3 +19,12 @@ of v
 light edge:
 weight is minimum of any edge 
 crossing the cut
+
+topo sort: 
+decreasing order of finishing time
+vertices at the front have latest finish time
+since finish time of v is defined when all
+of the adjacent vertices of v are finished
+
+
+ 
