@@ -1,0 +1,90 @@
+find vertex with minimum key attribute
+
+proof of correctness prim algo
+loop invar: in each step, T (set of chosen vertices
+& edges up to that step) is included in a mst
+
+initialization: at beginning, T = empty set
+so T \in mst
+
+maintenance: assumption: at beginning of this step,
+T \in mst
+conclusion: at end, T is also included in a mst
+
+proof: let u->v be an edge of min weight
+that runs between T and Q at this step
+prim's algo adds e to T at this step:
+T becomes T U {e}
+by assumption, know T is included in a
+mst M (T subset M)
+
+have to prove T U {e} is also 
+part of mst
+
+have 2 cases:
+1. e is part of mst M 
+T subset M
+e subset M
+->
+T U {e} subset M
+
+2. e is not part of mst M 
+construct a new MST M' that 
+contains T U {e}
+take path in M which connects
+u to v:
+
+let x-y be the edge on this path
+that runs between T & Q
+
+M' := (M \ {xy}) U {uv} /* remove edge x-y and use edge u-v instead, e = (u, v) */
+w(x-y) >= w(u-v)
+any edge running between T and Q have weight >= weight(u-v)
+since u-v is the edge of minimum weight
+
+w(M') = w(M) - w(x-y) + w(u-v)
+= w(M) + nagative number
+<= w(M)
+
+M': 
+1. connectedd all vertices of G
+since M connected all vertices of G and M' & M
+are different by an edge
+2. does not have a cycle: 
+since M does not have a cycle 
+3. w(M') <= w(M)
+if M was a mst, then M' must be also a mst
+
+M' is a mst which contains T U {uv}
+
+{uv} subset M'
+T subset M': T subset M, and
+M' and M only differs in the edge x-y
+also, x-y is not part of T (since x \in Q)
+thus, T subset M'
+
+termination: at end, T = V (all vertices are chosen)
+T is part of mst by maintenance step
+thus, T itself is a mst
+
+
+
+
+idea of prim & kruskal
+among "admissible edges", choose edge of min
+weight in each step
+
+
+
+
+kruskal mst greedy
+1. sort out edges of g based on their increasing weight
+2. start with empty graph on the vertex set v of G:
+ignore all edges: empty graph has |V| components
+3. traverse edges of g one by one in increasing weights
+check if that edge is "admissible" 
+(can be added to the mst)
+test for admissibility:
+if edge connects 2 different components (otherwise form a cycle)
+	- add that edge to the mst
+	- merge 2 connected components connected by this edge

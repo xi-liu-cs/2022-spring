@@ -1,0 +1,74 @@
+kruskal: disjoint set
+tc: O(|E|log|V|)
+
+single source shortest paths (sssp)
+input: a weighted graph g = (v, e) (undirected or directed)
+all edges of g are assigned weights
+a source vertex s of g
+
+output: find shortest path (paths of min total weight)
+from source s to all other vertices of g
+
+bfs(g, src) gives the shortest path from the src vertex
+to the rest of the vertices that are reachable from src
+
+solve the problem if graph is not weighted (all weight = 1)
+run bfs(g, s)
+
+sssp with all positive edge weights:
+dijkstra greedy
+
+preprocessing: 
+for each vertex v in V:
+(1) v.key: weight of the shortest path from s to v
+through already chosen vertices
+(weight of shortest path from s to v
+where all the vertices in this path
+except v are "already chosen")
+
+(2) v.parent: parent of v in the shortest path 
+from s to v described by v.key
+s -> . -> ... -> . -> v
+
+identify shortest path from s to other vertices 
+one by one:
+greedy:
+in each step, choose the vertex v with min key
+value among unchosen (remaining) vertices
+weight of the shortest path from s to this chosen 
+vertex v is v.key
+
+for each vertex v:
+	d(s, v) := weight of shortest path from 
+	s to v (among all possible paths from s to v)
+
+d(s, v) vs key:
+d(s, v) is the actual shortest
+more restricted: key is only the shortest path among already chosen vertices
+d(s, v) is a path form s to v not necessarily 
+through chosen vertices
+
+v.key becomes d(s, v) when a vertex is chosen
+
+for all vertices:
+d(s, v) <= v.key
+since d(s, v) is min among all possibilities
+v.key is min among a part of all paths
+
+claim of dijkstra's algo
+when a vertex becomes chosen, then
+d(s, v) = v.key
+
+after choosing each vertex v
+key values of all vertices u in adj[v]
+may be updated:
+if v.key + w(v, u) < u.key: /* weight of new path from s to u through chosen vertices */
+	update u.key = v.key + w(u, v)
+	update u.parent = v
+/* if the new quantity is less than the previous key value
+then update */
+
+to construct shortest path
+start from last vertex, go to the parent of the last vertex
+keep follow the parent until hit the source vertex
+

@@ -9,3 +9,13 @@ gcc -Wall -fopenmp -std=c99 -o a a.c
 ./a 4	
 /* 4 = number of threads */
 
+nvcc -o a a.cu
+./a 4
+/* 4 = number of threads */
+
+https://m31phy.tistory.com/136
+nvcc --list-gpu-code
+nvcc -arch=sm_87 -o a a.cu
+
+nvcc -o vectorprog vectors.cu -lm
+./vectorprog 1000000

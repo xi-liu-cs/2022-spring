@@ -1,0 +1,75 @@
+cuda 1: 34
+access of global mem, slow
+assume 1 thread 1 ele
+each thread execute inner most loop for(int k = 0)
+i, j correspond to unique id of threads
+
+__device__ functions can be called only from the device
+and it is executed only in the device
+__global__ functions can be called from the host
+and it is executed in the device
+
+36
+Pvalue is a register, fast
+access to global mem Pd is slow
+used cudaMalloc, so Pd is in global mem
+
+dim3 dimGrid
+dim3 dimBlock
+
+1 dimensional: <<<blk_ct, th_per_blk>>>
+n dimensional: <<<dimGrid, dimBlock>>>
+
+fatbinary, binary for each gpu
+parallel thread execution
+
+sp are called cores
+chunk of 32 threads: warp
+last warp has less threads
+
+if 1 fetch and decode for each sp,
+go back to multicore
+
+udaGetDeviceCount(int * count)
+count is num of gpu
+
+cudaGetDeviceProperties()
+called by host
+
+deviceProp:
+name: of card
+clockRate: freq of gpu low
+constMem: fast global mem, cached
+x.y compute capability
+int major = x, minor = y
+memoryClockRate * memoryBusWidth = bandwidth
+
+max num threads per block
+max num threads per sm
+
+block to be assigned on a sm
+must have all resources beforehand
+
+gflops: floating point operations per second
+
+all registers in sm is 32 bits
+every double data type use 2 reg
+
+thermal design power
+
+cuda 2: 8
+only 1 block
+
+num blocks = width / tile_width
+
+dim3 dimGrid(width / tile_width, width / tile_width)
+dim3 dimBlock(tile_width, tile_width)
+
+syncthread() is among blocks, not global synchronization
+more blocks than sm
+few blocks left in ready queue
+otherwise deadlock
+
+beforehand: static analysis
+by looking at code, how many sp
+
