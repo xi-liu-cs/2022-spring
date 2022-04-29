@@ -119,8 +119,8 @@ int main(int argc, char *argv[]){
 	*/
 	alloc(&ad, &bd, &cd, n); /* 1 */
 	send(a, b, c, ad, bd, cd, n); /* 2 */
-	int th_per_blk = 13, /* thread_per_block */
-	blk_per_grid = 231, /* block_per_grid */
+	int th_per_blk = 500, /* thread_per_block */
+	blk_per_grid = 4, /* block_per_grid */
 	th_work = n / (blk_per_grid * th_per_blk); /* thread work */
 	vecGPU<<<blk_per_grid, th_per_blk>>>(ad, bd, cd, th_work, blk_per_grid, th_per_blk, n); /* 4 */
 	cudaMemcpy(c, cd, n * sizeof(float), cudaMemcpyDeviceToHost); /* 5 */

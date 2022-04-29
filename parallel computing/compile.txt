@@ -19,3 +19,14 @@ nvcc -arch=sm_87 -o a a.cu
 
 nvcc -o vectorprog vectors.cu -lm
 ./vectorprog 1000000
+
+to save edit in vim:
+:x
+
+The procedure is as follows to save a file in Vim and quit the editor:
+Start vim by typing vim filename.
+To insert text press i.
+Now start editing text. ...
+Press Esc key and type :w to save a file in vim.
+One can press Esc and type :wq to save changes to a file and exit from vim.
+Another option is to press :x.

@@ -1,0 +1,114 @@
+move from 1 warp to another
+0 cycle context switch
+
+resources inside sm
+
+decoupling between
+threads per block
+sp per sm
+
+64kb shared mem in sm
+1 block need 32k
+
+2 blocks can be assigned to that sm
+
+shared int x // 4 bytes
+
+adding 1 var 
+force gpu outside of sm
+
+more blocks than sm
+
+x reg
+
+2 resources
+1. reg
+2. shared mem
+
+upper bound 
+tot sm
+max blocks per sm
+tot block a sm can hole
+
+cuda 2, 17:
+# block, # thread per block
+1, 1024
+2, 512
+4, 256
+...
+
+if threads are communicating
+make big blocks
+
+when data do not fit in register
+array put in global mem
+local per thread
+(1 copy per thread, a thread cannot access another thread's local mem)
+
+warp:
+once a block is assigned to an sm
+divided into warps
+
+if # threads per block is not close to 32
+then under utilizing
+
+assignment of threads to warps: deterministic
+
+simd:
+same front end or fetch and decode phase
+then same instruction is send to all threads
+
+branch divergence papers
+
+operation on vector 
+if(i < n)
+
+special function units
+sin cos
+tensor cores
+
+best performance:
+use all sp inside sm
+
+8 * 512 = 2^3 ^ 2^9 = 2^12
+
+
+cuda 2. 23
+16^2 = 2^4 * 2^4 = 2^8 = 256 threads
+
+
+
+
+
+cuda 3. 2
+most num threads: 
+3 blks of 512
+
+256 * 4 = 1024 <= 1536
+512 * 3 = 1536 <= 1536
+
+
+3.
+at least 4 blks, 4 * 512 = 2048
+
+how many warp divergence?
+
+
+not taking advantage of max # blocks per sm
+
+
+floating point calculations
+
+cgma = # compute / # mem access
+
+constant mem: only host can write to it
+faster to access, feverishly cached
+
+several warps acess shared mem parallel
+
+
+thousands of reg per sm
+reg grouped into file
+
+
+
