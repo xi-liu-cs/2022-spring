@@ -1,0 +1,5 @@
+Hi,
+you are grading on criteria not asked by the question.
+the question asks me to "develop an algorithm that determines whether G has a cycle. Your algorithm must run in O(|V| + |E|) time". the question neither asks me to justify the correctness of my algorithm, nor it asks me to provide any justification of time complexity. but nevertheless i already did the extra work of including some justification of both, which is not at all requested by the problem in the first place.
+can you regrade?
+Thank you.

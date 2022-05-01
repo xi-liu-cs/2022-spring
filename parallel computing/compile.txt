@@ -9,6 +9,9 @@ gcc -Wall -fopenmp -std=c99 -o a a.c
 ./a 4	
 /* 4 = number of threads */
 
+gcc -Wall -fopenmp -std=c99 -o histogram xl3504par.c
+./histogram 1 5 1000.txt
+
 nvcc -o a a.cu
 ./a 4
 /* 4 = number of threads */

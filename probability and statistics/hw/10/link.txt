@@ -1,0 +1,8 @@
+2, 3
+https://www.probabilitycourse.com/chapter8/8_2_5_solved_probs.php
+
+3
+https://stats.stackexchange.com/questions/373121/biasedness-of-uniform-distribution-mle
+
+5
+https://math.stackexchange.com/questions/328074/how-to-do-integral-int-infty-infty-x4-e-x2-2dx
