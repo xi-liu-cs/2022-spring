@@ -266,7 +266,7 @@ l(\theta) &= \ln(L(\theta))\\
 \theta &= \frac{2\sum_{i = 1}^n a_i^2}{3n}\\
 \end{align*}
 so the maximum likelihood estimate of $\theta$ is
-\[\hat{\theta} = \frac{2\sum_{i = 1}^n a_i^2}{3n}\]
+\[\theta_m = \frac{2\sum_{i = 1}^n a_i^2}{3n}\]
 \newpage
 \noindent
 2.\\
@@ -274,11 +274,9 @@ so the maximum likelihood estimate of $\theta$ is
 bias(\hat{\theta}) &= E[\hat{\theta}] - \theta
 \end{align*}
 \begin{align*}
-E[\hat{\theta}] &= E\left[\frac{2\sum_{i = 1}^n a_i^2}{3n}\right]\\
-&= \frac{2}{3n}E[\sum_{i = 1}^n a_i^2]\\
-&= \frac{2}{3n}\sum_{i = 1}^n E[a_i^2]\\
-&= \frac{2n}{3n} E[a_i^2]\\
-&= \frac{2}{3} E[a_i^2]\\
+E[\hat{\theta}] &= E\left[\frac{2\sum_{i = 1}^n x_i^2}{3n}\right]\\
+&= \frac{2}{3n}E[\sum_{i = 1}^n x_i^2]\\
+&= \frac{2}{3n}\sum_{i = 1}^n E[x_i^2]\\
 \end{align*}
 \begin{align*}
 E[x^2] &= \int_{-\infty}^{\infty} x^2 f_\theta(x) dx\\
@@ -320,8 +318,9 @@ E[x^2] &= \frac{2}{\sqrt{\pi}\theta^{3 / 2}} \int_{-\infty}^{\infty} x^4 e^{-x^2
 return to calculate $bias(\hat{\theta})$
 \begin{align*}
 bias(\hat{\theta}) &= E[\hat{\theta}] - \theta\\
-&= \frac{2}{3} E[a_i^2] - \theta\\
-&= \frac{2}{3}\cdot\frac{3}{2}\theta - \theta\\
+&= \frac{2}{3n}\left(\sum_{i = 1}^n E[x_i^2]\right) - \theta\\
+&= \frac{2}{3n}\left(\sum_{i = 1}^n \frac{3}{2}\theta\right) - \theta\\
+&= \frac{1}{n}(n\theta) - \theta\\
 &= \theta - \theta\\
 &= \boxed{0}\\
 \end{align*}
@@ -329,14 +328,11 @@ bias(\hat{\theta}) &= E[\hat{\theta}] - \theta\\
 \noindent
 3.
 \begin{align*}
-Var(\hat{\theta}) &= E[\hat{\theta}^2] - E[\hat{\theta}]^2
-\end{align*}
-\begin{align*}
-E[\hat{\theta}^2] &= E\left[\left(\frac{2\sum_{i = 1}^n a_i^2}{3n}\right)^2\right]\\
-&= \frac{4}{9n^2}E\left[\left(\sum_{i = 1}^n a_i^2\right)^2\right]\\
-&= \frac{4}{9n^2}E\left[(n a_i^2)^2\right]\\
-&= \frac{4}{9n^2}E\left[n^2 a_i^4\right]\\
-&= \frac{4}{9}E\left[a_i^4\right]\\
+Var(\hat{\theta}) &= Var\left(\frac{2\sum_{i = 1}^n x_i^2}{3n}\right)\\
+&= \frac{4}{9n^2}Var(\sum_{i = 1}^n x_i^2)\\
+&= \frac{4}{9n^2}\sum_{i = 1}^n Var(x_i^2)\\
+&= \frac{4}{9n^2}\sum_{i = 1}^n \left(E[(x_i^2)^2] - E[x_i^2]^2\right)\\
+&= \frac{4}{9n^2}\sum_{i = 1}^n \left(E[x_i^4] - E[x_i^2]^2\right)\\
 \end{align*}
 \begin{align*}
 E[x^4] &= \int_{-\infty}^{\infty} x^4 f_\theta(x) dx\\
@@ -363,12 +359,13 @@ E[x^4] &= \frac{2}{\sqrt{\pi}\theta^{3 / 2}} \int_{-\infty}^{\infty} x^6 e^{-x^2
 \end{align*}
 return to calculate $Var(\hat{\theta})$
 \begin{align*}
-Var(\hat{\theta}) &= E[\hat{\theta}^2] - E[\hat{\theta}]^2\\
-&= \frac{4}{9}E\left[a_i^4\right] - \theta^2\\
-&= \frac{4}{9}\cdot\frac{15}{4}\theta^2 - \theta^2\\
-&= \frac{15}{9}\theta^2 - \theta^2\\
-&= \frac{15 - 9}{9}\theta^2\\
-&= \boxed{\frac{2}{3}\theta^2}\\
+Var(\hat{\theta}) &= \frac{4}{9n^2}\sum_{i = 1}^n \left(E[x_i^4] - E[x_i^2]^2\right)\\
+&= \frac{4}{9n^2}\sum_{i = 1}^n \left(\frac{15}{4}\theta^2 - \left(\frac{3}{2}\theta\right)^2\right)\\
+&= \frac{4}{9n^2}\sum_{i = 1}^n \left(\frac{15}{4}\theta^2 - \frac{9}{4}\theta^2\right)\\
+&= \frac{4}{9n^2}\sum_{i = 1}^n \left(\frac{6}{4}\theta^2\right)\\
+&= \frac{2}{3n^2}\sum_{i = 1}^n \theta^2\\
+&= \frac{2n}{3n^2}\theta^2\\
+&= \frac{2}{3n}\theta^2\\
 \end{align*}
-as one increases the number $n$ of independent observations, $Var(\hat{\theta})$ does not change since $Var(\hat{\theta})$ does not depend on $n$\\
+as one increases the number $n$ of independent observations, $Var(\hat{\theta})$ decreases since there is a $n$ in the denominator\\
 \end{document}

@@ -1,0 +1,76 @@
+sp15
+2 cores slower than 1 core
+2 cores use floating point op, other use int op
+
+for i = 0 to n
+	do(i)
+must be indep
+mpi: distributed mem
+openmp: shared mem, same virt address space
+1 process with multiple threads
+0 to 2^{64} - 1
+
+each core has its own l1, l2 cache
+shared l3 cache with other cores
+
+"int i" come in as argument 
+all threads have same condition in "int i"
+so no divergence
+
+block not assigned to an sm until it gets all resources it needs beforehand
+context switch in 0 cycle
+
+only upper bound
+amdahl does not take into amount of overhead
+communication, memory overhead
+
+theoretical upper bound
+
+openmp:
+here num of cores is large
+so num iterations is smaller
+when num thread is not provided
+determine num of cores, or num iterations which is smaller
+2 + 0
+2 + 1
+2 + 2
+2 + 3
+= 14
+
+if num cores is large
+high contention on bus
+share mem
+ 
+
+same warp -> move in lockstep as if there is a barrier
+whole block must assign to same sm
+
+warp: 
+multiple of 32 threads
+if statement
+decoupling 
+threads per block
+sp per sm
+
+sections known at programming time
+
+section faster than tasks
+
+1 thread entering a critical section
+prevents all other threads entering same critical section
+give names to critical sections
+
+static: before execute loops
+thread know which iteration it assigned
+thread 0 assigned to iteration 0, 1
+
+warp
+thread divergence
+not multiple of 32
+if 1 thread is access slow array
+
+if problem size 
+linear increase, linear decrease
+
+
+2 blocks executed on same sm

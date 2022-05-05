@@ -1,0 +1,6 @@
+$\text{if } x \in [0, \theta], \; F_X(x) = \int_0^x f_X(x) dx = \int_0^x \frac{1}{\theta} dx = \frac{1}{\theta}\int_0^x dx = \frac{x}{\theta}\\
+F_X(x) = 
+\begin{cases}
+0 & \text{if } x \not \in [0, \theta]\\
+\frac{x}{\theta} & \text{if } x \in [0, \theta]\\
+\end{cases}\\$

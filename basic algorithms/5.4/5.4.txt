@@ -1,0 +1,151 @@
+for negative weighted graphs
+solve the more general problem 
+"all pairs shortest path problem"
+rather than "single source shortest path"
+since tc of more general probelm 
+is same as sssp
+
+all pairs shortest path problem
+input: weighted graph G = (V, E) directed or undirected
+output: find weights of shortest paths between
+any pairs of vertices u, v in V
+
+positive weighted graphs:
+run dijkstra's algo for each 
+source vertex
+
+dijkstra(G1, V1), ..., dijkstra(Gn Vn)
+shortest path from V1 to other vertices
+..., shortest path from Vn to other vertices
+
+tc = |V| * tc of dijkstra
+= |V|(|E| + |V|lg|V|)
+= |V||E| + |V|^2 lg|V|
+<= |V||V|^2 + |V|^2 lg |V| /* |E| <= |V|^2 */
+<= |V|^3 + |V|^2 lg |V|
+<= |V|^3
+
+graphs with negative weighted edges:
+no negative weighted cycle
+
+assume input graph is given adjacency matrix
+make following modification for niceness of discussion
+
+w(u, v) = 
+{
+	weight of edge (u, v)	if (u, v) in E
+	+infty	if (u, v) !in E & u != v
+	0	if u = v
+}
+
+using this notation
+if algo outputs +infty
+as weight of shortest path from 
+u to v
+then it means there is no path 
+from u to v
+
+dp approach 1 for negative weighted graphs
+bellman-ford algo
+idea of dp
+dp(u, v, k) := weight of shortest path
+from u to v using at most k edges
+
+base case
+k = 0
+dp(u, v, 0)
+for any u, v in V
+
+k = 1
+dp(u, v, 1)
+for any u, v in V
+
+k = 2
+...
+
+k = n - 1
+dp(u, v, n - 1)
+for any u, v in V
+weight of shortest 
+path from u to v
+
+any such shortest path
+using <= n - 1 edges
+
+recursion: what are the option for the vertex
+before last vertex as the shortest path?
+
+dp(u, v, k)
+option 1: x = v1
+	dp(u, v, k) = dp(u, v1, k - 1) + w(v1, v)
+option 2: x = v2
+...
+option n: x = vn
+	dp(u, v, k) = dp(u, vn, k - 1) + w(vn, v)	
+
+format of recursion:
+dp(u, v, k) = min_{i = 1, ..., n}(dp(u, vi, k - 1) + w(vi, v))
+
+dp(u, v, 0) = 
+{
+	0, if u = v
+	+infty (not feasible), if u != v
+}
+/* k is num edges, no path from u to v
+using 0 edges if u != v */
+
+tc of dp approach 1
+total tc = # subproblems * time for each subproblem
+= |V|^3 * O(|V|)
+= O(|V|^4)
+
+# subproblems:
+dp(u, v, k)
+u: |V| options, u = v1, ..., vn
+v: |V| options, v = v1, ..., vn
+k: n options, k = 0, 1, ..., n - 1
+
+tot # subproblems = |V|^3 
+time for each subproblem
+to find dp(u, v, k), find min among n quantities
+time = O(|V|) = O(n)
+
+
+
+dp approach 2:
+floyd-warshall algo
+dp(u, v, m) := weight of shortest path 
+from u to v where vertices in between 
+can only come from {v1, ..., vm}
+
+base case
+m = 0
+dp(u, v, 0)
+for any u, v in V
+vertices in between: emptyset
+
+m = 1
+dp(u, v, 1)
+for any u, v in V
+vertices in between: {v1}
+
+
+...
+
+m = n
+dp(u, v, n)
+for any u, v in V
+vertices in between: {v1, ..., vn} /* values that must be output */
+
+
+recursion: dp(u, v, m)
+check if vm occurs on shortest path
+case 1: vm does not appear on shortest path
+	dp(u, v, m - 1)
+case 2: vm appears on shortest path
+	tot weight = dp(u, vm, m - 1) + dp(vm, v, m - 1)
+
+recursion format:
+dp(u, v, m) = min(dp(u, v, m - 1), 
+dp(u, vm, m - 1) + dp(vm, v, m - 1))
+

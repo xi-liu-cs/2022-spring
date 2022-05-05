@@ -94,8 +94,8 @@ at least 4 blks, 4 * 512 = 2048
 how many warp divergence?
 
 
-not taking advantage of max # blocks per sm
-
+not taking advantage of max # threads in each block
+max # blocks per sm
 
 floating point calculations
 

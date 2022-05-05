@@ -2,7 +2,7 @@
 
 __global__ void print()
 {
-    printf("print\n");
+    printf("thread %d\n", threadIdx.x);
 }
 
 int main()

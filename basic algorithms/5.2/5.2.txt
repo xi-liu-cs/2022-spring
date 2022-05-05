@@ -1,0 +1,72 @@
+p679
+dijkstra(g, s)
+	/* preprocessing */
+	s.key = 0
+	min heap q := g.v /* min heap based on key value */
+	while(q is non-empty) /* once a vertex is removed from the queue, 
+	its distance to source vertex is found, v.key = d(s, v) */
+		v = q.extract_min()
+		for vertices u in adj[v] /* update attributes of the neighbor of v if necessary */
+			if v.key + w(v, u) < u.key
+				u.key = v.key + w(v, u)
+				u.parent = v
+	output all .key attributes as the weights of the 
+	shortest paths from s to corresponding vertices
+
+	parent attributes are used to construct shortest path
+
+tc:
+(1) preprocessing: Theta(|V|)
+(2) min heap q: Theta(|V| lg |V|), |V| insertions to the heap
+each insertion take O(lg |V|) time
+(3) while(q is non-empty)
+	(3.1) v = q.extract_min(): O(|V| lg |V|)
+	* |V| removals (each vertex is removed once)
+	* each removal takes O(lg |V|)
+	(3.2) for vertices u in adj[v]: O(|E| lg |V|)
+	* |E| iterations (1 iteration for each edge)
+	* each iteration takes O(lg |V|): time needed
+	for updating keys in "u.key = v.key + w(v, u)"
+total tc = Theta(|V|) + O(|V| lg |V|) +　O(|E| lg |V|)
+		 = O(|V| lg |V|) +　O(|E| lg |V|)
+		 = O((|V| + |E|) lg |V|)
+	
+why time needed for updating keys in normal heap is O(lg |V|)?
+
+remark: if problem involves many update of keys
+if use a fibonacci heap (of size n)
+insertion: O(lg n)
+removal: O(lg n)
+update keys: O(1)
+
+if use fibonacci heap
+tc of (3.2): O(|E|)
+total tc = O(|V| lg |V|) + O(|E|)
+= O(|E| + |V| lg |V|)
+
+if the given graph is connected
+then it would be |E| log (v)
+
+remark: dijkstra's algo fails on negative
+weighted edges
+
+graphs with negative weighted edges: dp-based
+(1) no min walk (shortest walk) may exist 
+when the graph has a cycle of negative weight
+(2) no polynomial-time algo for general graphs
+is known for shortest path problem with 
+negative-weighted cycles
+if record vertices to ensure no repeated vertices
+in already found shortest path, then running time
+become exponential
+
+assume input graph has no negative weighted cycle
+otherwise only exponential algo can be find
+
+(3) if g has no negative weighted cycle, then any
+shortest walk is a shortest path
+do not have any repeated vertices in shortest path
+(4) if g has no negative weighted cycle
+then any shortest walk (path) has <= |V| vertices
+and <= |V| - 1 edges
+

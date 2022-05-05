@@ -1,0 +1,72 @@
+cudadevicesynchronize
+after kernel launch
+
+mem:
+global
+constant: can only written by host
+shared: fastest
+register: all scalar variables
+stored in reg
+every sm have 32000 reg
+texture
+
+arg to kernel funct in constant mem
+__shared__ put in share mem instead of reg
+__device__ int x; global var, available from all threads
+in same process
+
+once a kernel is launched, it is a grid
+
+isolated place in global memory 
+that has a local scope to each thread
+so accessing array slower than accessing reg
+
+cgma
+computation
+to
+global
+memory
+access
+
+# computation / # mem access
+higher means faster code
+
+make threads in same tile collaborate
+to reduce trips to global mem
+
+access 1 var in global once, store
+it in each local mem
+
+load few mem into shared mem
+partial computation
+barrier
+
+max # sp in parallel as possible
+so can reduce shared mem size
+
+
+cuda 3. 26
+mds, nd
+
+29
+86.4 / 4 = # float / sec
+
+every block need 
+
+max # threads per sm, not block
+bigger blocks or more blocks inside sm
+
+cudamemcpy is blocking
+
+stream or a queue storing commands such as cudamemcpy
+blocked until cudamemcpy and kernel launch done
+
+
+1. sharing memory 
+2. dynamic array alloc
+
+local: 1 per thread
+shared: 1 per block
+
+mem or compute bound
+which time is more

@@ -1,0 +1,50 @@
+\documentclass[12pt,border=4pt,multi]{article} % \documentclass[tikz,border=4pt,multi]{article}
+\usepackage{lingmacros}
+\usepackage{tree-dvips}
+\usepackage{amssymb} % for mathbb{}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{forest}
+\usepackage{amsmath} % for matrices
+\usepackage{xeCJK}
+\usepackage{tikz}
+\usepackage[arrowdel]{physics}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{pgfplots, pgfplotstable}
+\usepackage{diagbox} % diagonal line in cell
+\usepackage[usestackEOL]{stackengine}
+\usepackage{multirow}
+\graphicspath{{./img}} % specify the graphics path to be relative to the main .tex file, denoting the main .tex file directory as ./
+\definecolor{orchid}{rgb}{0.7, 0.4, 1.1}
+
+\begin{document}
+
+\section*{lec 10}
+first course in prob\\
+381\\
+2a\\
+number of items produced in a factory during a week is a random variable with mean 50\\
+(a) what can be said about the probability that this week’s production will
+exceed 75?
+\begin{align*}
+&markov\\
+E[X] &\geq aP(X \geq a)\\
+a &= 75\\
+P(X \geq 75) &\leq \frac{50}{75} = \frac{2}{3}\\
+\end{align*}
+(b) if the variance of a week’s production is known to equal 25, then what can
+be said about the probability that this week’s production will be between 40
+and 60?
+\begin{align*}
+&chebyshev\\
+P(|X - E[X]| \geq |a|) &\leq \frac{Var(X)}{a^2}\\
+distance &= \frac{60 - 40}{2} = 10\\
+midpoint &= 40 + 10 = 60 - 10 = 50\\
+P(40 \leq X \leq 60) &= P(|X - 50| \leq 10)\\ 
+&= 1 - P(|X - 50| \geq 10)\\
+&\geq 1 - \frac{25}{10^2}\\
+&= 1 - \frac{1}{4}\\
+&= \frac{3}{4}\\
+\end{align*}
+\end{document}
