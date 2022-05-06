@@ -1,0 +1,133 @@
+\documentclass[12pt,border=4pt,multi]{article} % \documentclass[tikz,border=4pt,multi]{article}
+\usepackage{lingmacros}
+\usepackage{tree-dvips}
+\usepackage{amssymb} % for mathbb{}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{forest}
+\usepackage{amsmath} % for matrices
+\usepackage{xeCJK}
+\usepackage{tikz}
+\usepackage[arrowdel]{physics}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{pgfplots, pgfplotstable}
+\usepackage{diagbox} % diagonal line in cell
+\usepackage[usestackEOL]{stackengine}
+\usepackage{multirow}
+\graphicspath{{./img}} % specify the graphics path to be relative to the main .tex file, denoting the main .tex file directory as ./
+\definecolor{orchid}{rgb}{0.7, 0.4, 1.1}
+
+\begin{document}
+
+\section*{liu xi}
+multi choice\\
+1\\
+lec 12. 8\\
+median of absolute deviation
+\[mad = med(|x_i - med_n|, ..., \text{ for } i = 1 \text{ to } n)\]
+\begin{align*}
+sort &= 38, 56, 59, 64, 74\\
+med_n &= 59\\
+|x_i - med| &= 21, 3, 0, 5, 15\\
+sort &= 0, 3, 5, 15, 21\\
+med &= 5\\
+\end{align*}
+\\
+\\
+\\
+\\
+2
+\begin{align*}
+L(a) &= \prod_{i = 1}^4 f(x = x_i)\\
+&= \frac{a^4}{4^a 2^a 5^a 3^a}\\
+l(a) &= \ln(L(a))\\
+&= \ln(a^4) - \ln(4^a) - \ln(2^a) - \ln(5^a) - \ln(3^a)\\
+&= 4\ln(a) - a\ln(4) - a\ln(2) - a\ln(5) - a\ln(3)\\
+&= 4\ln(a) - a(\ln(4) + \ln(2) + \ln(5) + \ln(3))\\
+&= 4\ln(a) - a(\ln(120))\\
+\frac{dl}{da} &= \frac{4}{a} - \ln(120) = 0\\
+\frac{4}{a} &= \ln(120)\\
+a &= \frac{4}{\ln(120)}\\
+\end{align*}
+\\
+\\
+\\
+\\
+3
+\begin{align*}
+mse(\hat{\theta}) &= var(\hat{\theta}) + (E[\hat{\theta}] - \theta)^2\\
+X or X_i &\sim uniform(0, \theta)\\
+&\text{see formula page}\\
+E[X] &= \frac{a + b}{2} = \frac{0 + \theta}{2} = \frac{\theta}{2}\\
+var(X) &= \frac{(b - a)^2}{12} = \frac{(\theta - 0)^2}{12} = \frac{\theta^2}{12}\\
+E[\overline{X_n}] &= E\left[\frac{\sum_{i = 1}^n X_i}{n}\right] = \frac{1}{n}nE[X] = E[X]\\
+\end{align*}
+\begin{align*}
+E[\hat{\theta}] &= E[2\overline{X_n}] = 2E[X] = 2(\theta / 2) = \theta\\
+var(\hat{\theta}) &= var(2\overline{X_n}) = 4var(\overline{X_n}) = 4var\left(\frac{\sum_{i = 1}^n X_i}{n}\right)\\
+&= \frac{4}{n^2}var(\sum_{i = 1}^n X_i) = \frac{4n}{n^2}var(X_i) = \frac{4}{n}var(X)\\
+&= \frac{4}{n}\cdot\frac{\theta^2}{12} = \frac{\theta^2}{3n}\\
+\end{align*}
+\begin{align*}
+mse(\hat{\theta}) &= var(\hat{\theta}) + (E[\hat{\theta}] - \theta)^2\\
+&= \frac{\theta^2}{3n} - (\theta - \theta)^2\\
+&= \frac{\theta^2}{3n}
+\end{align*}
+\\
+\\
+\\
+\\
+4
+\begin{align*}
+P(X \leq 2 | Y \leq 2) &= \frac{P(X \leq 2, Y \leq 2)}{P(Y \leq 2)}\\
+&= \frac{1 / 4}{1 / 2}\\
+&= \frac{1}{2}\\
+\end{align*}
+\newpage
+\noindent
+true false\\
+1\\
+true\\
+\begin{align*}
+F_{X, Y}(x, y) &= \int_0^a \int_0^b 12x^2 y^3 dy dx\\
+&= 12\int_0^a \int_0^b x^2 y^3 dy dx\\
+&= 12\int_0^a\left[x^2 \frac{y^4}{4}\right]_{y = 0}^{y = b} dx\\
+&= 3\int_0^a x^2 b^4 dx\\
+&= a^3 b^4\\
+\end{align*}
+\begin{align*}
+f_X(x) &= \int_{-\infty}^{\infty} f_{X, Y}(x, y) dy\\
+&= \int_0^1 12x^2 y^3 dy\\
+&= 12x^2[y^4 / 4]_0^1\\
+&= 3x^2\\
+f_Y(y) &= \int_{-\infty}^{\infty} f_{X, Y}(x, y) dx\\
+&= \int_0^1 12x^2 y^3 dx\\
+&= 12[x^3 / 3]_0^1 y^3\\
+&= 4y^3\\
+\end{align*}
+\begin{align*}
+f_X(x)f_Y(y) &= (3x^2)(4y^3) = 12x^2 y^3 = f_{X, Y}(x, y)
+\end{align*}
+\newpage
+\noindent
+2\\
+true
+\begin{align*}
+f_X(x) &= \int_{-\infty}^{\infty} f_{X, Y}(x, y) dy\\
+&= \int_{0}^{\infty} 6e^{-(3x + 2y)} dy\\
+&= -3[e^{-(3x + 2y)}]_{y = 0}^{y = \infty}\\
+&= -3(\frac{1}{e^{\infty}} - \frac{1}{e^{3x}})\\
+&= 3e^{-3x}
+\end{align*}
+\begin{align*}
+f_Y(y) &= \int_{-\infty}^{\infty} f_{X, Y}(x, y) dx\\
+&= \int_{0}^{\infty} 6e^{-(3x + 2y)} dx\\
+&= -2[e^{-(3x + 2y)}]_{x = 0}^{x = \infty}\\
+&= -2(\frac{1}{e^\infty} - \frac{1}{e^{2y}})\\
+&= 2e^{-2y}
+\end{align*}
+\begin{align*}
+f_X(x)f_Y(y) &= (3e^{-3x})(2e^{-2y}) = 6e^{-(3x + 2y)} = f_{X, Y}(x, y)
+\end{align*}
+\end{document}
