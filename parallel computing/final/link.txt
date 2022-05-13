@@ -1,0 +1,15 @@
+communicator
+http://www.rc.usf.edu/tutorials/classes/tutorial/mpi/chapter9.html
+
+master vs single
+https://stackoverflow.com/questions/18820471/what-is-the-benefit-of-pragma-omp-master-as-opposed-to-pragma-omp-single
+
+single
+https://www.openmp.org/spec-html/5.0/openmpsu38.html
+
+master
+https://www.openmp.org/spec-html/5.0/openmpse24.html
+
+cuda prog guide 30
+__syncthreads() is a barrier at which all threads in the block 
+must wait before any is allowed to proceed
