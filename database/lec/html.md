@@ -90,7 +90,7 @@ Let's start with the first line, the `doctype`.
 
 - This informs the web browser that this is an HTML version 5 document.
 - Other versions of HTML have [other `doctype` strings](https://www.w3schools.com/tags/tag_doctype.asp).
-- The browsers are programamed by their creators to understand these strings.
+- The browsers are programmed by their creators to understand these strings.
 
 ---
 
