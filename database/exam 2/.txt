@@ -1,0 +1,33 @@
+is there a mistake in the question: "How many stages must the aggregate( ) function include in the "aggregation pipeline"?"
+the closest answer seems to be "as many as desired"
+but the mongodb manual says 1000 is the upper limit
+https://www.mongodb.com/docs/manual/core/aggregation-pipeline-limits/
+"Number of Stages Restrictions
+Changed in version 5.0: MongoDB 5.0 limits the number of aggregation pipeline stages allowed in a single pipeline to 1000."
+what should i do?
+
+https://www.knowledgehut.com/blog/web-development/createcollection-method-mongodb
+Collections in MongoDB can be created implicitly while we are importing the data or explicitly by specifying the ‘createCollection’ command
+collection is created automatically when data is imported from the application
+
+https://www.mongodb.com/docs/manual/reference/operator/aggregation/project/
+
+https://stackoverflow.com/questions/41286569/get-total-of-pandas-column
+
+https://stackoverflow.com/questions/21285380/find-column-whose-name-contains-a-specific-string
+
+for the question that asks me "What is the average increase per year in the total number of pigs in the United States between 2009 and 2019?"
+should i find "(sum_{i = 2009}^{2019} pig_count_at_year_i - pig_count_at_year_{i - 1}) / (2019 - 2009)"?
+
+in the data source and definitions, for format YxxxxF, it says "actual counts have no value in this field",
+then what does the cell value "A" represent in column YxxxxF? 
+
+https://pythonexamples.org/pandas-dataframe-iterate-over-cells/
+
+6. How many entries for United States have actual counts of items for the year 2019?
+us_data = df[df["Area"] == "United States of America"]
+num_entries = 0 # number of entries having actual counts of items 
+for i in range(us_data.shape[0]): # shape[0] = number of rows
+    if us_data.iloc[i]["Y2019"] == "" or pd.isnull(us_data.iloc[i]["Y2019"]):
+        num_entries += 1
+num_entries
