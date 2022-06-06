@@ -1,0 +1,14 @@
+distri mem:
+core-memory pairs connected by a network
+mem associated with a core
+is directly accessible only to that core
+
+shared mem:
+cores connected to a glocally accessible mem
+each core can access any mem location
+
+mpi (message passing interface) 讯息传递界面
+
+two processes can communicate by calling functions
+one process calls a send function 
+and the other calls a receive function

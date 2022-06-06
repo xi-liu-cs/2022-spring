@@ -1,0 +1,109 @@
+mpi_reduce
+called by all processes involved
+
+collective blocking
+synchronization point
+deadlock
+
+only the sum in the dest process modified
+
+mpi_maxloc
+which process has that number
+the rank of process
+
+mpi data types
+mpi_...type..._int	//int = process rank
+
+several different virt address space
+
+
+mpi_maxloc
+int val is max
+int rank is loc
+
+point-to-point: send and receive
+
+receive is always blocking
+send can do blocking or buffer
+
+proc send number to each other
+
+p1 	p2
+send	send
+recv	recv
+
+
+p1
+send 
+recv
+
+p2
+recv
+send
+
+the order of the calls will determine the
+matching
+mpi_reduce is blocking
+order 
+no need of tag
+
+
+
+28
+sum of all &a in all processes (1st arg of mpi reduce)
+
+destination of process 0
+
+second argument is only relevant to destination process (process 0)
+
+
+all of the reductions 
+are commutative
+
+n body problem
+everybody need the charge of everybody else
+
+mpi_reduce()
+no dest proc here
+all of the processes need the result of a global sum to
+complete some larger computation
+
+
+
+mpi_init()
+mpi_finalize() 
+are not collective (no wait of everyone)
+
+
+mpi_bcast()
+the src void * data_p is not changing
+
+void * data_p is the dest for every process 
+besides the sender
+
+
+mpi_comm_world and src_proc
+gives unique id
+so can know a proc 0 
+is from which communicator
+if there are more than 1 communicator
+
+
+scatter and gather of data
+
+
+compared with prev trapezoid
+no need to copy shared global variable 
+
+
+mpi_scatter()
+first 3 arguments
+are not relevant to receiving process
+
+the send process
+also receive data
+
+
+unsigned
+0 to 4 billion
+

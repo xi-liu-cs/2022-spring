@@ -1,0 +1,16 @@
+sp21, 1
+speedup = T_1 / T_para
+
+span: longest path of dep
+
+parallelism: T_1 / T_inf
+max number of cores to 
+have no performance gain
+ceil(answer)
+ceil, go up, at least get best performance
+floor, lose some performance
+
+directed acyclic (no loop) graph:
+
+1 core 
+100% efficiency

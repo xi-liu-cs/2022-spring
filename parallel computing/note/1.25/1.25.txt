@@ -1,0 +1,111 @@
+record all lectures
+
+best code
+
+access mem slow
+
+scalability: capacity to be changed in size or scale
+
+same time and space complexity, 
+but diff power consumption 
+
+why parallel computing current norm
+
+everything is parallel
+
+row-wise access in 2d matrix is cache friendly
+
+matrix stored language dependent
+c: row-wise
+fortran: column-wise
+
+smallest details of language
+
+each language has strength or weakness
+
+which language
+which machine or hardware
+
+if what u take out is only the syntax 
+then easily replaced and fall out of fashion
+
+
+prepare exam from slides (slide = superset of book)
+
+open note exams
+
+midterm and final take home
+
+sample midterm & final with solutions
+
+*download exam at time x
+submit exam at x + 24 hours
+
+reading & answering forum is good to study
+
+
+if border between 2 grades,
+forum participation can push up grade
+
+brightspace submit midterm & final
+
+whenever finish small piece, submit
+
+
+moore's law
+num transistor double every 18 months
+
+
+more realistic games
+
+
+computational power increase -> 
+num problems seriously consider increase
+
+
+
+scaling down transistor:
+1. reduce circuit delay
+2. increase operating freqency
+3. operating voltage decreased
+
+
+power consumed
+power dissipated in form of temperature
+temperature increase
+
+
+power = c * v^2 * f
+c = capacitance
+v = voltage
+f = freqency
+perfomance = cores * f
+
+
+parallelism among instructions
+parallelism among tasks/threads/processes
+
+hide mem latency
+
+while wait mem to response
+	do other things
+
+simpler cores
+	easier to design and test
+	higher yield
+	lower cost
+
+put multiple cores on a single integrated circuit (chip)
+
+when serial programs benefit from multicore:
+dynamic voltage and frequency scaling
+if 1 core get too hot, switch to another core
+thread migration, context switch
+
+
+
+
+
+chip: 
+processor: 
+cores: cpu

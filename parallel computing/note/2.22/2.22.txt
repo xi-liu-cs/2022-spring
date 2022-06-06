@@ -1,0 +1,86 @@
+superscalar still work without speculative execution
+but performance improve with speculative execution
+
+many instructions are conditional branch
+
+real = wall clock time
+
+clock_t: double precision float
+
+expands to an expression 
+(not necessarily a compile-time constant)
+of type clock_t equal to the number of clock
+ticks per second, as returned by clock()
+
+outside of user time and system time
+real time may include
+
+cache miss,
+i/o from disk
+
+response time (execution time) 
+– The time between the start and completion of a task
+throughput – total amount of work done in a given
+
+when throughput go up, response time go down
+
+throughput: graphics
+response time: scientific computing, find partial diff equa
+
+et // execution time
+mips // millions instruction per sec
+meaningless indication of processor speed
+
+ic //instruction count
+cpi // cycles per instruction
+ct //cycle time, 1/freq
+
+machine code dynamically
+
+21
+1. no account of page fault
+2. every instruction have diff number of cycles
+
+
+ic depends on programmer
+cpi depends on hardware
+ct depends on hardware
+
+
+22
+A equation / B equation
+
+same machine means cycle time is same
+
+
+cpi = cycle per instruction = cycle / instruction
+
+
+in frequency, 10^something
+in mem, 2^something
+
+higher mips better
+
+total number of instructions executed may be diff across 
+diff across diff runs
+
+diff involvement of os code (to handle page faults)
+
+/*
+more threads
+more prob of page faults
+more variation in os involvement
+*/
+
+
+so browser and other applications
+do not cause cache coherence
+processes don't share mem
+
+
+library is reading not writing
+for the library, diff virtual mem map to same physical mem
+
+
+
+

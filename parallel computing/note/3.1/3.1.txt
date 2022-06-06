@@ -1,0 +1,107 @@
+mpi runtime
+create a group of communicators
+
+in case a process is
+sending more than 1 message 
+to another process
+
+to differentiate message (tag)
+
+mpi_rev(... src = rank of receiving process = q)
+//enforce ordering
+
+mpi_rev(... src = rank of receiving process = mpi_any_source)
+//can be out of order
+
+return value of mpi_recv can tell sth went wrong
+mpi_error can tell what went wrong
+
+smaller transistor
+prob of hardware error occur
+
+1. permanent error
+2. transient error: some bits flipped
+
+error collection code
+
+mpi_send: can buffer or block
+mpi_recv: always block
+
+book p123
+buffer the message or it can block. 
+If it buffers the message, the MPI
+system will place the message
+(data and envelope) into its own internal storage, 
+and the call to MPI_Send will return.
+Alternatively, if the system blocks,
+it will wait until it can begin transmitting
+the message, and the call to MPI_Send may not return immediately
+
+
+
+
+opened by default for every process
+input, output, error
+
+
+
+pointer to file is per process
+
+
+
+
+libary is not writable
+so processes can share library
+
+compiler generate assembly
+assembler generate binary 
+
+junk instead of binary
+
+
+ascii code instead of actual 1 and 0
+
+
+os is buffering i/o
+
+most MPI implementations 
+only allow process 0 in 
+MPI_COMM_WORLD to access to stdin
+
+
+
+%lf 
+double precision float
+
+
+
+
+lec mpi2
+mpi_recv(...double)
+mpi_recv(...double)
+/* both double, src both come from process 0 */
+change tag
+
+
+
+
+every process calculate trapezoid in parallel
+
+
+
+addition can be out of order
+
+
+
+can de reduction on per element basis
+
+
+output_data_p is only releveant for
+receiving end
+
+mpi call collective functions
+1. called by everybody
+2. blocking if 1 process dont call
+
+
+device driver

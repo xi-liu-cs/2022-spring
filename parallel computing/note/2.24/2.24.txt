@@ -1,0 +1,109 @@
+cluster computing
+
+distributed mem
+processes running in diff cpu
+have no direct access to another cpu's mem
+
+sending message to each other
+
+don't have many languages that
+conform with high speed
+c, cpp, fortran
+
+each programs have virtual address space
+so can write mpi prog for laptop
+
+assume every process is sequential
+
+each process can be multi-threaded
+
+mpi, openmp, and cuda can be combined 
+in the same program
+
+higher level than pthreads 
+implemented using pthreads
+but same performance
+
+add vectors together
+unique id is only way to determine which 
+part of work to do
+
+from machine code (binary)
+can go to assembly (disassembler)
+
+link, path
+mpi_hello		//command not find
+./mpi_hello	
+
+mpiexec	-n <num of proc>	<exe>
+//require to know num of proc beforehand
+
+
+
+pure c code until mpi_init()
+
+
+main(int argc, char * argv[])
+
+./prog file 1
+
+argc = 3
+
+array of pointers to strings
+argv:
+0	prog
+1	file
+2 	1
+
+mpi_init(&argc, &argv)
+
+
+if main() have no args
+call mpi_init() or mpi_init(NULL, NULL)
+
+
+
+main() return 0 to whom?
+main() can be a child process of another process
+
+
+loader open exe file
+bomb lab
+
+buffer overflow
+overwrite stack
+below stack are return address
+
+mpiexec or mpirun
+
+
+
+mpi_send must match with mpi_receive
+mpi_receive is a blocking function
+
+msg_size is num elements 
+dest
+
+void * 
+int, float then can cast
+
+
+
+ C types (int, char, etc.) can't be passed as arguments to functions
+so mpi datatype are created
+
+
+mpi_status
+
+
+every Recv is blocking
+so print in order
+
+
+
+mpi_finalize() end runtime, not processes
+
+
+better performance:
+if mpi_any_source,
+then can print out of order

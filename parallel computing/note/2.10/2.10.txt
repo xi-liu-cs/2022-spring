@@ -1,0 +1,127 @@
+can we have thread without process?
+no
+
+sequential: 1 process
+
+virtual mem
+isolate processes
+
+distributed mem 
+not share process
+
+processes are not sharing mem
+so only messages 
+
+when processes need to communicate?
+when solving the same problem
+
+philosophy of mem layout
+
+1. instruction
+2. data
+
+if code printed on paper
+can know the number of bytes the program
+occupies
+
+
+process: 
+
+heap
+
+stack2 //thread2
+stack1 //thread1
+
+text
+data
+
+don't know local var
+
+how much dynamic allocation is done
+
+heap size is unknown
+
+
+1 process:
+each thread is piece of code
+(funct calling other functs)
+multithread: multiple stacks
+all growing toward the heap
+
+
+
+order of magnitude = 10 times
+
+bigger problem size
+more threads
+
+are communication operations
+able to proceed concurrently
+(hide it)
+
+scalability: when num_core
+and problem size increase
+
+
+computation cheaper than communication
+
+
+linked list not cache friendly
+parallel data struct
+
+allocate a chunk of heap
+store linked list nodes close to each other
+
+silk lang
+
+
+
+31
+data[i - 1] and data[i]
+want to update bin_count[b - 1]++
+at same time
+critical section
+
+
+
+
+
+
+
+
+---------
+diff between compile (translated) vs interpret
+
+https://www.geeksforgeeks.org/difference-between-compiled-and-interpreted-language/
+
+compile:
+translate whole program into machine code
+
+interpret:
+instructions are not directly executed 
+by the target machine, 
+but instead read and executed
+by some other program
+
+
+
+concurrency: software, same time frame
+parallel: hardware, physically same time
+
+
+if 2 cores, 2 times speedup?
+no
+1. create threads
+2. synchronization
+3. communicate
+
+some part are inherently sequential
+
+f: fraction of code is totally sequential
+1 - f: parallel part
+
+t_seq
+t_p = (f)(t_seq) + (1 - f)t_seq / p
+
+speedup
+s_p = t_seq / t_parallel

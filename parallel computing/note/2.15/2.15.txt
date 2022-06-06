@@ -1,0 +1,123 @@
+directed acyclic graph
+
+A vertex is a unit of execution. 
+For example:
+• An instruction
+• A basic block
+https://en.wikipedia.org/wiki/Basic_block
+• A function
+
+if want to have a loop
+must know the number of iterations beforehand
+unfold loop to vertices
+
+min num cores to produce best performance
+
+every split can be parallel
+
+Work: total amount of time spent on all instructions
+Tp = The fastest possible execution time on p processors
+work law:
+T_p >= T_1 / p
+
+
+Span: The longest path of dependence in the DAG
+= T_{inf}
+
+span is time, not in term of num of vertices
+T_p >= T_{inf}
+
+
+
+after a num of cores, we will see no performance increase
+T_1 / T_{inf}
+
+
+take ceiling of T_1 / T_{inf} = speedup
+
+
+T_{inf} sequential
+
+embarassingly parallel 
+
+
+prog model
+object, funct
+
+
+*para software-2, 14
+Programming Model
+• What is it? the languages and libraries that create an abstract view of the machine
+• Control – How is parallelism created? – How are dependencies enforced?
+• Data – Shared or private? – How is shared data accessed or private data communicated?
+• Synchronization – What operations can be used to coordinate parallelism
+– What are the atomic (indivisible) operations?
+
+
+
+transactional memory, atm machine,
+allowing a group of load and store instructions to execute in an atomic way
+functional programming
+
+异构计算
+Heterogeneous computing refers to systems 
+that use more than one kind of processor or cores. 
+These systems gain performance or energy efficiency
+not just by adding the same type of processors, 
+but by adding dissimilar coprocessors,
+usually incorporating specialized processing 
+capabilities to handle particular tasks
+
+data parallelism: simd
+task parallelism: threads
+instruction parallelism: diff instruction units
+
+synchronization is slow but put for correctness
+
+reduce global var and shared data
+
+
+mem: dark squares are banks, divided into 2 groups
+each group is a rank
+dimm 双列直插式存储器模块, 双线存储器模块: dual in-line memory module
+chunk
+
+hardware understand cache lines, not variables
+
+
+
+18
+no point making result a global var
+
+in an array
+if thread 0 access ele 0, thread 1 access ele 1, problem
+cache coherence
+threads access elements at least 64 bytes away
+
+
+synchronization is stopping some threads,
+so more load imbalance
+
+
+21
+for i < 100
+look at loop body
+if each body is equal, do static assignment
+if each body is not equal, ex: if else..., dynamic assignment
+
+
+
+
+task level para:
+calculate min, max, average in arr
+tasks indep from each other
+not scalable:
+if given more core, no improvement
+num tasks same
+
+
+sorting partial lists indep
+
+big enough for split:
+small, no need to pay cost of creating threads
+

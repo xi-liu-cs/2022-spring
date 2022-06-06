@@ -1,0 +1,131 @@
+python or java are not strong but easy
+
+attempts to make multicore prog easy
+
+1
+right computer language would make
+parallel prog straightforward
+
+2 
+make hardware proper
+
+3
+write software that will
+automatically parallelize existing
+sequential programs
+
+if loops are indep from each other
+
+not about parallelizing every step
+of the sequential prog
+
+if give sequential code
+
+first look algorithmically
+not syntax (mutex or cond var)
+
+run sequential run and profile it
+look at profile results, which one took most time
+
+each core performs
+a partial sum of n / p values
+
+when all cores are done computing
+their private sum, send to master core
+
+
+better algo
+don't make master core do all work
+share among other cores 
+pair the cores so core0 adds its result
+with core1's result
+
+
+constraints:
+communication
+mem access
+load balancing
+synchronization //for correctness
+
+
+due to tech constraints, moved to multicore processor
+
+
+
+
+
+
+
+
+
+
+-------------
+lec 2, parallel hardware
+
+eniac
+电子数值积分计算机
+(electronic numerical integrator and computer) 
+
+transistor is building block for microprocessor
+transistor is a switch
+
+eniac use vacuum tubes instead of transistor
+
+1800 instructions / sec
+3000 ft^3 = 914.4 m^3
+
+von neumann 
+stored program concept
+mem born
+
+1st stored prog computer
+less instructions / sec
+smaller size
+
+add mem and software make performance slower
+
+mem is bottleneck
+
+108 KHz
+
+higher freq, better performance
+
+pentium 4 (year 2000)
+last single core
+
+10 core cpu:
+8 performance-cores
+2 efficiency-cores
+
+how did hardware evolve like that?
+
+i1, i2... models
+
+cycle = 1 / freq
+freq = 1 / cycle
+
+1st generation
+if only 1 instruction go in,
+it does not use all of the black box
+
+2nd generation
+pipelining
+5 instructions in each stage execute at same time
+
+after "decode" instruction
+is floating instruction
+"issue" = check is execution available or not 
+
+maximum cpi (cycle per instruction) = 1
+
+fetch decode issue execute commit
+what is W1, W2... = withdraw
+
+thick arrows: more than 1 instructions
+
+executing several instructions at same time:
+superscalar 超标量 capability
+
+every core in multi core is superscalar
+
+measure of performance = ipc (# instructions / cycle) 

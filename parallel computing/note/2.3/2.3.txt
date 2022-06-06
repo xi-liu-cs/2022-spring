@@ -1,0 +1,78 @@
+distributed mem
+send messages
+mpi
+
+symmetric multi-processing
+all core can access main funct
+
+interconnect performance
+1. material, copper
+2. topology, graph
+
+shared mem interconnect
+on laptop
+8, 16, 32 cores
+
+distributed 
+scalability
+1000 cores...
+
+bus:
+connection of parallel wires 
+every wire carry 1 bit
+bus width: how many bits
+high bandwith: thin wire, hot, high resistance
+
+switches to control the routing of data
+
+if all cores try to access the same mem
+parallelize, serialize the tasks
+
+node: containing processor
+and memory module
+
+ring:
+when p1 send to p2, p2 and send to p3
+
+
+indirect:
+each motherboard is a node
+
+speed up bandwidth:
+1. create more lines
+2. make people walk faster
+
+message trans time = 
+latency + length of message (bytes) / bandwidth (bytes per sec)
+
+put linked list nodes close to each other on the heap
+exploit locality
+
+if x = 7 is slow and core1 finish first, z1 = 4 * x = 4 * 2
+
+
+
+
+snooping cache coherence
+
+go to directory and ask for permission
+
+
+
+
+
+if(!x)
+x = true 
+//faster for multicore
+
+x = true
+
+
+cache block 64 bytes (16 ints)
+update every element of array by 1
+
+
+mesi protocol
+4 red states describe cache blocks
+
+

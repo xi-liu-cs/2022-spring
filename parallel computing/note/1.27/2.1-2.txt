@@ -1,0 +1,181 @@
+41
+von neumann architecture:
+main mem
+cpu
+processor or core
+interconnection 互连
+是指使用连接器件把一端的电缆或光缆与另一端的光缆
+between mem & cpu
+every location has
+1. address (to access the location)
+2. location's contents (instruction or data stored)
+
+42
+cpu is logically divided into 
+1. control unit 控制单元, responsible 
+for deciding which instructions in prog executed
+2. data path 数据通路
+executing actual instructions
+
+fetch or read: mem -> cpu
+
+written to mem: cpu -> mem
+
+
+44
+each process runs for a 
+small interval of time (time slice, 时间片
+a short interval of time during which
+a computer or its central processor
+deals uninterruptedly with one user or program,
+before switching to another)
+
+block: if a process needs to wait for a resource
+(ex: needs to read data from external storage)
+it will block
+stop executing and the operating system
+can run another process
+
+threading provides a mechanism for programmers
+to divide their programs into more or less independent tasks,
+with the property that when one thread is blocked, 
+another thread can be run
+
+in most systems, 
+possible to switch between threads much faster
+than it is possible to switch between processes
+
+threads are "lighter weight" than processes
+threads are contained within processes
+so threads can use the same executable
+share the same memory and I/O devices
+
+two threads belonging to one process can 
+share most of the process's resources
+
+when a thread is started, it forks off the process
+when a thread terminates, it joins the process
+
+45
+caching:
+compnay has factory (cpu) in 1 town
+and a warehouse 仓库 (main mem) in another town
+single, two-lane road joining the factory and the warehouse
+
+
+49
+virtual mem developed so main mem
+can function as a cache for secondary storage
+
+idle parts can be kept in a block of secondary storage:
+swap space
+
+
+
+50
+trouble if assign physical mem addresses to pages
+
+page table can double the time needed to
+access a location in main memory
+
+many programs want to use same block 
+of mem
+
+to avoid this problem:
+when prog compiled
+pages are assigned virtual page numbers
+
+when prog run
+table created that maps virtual page numbers
+to physical addresses
+
+when prog refers to a virtual address
+page table is used to translate the 
+virtual address into a physical address
+
+ensure that the memory used by one program 
+doesn't overlap the memory used by another
+
+drawback of page table:
+double time needed to access a location 
+in main mem
+
+virtual page number is stored as a
+part of the virtual address
+
+each byte in the page can be 
+identified with 12 bits, since 2^12 = 4096
+
+can use the low-order 12 bits of the virtual address
+to locate a byte within a page
+
+virtual page number can be computed 
+from the virtual address without going to memory
+
+translation-lookaside buffer caches 
+a small number of entries (typically 16–512)
+from the page table in very fast memory
+
+
+51
+if access a page not in mem,
+attempted access is a page fault
+
+instruction level parallelism 指令级并行
+is the parallel or simultaneous execution of
+a sequence of instructions in a computer prog
+
+
+ILP must not be confused with concurrency.
+In ILP there is a single specific thread of 
+execution of a process. 
+On the other hand, 
+concurrency involves the assignment 
+of multiple threads to a CPU's core 
+in a strict alternation, or in true parallelism 
+if there are enough CPU cores, 
+ideally one core for each runnable thread
+
+
+A superscalar 超标量 processor is a CPU that 
+implements a form of parallelism 
+called instruction-level parallelism 
+within a single processor
+
+
+
+Instruction-level parallelism, or ILP,
+attempts to improve processor performance 
+by having multiple processor components
+or functional units simultaneously
+executing instructions
+1. pipelining 指令流水线
+	functional units are arranged in stages
+	dividing incoming instructions 
+	into a series of sequential steps ("pipeline")
+2. multiple issue 多发技术
+	mutiple instructions can be 
+	simultaneously initiated
+	
+
+pipeline:
+factory assembly line 装配线; (工厂的)流水线
+add floating point 
+chassis 机壳, 机架, base frame of a motor vehicle
+
+Time Operation Operand 1 Operand 2 Result
+1 Fetch operands 9.87 × 104 6.54 × 103
+2 Compare exponents 9.87 × 104 6.54 × 103
+3 Shift one operand 9.87 × 104 0.654 × 104
+4 Add 9.87 × 104 0.654 × 104 10.524 × 104
+5 Normalize result 9.87 × 104 0.654 × 104 1.0524 × 105
+6 Round result 9.87 × 104 0.654 × 104 1.05 × 105
+7 Store result 9.87 × 104 0.654 × 104 1.05 × 105
+
+mantissa 尾数
+
+
+
+58
+real time graphics api use points, lines, and triangles
+to internally represent the surface of an object

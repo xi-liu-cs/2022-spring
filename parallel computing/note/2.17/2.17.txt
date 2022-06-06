@@ -1,0 +1,166 @@
+embarassing parallel:
+pieces are indep
+
+divide and conquer
+loop iterations not indep of each other
+
+c: computation stages
+
+pipeline
+if loop have heavy inter loop dependence
+(dependence among loops)
+
+c1, c2, ... intra loop indep
+(within same loop)
+
+
+
+while(!done) {
+Read block;
+Compress the block;
+Write block;
+}
+
+in sequential
+read, compress, write, read, compress, write, ...
+
+cannot write block out of order
+zip file will be corrupt
+
+
+
+in parallel
+write wait until compression finish
+
+
+
+
+repository model
+tot indep work
+whenever a thread finish, take over another work
+
+
+
+
+
+static thread creation
+with 1 syscall, can create x threads
+
+dynamic thread creation
+with x syscall, more cost
+
+
+filter amdahl's law in algorithm stage 
+
+
+
+speed
+portability
+
+
+data center:
+throughput
+
+super computer:
+tot execution time
+
+
+perf = 1 / exe time
+
+x is n times faster than y
+s = T_{serial} / T_{parallel}
+
+
+
+for small problem sizes, serial is always better than parallel
+once reach a threshhold, parallel better than serial
+ex: 10000 * 10000 = 10^8 ele per matrix
+then see some speedup
+
+creating a thread is much longer than a computation
+
+
+
+https://kb.iu.edu/d/bbzo
+a system's Rmax score describes its maximal achieved performance
+Rpeak score describes its theoretical peak performance
+
+
+Rpeak is theoretical, always faster than Rmax
+
+
+
+
+sparse matrix, linked list
+more communication (slow)
+real computer Rmax close to Rpeak 
+
+
+communication: messages between processes
+cache sending invalidate
+interconnect in hardware
+
+
+E = speedup / p = (T_serial / T_parallel) / p
+p = can be number of threads, processes, or cores
+if num cores increase, but speedup stay constant, E go down
+
+
+
+measure time of parallel code only
+remove i/o from disk 
+
+
+
+sequential code has E = (T_serial / T_parallel) / p = (T_serial / T_serial) / 1 = 1
+
+
+
+
+
+If we keep the efficiency fixed by increasing 
+the number of processes/threads and without 
+increasing problem size, the problem is 
+strongly scalable. 
+
+If we keep the efficiency fixed by increasing 
+the problem size at the same rate as we 
+increase the number of processes/threads, 
+the problem is weakly scalable.
+
+test if code is doing load balancing well:
+increase problem size without increase num threads
+
+but should inc num threads if inc problem size
+not inc load to each thread
+
+
+
+wall-clock time
+useful for customer
+
+
+cpu time:
+1. ur code (user cpu time)
+2. os code to serve ur code (system cpu time)
+
+
+In Linux:
+time prog
+
+returns
+real Xs
+user Ys
+sys Zs
+
+in cygwin
+
+$ time ./a
+81
+
+real    0m0.158s
+user    0m0.015s
+sys     0m0.030s
+
+
+clock_t in <time.h> measure wall-clock time

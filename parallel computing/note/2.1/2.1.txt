@@ -1,0 +1,95 @@
+issue:
+look at info about this instruction
+detect whether execution unit is free
+(done from prev instruction)
+
+keep execution units busy
+
+fetch more than 1 instructions at a time
+
+instructions per cycle
+
+1 conditional branch per 6 assembly 
+
+fetch:
+branch predictor
+compare with
+
+9-10 rule
+
+
+21
+instructions from multiple programs
+simultaneous multithreading
+hyperthreading
+
+multitasking
+few processes can run in parallel if several cores
+
+thread blocks,
+other thread do work
+
+
+best case:
+tlb hit
+find data in address
+
+worst:
+tlb miss
+page table, page fault
+get page from disk
+l1, ... cache miss, go to mem
+
+
+
+dealing with mem (latency, capacity)
+
+
+
+
+
+
+
+
+
+hardware 2
+mem access
+cache coherence
+
+if both threads want to 
+update x, then different copies of x
+
+multiple threads can read
+x at same time
+
+most of performance loss is mem system
+
+
+simd (vectorized gpu)
+increment every ele in matrix
+
+misd
+find average, max, min of same num
+
+mimd (multi core)
+
+vector registers
+
+
+control unit: decode
+alu: execute phase
+
+multicore processors
+multiprocessor systems
+
+openmp, cuda, mpi
+
+core: cpu + l1 cache
+l1: private to the cpu
+l2: depends
+l3: share among all cores
+last line before leave chip
+
+
+every bank is responsible for a subset of addresses
+diff the distance between core and bank location

@@ -1,0 +1,79 @@
+diff
+1. num exe units (more instructions in parallel)
+2. num threads 
+
+cache coherence
+1 cache per core
+hardware only understand cache blocks
+
+cache controller
+in 1 of 4 states
+exclusive: only this cache has the only copy block
+
+modified can only come exclusive
+
+invalid -> exclusive
+(if not shared)
+
+p: processor, myself
+b: other
+
+L1
+64 B line
+size int: 4 bytes
+cache get 64 / 4 = 16 ints
+
+write thru: update all levels
+
+least recently used not used
+
+not:
+L1 not subset L2 not subset L3
+
+coherence happen at L2
+L3 is shared among all
+
+mips 
+million instr per sec
+
+gpu is a co-processor
+
+
+determine num threads:
+1. problem size
+2. num cores
+3. more threads than cores (sometimes twice)
+some instructions slow (do io), scheduling
+
+if problem size is changing, unknown
+use dynamic threads
+thread creation and termination time consuming
+
+
+every syscall require interrupts
+static threads
+amortize 
+
+when open()
+
+
+100 threads doing x++
+min: 1
+max: 100
+
+writes 1 to mem are serialized (wrong)
+
+if more threads access critical section, wrong result
+
+
+
+
+10
+miserable performance
+busy waiting: wasteful, consuming power
+
+if 2 threads, correct
+
+
+2 processes have separate address space
+even if same virt addr, diff physical

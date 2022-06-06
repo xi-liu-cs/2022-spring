@@ -1,0 +1,55 @@
+74
+add 2 arrays
+
+double x [n] , y [n] ;
+...
+for(int i = 0; i < n ; i++)
+	x [ i ] += y [ i ];
+
+assign elements of the arrays to threads
+
+p threads, make thread 0
+responsible for elements 0, ..., n / p - 1
+
+
+divide work among threads so 
+a. each thread gets roughly same amount
+of work
+b. amount of communication minimized
+
+
+
+79
+message passing provides a 
+send and a receive function
+
+char message [100];
+...
+my_rank = Get_rank();
+if(my_rank == 1) 
+{
+	sprintf(message, "greetings from process 1") ;
+	Send(message, MSG_CHAR , 100, 0);
+} 
+else if(my_rank == 0) 
+{
+	Receive(message, MSG_CHAR , 100, 1);
+	printf("Process 0 > Received: %s\n" , message) ;
+}
+
+/*
+Send(message,
+type of elements in the message (MSG_CHAR),
+number of elements in message (100),
+rank of destination process (0))
+
+Receive(variable into which the message will be received,
+type of message elements,
+number of elements available for storing message,
+rank of process sending the message)
+*/
+
+spmd = single program, multiple data
+message refers to different blocks of memory
+on the different processes
+using names such as my_message or local_message
