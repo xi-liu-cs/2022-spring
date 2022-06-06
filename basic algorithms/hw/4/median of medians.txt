@@ -1,0 +1,36 @@
+https://en.wikipedia.org/wiki/Median_of_medians
+
+properties of pivot
+
+pivot = median of medians
+
+of n/5 groups
+half the number of groups 
+(1/2)(n/5) = n/10 groups have their median less than the pivot	(left part)
+(1/2)(n/5) = n/10 groups have their median greater than the pivot	(right part)
+
+in each of the n/10 groups with median
+less than the pivot,
+there are 2 elements that are smaller than
+their respective medians
+
+each of the n/10 groups from (left part)
+have at least 3 elements that are smaller than the pivot
+/* 2 elements that are less than local median + the local median 
+that is less than the global median */
+
+similarly,
+each of the n/10 groups from (right part)
+have at least 3 elements that are greater than the pivot
+/* 2 elements that are greater than local median + the local median 
+that is greater than the global median */
+
+so
+pivot is less than 3(n/10) elements 
+and greater than another 3(n/10) elements
+
+T(n) <= T(n/5) + T(7n/10) + cn
+T(n/5): find the median of n/5 medians,
+by running quickselect on them
+O(n): find the median in each of the n/5 groups
+T(7n/10): quickselect recursion

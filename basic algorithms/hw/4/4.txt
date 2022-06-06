@@ -1,0 +1,43 @@
+4
+(a)
+
+after choosing a pivot in the select() function
+
+array:
+1	k	n
+
+A[1...k] <= A[k]
+A[k] -> kth smallest
+
+
+in select()
+if i == k
+	return rand_i
+//return the index of pivot instead of its value
+
+
+use a for loop to store A[1...k] in an array
+not asked to sort 
+and output that array
+
+
+
+
+
+
+
+
+
+4
+(b)
+L to k smallest elements
+which are k - L + 1 elements
+
+use the algo developed 
+in part (a)
+
+first find the 1 to k smallest elements in 
+array of length n
+
+then call the algo 
+to find L
