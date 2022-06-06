@@ -1,0 +1,69 @@
+running time of algorithms:
+
+Theta(1)
+Theta(lg n)
+Theta(n)
+Theta(n lg n)
+Theta(n^2)
+Theta(2^n)
+
+tc = time complexity
+insertion:
+best: Theta(n)
+average: Theta(n^2)
+worst: Theta(n^2)
+
+insertion
+height = n 
+
+
+1
+2
+...
+n
+Theta(n^2)
+
+
+merge 
+reduce height
+
+1. split array into 2 halves
+2. sort each half
+3. merge them together
+
+msort(A[1...n])
+	msort(A[1...n / 2]) // 1.
+	msort(A[n / 2 + 1...n]) // 2. conquer
+	merge(A[1...n / 2], A[n / 2 + 1...n]) //3. combine
+
+merge:
+combine sorted arrays B[1...m]
+and C[1...k] together in sorted order
+
+// i, j: next element of B, C to be taken
+merge(B[1...m], C[1...k])
+	define D[1...m + k]
+	i, j = 1
+	for L = 1 to m + k
+		if j > k or B[i] <= C[j]
+			D[L] = B[i]
+			i = i + 1
+		else
+			D[L] = C[j]
+			j = j + 1
+	return D[1...m + k]
+
+		
+there are m + k iterations for the for loop
+each iteration takes O(1) time
+tc of merge = Theta(m + k) = constant * (m + k)
+
+T(n) = running time of mergesort over an input of size n
+1. T(n / 2)
+2. T(n / 2)
+3. Theta(n / 2 + n / 2) = Theta(n)
+
+
+T(n) = 2T(n / 2) + Theta(n)
+i. given  T(n) = ?
+ii. prove the given: strong induction

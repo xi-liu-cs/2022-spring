@@ -1,0 +1,175 @@
+split
+merge sort: split array from middle index
+quick sort: split array using partition function
+do not need last step of merging
+
+quicksort(A[1...n])
+	k = partition(A[1...n], pivot = n)  //k = index of pivot after partition
+	quicksort(A[1...k - 1]) //left subarray
+	quicksort(A[k + 1...n]) //right subarray
+
+1st way:	
+partition:
+A = [10 5 2 7 4 6], piv = 6
+define aux array 
+B = [5 2 4 6 7 10]
+
+implementation of partition function in Theta(n) space
+
+
+
+
+
+
+2nd way:
+partition(A[1...n], pivot = n)
+{
+idea: build left part iteratively
+i = 1
+i: index of next identical left element to be inserted at
+
+j: current element of array to be decided 
+for j = 1 to n - 1
+	if A[j] <= A[n] //pivot, A[j] belongs to the left part
+		swap(A[i], A[j]) //insert A[j] at the end of the left part
+		i = i + 1 //index i is updated
+swap(A[i], A[n]) //placing pivot at end of left part
+return i
+}
+
+
+
+
+
+
+ex: A = [10 5 2 7 4 6]
+
+i
+j	   piv
+[10 5 2 7 4 6]	left = []
+
+
+  i   j
+[10 5 2 7 4 6]	left = []
+
+
+     i    j
+[5 10 2 7 4 6]	left = [5]
+
+
+        i   j	
+[5 2 10 7 4 6]	left = [5 2]
+
+...
+           i       piv
+[5 2 4 7 10 6]	left = [5 2 4]
+
+           piv
+[5 2 4 6 10 7]	left = [5 2 4]
+
+
+
+
+
+partition space complexity = Theta(1)	in-place
+time complexity = constant * (n - 1) = Theta(n)
+/* 1. for loop has n - 1 iterations
+2. each iteration of for loop takes Theta(1) time */
+
+
+
+tc of quicksort depends totally on the choice of pivot
+
+sorted array: 	
+min	median	  max
+
+it is most efficient to choose pivot from the elements
+close to the median
+
+ex 1: if piv is chosen from max element
+A = [1 2 3 ... n - 1 n]
+
+
+after call partition
+
+A = [1 2 3 ... n - 1 n]
+|\
+|	\
+|		\
+left:		right:	//no element bigger than max = piv	
+[1 2 ... n - 1]	[]
+|\
+|	\
+|		\
+left:		right:	//no element bigger than max = piv	
+[1 2 ... n - 2]	[]
+.
+.
+.
+[1]
+
+
+
+in each layer, by going to the next layer
+number of element decrease by 1 (chosen pivot)
+
+
+tc of layers:
+n
+n - 1
+n - 2
+...
+1
+
+
+tc = 1 + 2 + ... + n = n(n + 1) / 2
+tc = Theta(n^2)
+
+
+
+
+ex 2:  choose pivot as the median:
+              piv	
+	A = [1... n / 2 ... n]
+		/\
+	/		\
+[1... n / 2 - 1]	        [n / 2 + 1 ... n]
+	/\		  /\
+            /	      \		/	            \
+[1..n/4 - 1]    [n/4+1...n]	[n/2+1...3n/4-1]	[3n/4+1...n]
+	/
+              /
+             /
+            [1]	...	[n]
+
+
+
+tc = Theta(n log_2 n)
+
+
+
+
+
+
+
+
+1
+best choice: choose pivot as the median
+2
+weaker choice: choose it as median of 3 chosen
+elements of the array
+
+median of {first, middle, last}
+
+A = [10 5 2 7 4 6 11] median = 6
+        \|/       \|/       \|/
+
+
+take of median of {10, 7, 11} = 10
+
+n log_2 n \lesssim tc \lesssim n^2
+
+
+3
+weaker choice: randomly choose an element from
+the input array on the pivot

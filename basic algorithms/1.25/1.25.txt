@@ -1,0 +1,91 @@
+greatest common divisor
+
+gcd(81, 57)
+
+triangular numbers
+1 + 2 + ... + n
+//around the middle, they are roughly n
+n numbers, O(n^2)
+
+square pyramidal numbers
+1^2 + 2^2 + ... n^2
+//around the middle, they are roughly n^2
+n numbers, O(n^3)
+
+driving directions, graph algo
+
+deep learning, optimization
+
+quantum algo
+
+
+
+
+
+
+input: A[1...n] of n num
+goal: sort in increasing order
+
+
+scan array from left to right
+	for each position j
+		insert A[j] into correct position
+		by moving all elements larger
+		than it 1 position to the left
+
+
+for j = 2 to n:
+	key = A[j]
+	i = j - 1
+	while(i > 0 and A[i] > key)
+		A[i + 1] = A[i]
+		i = i - 1
+A[i + 1] = key
+
+//0 or 1 based index are both allowed
+
+
+loop invar:
+at beginning of jth iteration
+(or end of j - 1th iteration)
+A[1...j - 1] contains the same elements
+that are initially contained, by in sorted order 
+
+if loop invar is true, then at the end of the nth iteration,
+A is sorted as required
+
+
+
+
+
+claim: loop invar is true for j = 2, 3, ..., n + 1
+
+
+proof: 	
+base: when j = 2, A[1] is sorted 
+
+maintenance: by assumption, A[1...j -1]
+is sorted. during the jth iteration, insert
+A[j] into its correct position, so invar is true 
+at end of jth iteration
+
+ 	
+
+energy consumption
+how to use multicores
+
+
+
+
+running time
+
+sum_{j = 2}^n (c + c' t_j)
+
+t_j = num iterations of while loop
+
+= c(n - 1) + c' sum_{j = 2}^n t_j
+<= c(n - 1) + c' sum_{j = 2}^n j
+= c(n - 1) + c' (n(n + 1) / 2 - 1)
+= c' n^2 / 2 + (c + c' / 2) n - (c + c')
+= Theta(n^2) 
+t_j <= j

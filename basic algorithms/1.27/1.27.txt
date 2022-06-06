@@ -1,0 +1,139 @@
+average runtime
+about 1 / 2 worst case, still Theta(n^2)
+
+best case
+Theta(n) when input sorted
+
+stability
+if 2 identical keys, stay same order
+
+identical keys in input remain
+in the same order
+
+
+big O
+notation		means, up to constant
+Theta 		<= & >= 
+O		<=
+Omega		>=
+
+for a function g \cdot N -> R^+
+define the sets
+
+O(g(n)) = {f \cdot N -> R^+ : exists c > 0, forall n,
+f(n) <= c g(n)}
+
+Omega(g(n)) =  {f \cdot N -> R^+ : exists c > 0, forall n,
+f(n) >= c g(n)}
+
+Theta = {f \cdot N -> R^+ : exists c1, c2 > 0, forall n,
+0 <= c1g(n) <= f(n) <= c2g(n)}
+
+
+2n^2 + 5n + 10 = O(n^2)
+	           = Theta(n^2)
+	           = O(n^3)
+	           \not= Theta(n^3) 
+
+
+n \lg n = O(n^2) 
+O(n) + n = O(n) //true
+
+
+4^n = O(2^n) //false
+4^n / 2^n = 2^{2n} / 2^n = 2^n 
+//not bounded by constants
+
+2^{n + 3} = O(2^n) //true
+
+2^n \lg n = O(2^n) //false
+
+3^n + 2^n = Theta(3^n) //true
+
+claim
+f in O(g) iff g in Omega(f)
+proof
+assume f in  O(g)
+exists c > 0, forall n, f(n) <= cg(n)
+hence forall n, g(n) >= 1/c f(n)
+so g in Omega(f)
+
+merge sort
+von neumann
+if 2 elements are same
+for stability, choose left first
+
+//A, B are input sorted arrays, C is output
+merge(A[1...m], B[1...n], C[1...m + n])
+{
+	i = 1
+	j = 1
+	for k = 1 to m + n
+		if A[i] <= B[j]
+			C[k] = A[i]
+			i = i + 1
+		else
+			c[k] = B[j]
+			j = j + 1
+}
+
+loop invar:
+at begining of k-th iteration,
+C[1...k - 1] contains the k - 1 smallest
+elements of A cup B in sorted order,
+the elements are A[1...i - 1] and B[1...j - 1]
+
+initialization: 
+when k = 1, i = j = 1, invar is true trivially
+
+maintenance:
+assume invar is true for iteration k, 
+want to show also true for iteration k = 1
+assume A[i] <= B[j]
+then A[i] is the smallest element among 
+all the remaining items
+so invar is true also at iteration k + 1
+if A[i] > B[j], similar
+
+termination:
+when k = m + n + 1 (end of last iteration)
+C contains all elements of A cup B
+in sorted order
+
+
+
+ 
+merge runtime: Theta(m + n)
+mergesort(A[1...n])
+{
+	mergesort(A[1...n / 2])
+	mergesort(A[n / 2 + 1...n])
+	merge both output
+}
+
+
+denote T(n) the runtime on input
+of size n
+
+T(n) = 2 T(n / 2) + n
+
+false claim: T(n) = O(n)
+proof: by induction on n
+assume holds for 1, 2, ..., n - 1
+T(n) = 2 T(n / 2) + n
+      =  2 O(n / 2) + n
+       = O(n) //false
+
+
+n / 2^i = 1
+n = 2^i
+log_2 n = i
+
+total time spent in each level merging is n
+
+claim T(n) <= c n lg n
+assume T(m) is true for all m < n, 
+especially m = n / 2, T(n / 2) <= c (n / 2)lg (n / 2)
+T(n) = 2 T(n / 2) + n
+       <= 2 (n / 2) lg (n / 2) + n
+       <= cn lg n

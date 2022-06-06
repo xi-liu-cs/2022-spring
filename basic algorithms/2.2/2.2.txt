@@ -1,0 +1,124 @@
+asymptotic
+
+i
+efficiency should not depend on 
+architecture of machine
+
+ii
+care about the case when input 
+size (n) is large enough
+
+
+
+
+
+ex: f vs g
+
+f(n) = 4n^2 + 100n 
+i: n^2 + n
+ii: n -> inf,  n^2
+
+g(n) = 2n^2 + 30n^{3 / 2}
+i: n^2 + n^{3 / 2}
+ii: n -> inf,  n^2
+
+same time efficiency
+f and g are asymptotically equivalent
+
+
+
+
+
+asymptotic equivalency
+f and g are asymptotically equivalent
+f(n) \cong g(n)
+f(n) = Theta(g(n))
+if f and g are equal
+i. up to constant
+ii. for large enough val of n
+
+
+
+
+math def
+f(n) = Theta(g(n)) 
+if exist constants c1, c2 > 0 and 
+a threshold n0 (positive int)
+such that c1 g(n) <= f(n) <= c2 g(n)
+for all n >= n0 //after a while
+
+
+ex:
+f(n) = 4n^2 + 10n
+g(n) = n^2
+
+why f = Theta(g)?
+find numerical val for n0, c1, c2
+such that
+c1 g(n) <= f(n) <= c2 g(n) for all n >= n0
+n^2 <= 4n^2 + 10n <= 14n^2
+for all n >= 1
+
+other possible c1 = 1, c2 = 14, n0 = 1
+c1 = 0.5, c2 = 5, n0 = 10
+
+
+
+inequalities
+f and g satisfy f(n) \lesssim g(n) 
+or f(n) = O(g(n))
+if f(n) is asymptotically slower than g(n)
+i. up to constant
+ii. for large enough val of n
+
+
+math def 
+f(n) = O(g(n)) 
+if exist constants c > 0 and 
+a threshold n0 (positive int)
+such that f(n) <= c g(n)
+for all n >= n0 //after a while
+
+
+
+ex
+f = 4n^2 + 10n
+g = n^3
+why f = O(g)
+f <= c g
+4n^2 + 10n <= 14n^3
+for all n >= 1
+choose c = 14, n0 = 1
+
+
+
+
+https://www.geeksforgeeks.org/inequalities-in-latex/
+$\lesssim \gtrsim$
+
+
+
+a >= b     <->     b <= a
+f \gtrsim g      <->    g \lesssim f 
+f = Omega(g)     <->    g = O(f)
+
+
+
+reason 
+assume f = Omega(g) 
+show g = O(f)
+
+assume exist c > 0 and n0 
+such that f >= c g for all n >= n0
+
+g <= (1 / c) f for all n >= n0
+g = O(f)
+
+
+sin n and n = 0 are not comparable
+since sin n in [-1, 1]
+
+
+* fact
+log n = O(n^{\alpha})
+a_d n^d + a_{d - 1} n^{d - 1} + ... + a_1 n + a_0 = ??

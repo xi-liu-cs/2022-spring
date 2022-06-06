@@ -1,0 +1,83 @@
+insertion sort
+
+total = 3c + ... + 3c + (t_1 + ... + t_n) = (3c)n + sum_{i = 1}^n t_i
+
+each iteration for j takes constant time
+
+how many iteration do we need for j until while loop terminate
+best case: 1 iteration (already sorted), t_i = c'
+	10 20 30 ... 10(i - 1) 10i
+worst case: i iteration
+	20 30 40 ... 10(i - 1) 10
+
+t_i = c' + c' + ... + c' = c_i
+
+total time = (3c)n + sum_{i = 1}^n t_i 
+= (3c)n + c' + ... + c'
+= (3c + c')n
+
+time complexity of insertion sort is linear in the input size
+
+worst case:
+array is reversely sorted
+
+total time = (3c)n + sum_
+
+conclusion 
+c' <= b_i <= c'
+
+total time = (3c)n + sum_{i = 1}^n t_i
+= (3c)n + sum_{i = 1}^n c'_i
+
+total time = (3c)n + c' sum_{i = 1}^n i
+= (3c)n + c'(n(n + 1) / 2)
+= (3c)n + (c' / 2)n^2 + (c' / 2)n
+= c'/2 n^2 + (3c + c' / 2)n
+= O(n^2)
+
+total time of insertion sort is quadratic
+
+time complexity of insertion sort:
+input array:	sorted		average 		almost sorted	reversely sorted
+		linear		n^2				quadratic
+		n						n^2
+
+question: what is time complexity of insertion sort
+for a given arbitrary (random) array?
+
+
+on average, we need i / 2 iterations for the while-loop
+replace t_i = c' i / 2 and deduce that tc is quadratic
+
+proof of correctness: insertion sort
+
+loop invariant: at end of the for-loop iteration for
+index i, the first i elements of the array become
+sorted with respect to each other
+
+how to prove that loop invariant is satisfied for 
+all input arrays?
+i = 1, i = 2, i = 3, ..., i = n - 1, i = n
+
+
+i = 1:
+initialization
+
+
+initialization: check that the loop invariant is true for i = 1:
+first element is always sorted with respect to itself
+maintenance: 
+	assumption: assume that the loop invariant
+	is true for i = k
+	conclusion: prove that the loop invariant 
+	is true for i = k + 1 
+
+if the first k elements are sorted in the next iteration of 
+the for loop, find the correct position of the k + 1 th 
+element among the first k elements. so all the first 
+k + 1 elements become sorted with respect to each
+other
+
+termination: once the algo terminates by (ii),
+we know that the loop invariant is true for i = n
+it means the whole array becomes sorted

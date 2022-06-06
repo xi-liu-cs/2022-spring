@@ -1,0 +1,24 @@
+T(n) = Theta(n lg n)
+
+
+T(2) = 2T(1) + 2 = 4
+
+base case n = 2:
+T(2) <= c (2) (log_2 2)
+4 <= c (2) (1)
+2 <= c
+
+space complexity sc of merge:
+Theta(m + k) 
+not in place
+
+
+
+
+quick sort
+in place
+1. choose a pivot (choose it the last element A[n])
+2. partition the array into 2 parts
+based on the pivot
+left elements <= pivot < right elements
+3. recursively sort left & right parts

@@ -1,0 +1,143 @@
+quick
+
+n log_2 n \lesssim tc \lesssim n^2
+
+bottom		middle		top
+%30		%40		%30
+min		median		max
+3n/10		4n/10		3n/10
+
+if rand choose the pivot,
+then the prob that the 
+pivot lies in the middle %40 part is /* %40 */
+
+if pivot is in the middle %40, then
+there are >= 3n/10	elements <= pivot
+	-> left size >= 3n / 10
+there are >= 3n/10	elements >= pivot
+	-> right size >= 3n/10
+
+3n/10 <= left size of partition  <= n - 3n/10 = 7n/10
+3n/10 <= right size of partition <= n - 3n/10 = 7n/10
+
+recursion tree: 
+worst case
+most unbalanced case
+
+	            n
+            	left/            \right
+         	3n/10               7n/10
+          left/      \right
+(3/10)(3n/10)   (7/10)(3n/10)
+           
+
+
+should take 7n/10 (right) instead of 3n/10 (left)
+since the branch with 3n/10 (left) end sooner
+
+
+n (7/10)^i = 1
+n / (10/7)^i = 1
+n = (10/7)^i
+i = log_{10/7} n
+
+height = log_{10/7} n
+
+tc of each layer = Theta(n)
+
+tc of tree = Theta(n log_{10/7} n) = Theta(n log_2 n)
+remark: log_a n = Theta(log_b n), a, b > 0
+
+
+
+if choose a pivot to have a positive proportion (>0)
+to the left and right side of the pivot,
+
+
+quick sort: 	tc,		sc
+average case: Theta(n lg n)		O(1)
+worst case: Theta(n^2)
+
+
+
+finding the k-th smallest element
+input: A[1...n] 
+(all elements of A are distinct)
+output: the k-th smallest element of A 
+1 <= k <= n
+ex:
+A = [10 -7 2 5 7 20]
+the 3rd smallest ele = 5
+
+
+approach 1: 
+- sort A (doing too much, find 1st smallest, 2nd smallest,
+...n-th smallest)
+- output A[k] after sorting it
+tc = Theta(n lg n)
+
+//lc 215
+approach 2: (more time efficient)
+select(A[1...n], k)
+	choose a pivot from A[1...n]
+	pivot = A[i]
+		j = partition(A[1...n], pivot = A[i]) 
+		/* j = index of pivot after partition */
+		if k == j
+			return A[k] //piv
+		else if k < j //left
+			return select(A[1...j - 1], k)
+		else if k > j
+			return select(A[j + 1...n], k - j)
+		
+
+
+
+A after partition:
+1. piv is in its correct (sorted) position after partition
+(all left ele <= piv <= all right ele)
+2. the k-th smallest of A is k-j^th smallest of the right part
+
+
+
+
+how to choose pivot to get a good tc?
+sorted A:
+bottom %30	middle %40	top %30
+choose the piv so that left and right parts contain
+a positive fraction of A (* condition)
+
+(** bounds)
+3n/10 <= left size of partition  <= 7n/10
+3n/10 <= right size of partition <= 7n/10
+
+
+
+rec tree						tc of partition function
+		    n				n
+	           	    |   
+		    |left or right
+		   size of left or right part
+		   <= 7n/10			7n/10
+	                   |
+		   |
+		   <= (7/10)(7n/10)			(7/10)^2 n
+	                   |
+		   |
+		   ...
+		   1				1
+
+tc of tree = n + 7n/10 + (7/10)^2 n + ... + 1 = Theta(n)
+tc of select = Theta(n)
+
+
+
+how to choose piv so that (* condition) is satisfied 
+
+
+method 1:
+rand select pivot
+(* condition) is satisfied with (** bounds)
+with prob of %40
+
+	           
