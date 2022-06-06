@@ -1,0 +1,85 @@
+md syntax links
+
+normalization
+entity relationship
+
+normal forms
+algo
+general
+apply to any relational
+
+redundancy:
+store data in multiple places
+
+penalize retrieval
+reading with select 
+
+repeated mention 
+same name
+repetition 
+
+normal form reduce redundancy
+
+normalization
+split data into multiple tables
+joins
+
+
+anomalies
+insertion anomalies
+occur when not able
+to insert certain attributes
+
+update 1 record 
+require me to update multiple records
+
+if delete 1 record
+all records with the name deleted
+
+
+
+same number of fields
+fixed schema
+
+
+value in given field is singular val
+
+
+primary key(part, warehouse)
+//combination of part and warehouse
+is unique, each one might not be unique
+
+
+
+
+
+1st normal form
+all records in a table must contain the same number of fields
+
+second normal form
+only applies to table whose primary
+key is composed of 2 or more fields
+
+3rd normal form
+As with second normal form, third normal forms deals
+with the relationship between non-key and key fields
+
+
+
+department and location repeated
+department depend on location
+store pointer to department (id)
+(split table into 2 tables)
+
+
+
+4th normal form
+not contain more than one independent
+multi-valued fact about an entity
+
+
+
+
+skill does not depend on language
+for a given employee, there
+are more than 1 skill

@@ -1,0 +1,160 @@
+https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/
+
+in unicode, a letter maps to a code point
+
+english letter A would be U+0041. 
+you can find them all using the charmap (character map)
+utility on windows or visiting
+the unicode web site
+
+ebcdic = extended binary coded decimal interchange code
+扩增二进制交换码
+
+
+
+
+
+
+
+
+
+https://kunststube.net/encoding/
+
+php: hypertext preprocessor 超文本预处理器
+= 在服务器端执行的脚本语言
+
+a computer cannot store 
+"letters", "numbers", "pictures" or anything else
+
+only thing it can store are bits, 1 or 0
+an "actual" bit is a blip 波动 of electricity 
+that either is or isn't there
+
+A string of 1s and 0s is broken down into
+parts of eight bit each (a byte for short). 
+The ascii encoding specifies a table 
+translating bytes into human readable letters
+
+bits	character
+01000001	A
+01000010	B
+01000011	C
+01000100	D
+01000101	E
+01000110	F
+
+ascii encoding have 2^7 = 128 char
+
+to encode something in ascii,
+follow the table from right to left,
+substituting letters for bits
+
+encode 编码:
+convert into a coded form
+
+code 密码:
+a system of words, letters, figures,
+or other symbols substituted for
+other words, letters, etc
+
+to encode means to use something 
+to represent something else
+
+
+
+
+
+to create a table that maps characters 
+to letters for a language that uses more
+than 256 characters, one byte simply isn't enough.
+using two bytes (16 bits), it's possible to encode
+65,536 distinct values. BIG-5 大五码 is such a double-byte
+encoding. Instead of breaking a string of bits into
+blocks of eight, it breaks it into blocks of 16 and
+has a table that specifies which character each 
+combination of bits maps to.
+BIG-5 in its basic form covers mostly Traditional
+Chinese characters
+
+GB 18030全称《信息技术 中文编码字符集》
+
+four bytes would be the comfortable minimum
+but, unless you're actually using chinese or some
+of the other characters with big numbers that take
+a lot of bits to encode, you're never going to use
+a huge chunk of those four bytes
+
+how many bits does unicode use to encode all these
+characters? none
+because unicode is not an encoding
+
+unicode first and foremost defines a table of 
+code points 码位, 编码位置 for characters. 
+That's a fancy way of saying
+"65 stands for A, 66 stands for B
+
+
+to represent 1,114,112 different values
+log_2 (1,114,112) = 20 bits
+3 byte(3*8=24 bits)is enough, but awkward to work with
+4 byte(4*8=32 bits) is minimum
+
+unless you're using chinese with big numbers 
+that take a lot of bits to encode, 
+you're never going to use a huge chunk
+of those four bytes
+
+UTF-16 and UTF-8 are variable-length encodings
+
+/*
+if a character can be represented using a single byte
+(because its code point is a very small number), 
+UTF-8 will encode it with a single byte. 
+if it requires two bytes, it will use two bytes and so on.
+it has elaborate ways to use the highest bits in a byte to
+signal how many bytes a character consists of
+this can save space, but may also waste space if these 
+signal bits need to be used often
+*/
+
+
+あ = 安
+character	encoding	bits
+A	UTF-8	01000001
+A	UTF-16	00000000 01000001
+A	UTF-32	00000000 00000000 00000000 01000001
+あ	UTF-8	11100011 10000001 10000010
+あ	UTF-16	00110000 01000010
+あ	UTF-32	00000000 00000000 00110000 01000010
+
+
+
+
+Say, your app must accept files uploaded in GB18030,
+but internally you are handling all data in UTF-32. 
+a tool like iconv can cleanly convert the uploaded
+file with a one-liner like iconv('GB18030', 'UTF-32', $string). 
+that is, it will preserve the characters while changing the
+underlying bits:
+
+character	GB18030 encoding	UTF-32 encoding
+縧	10111111 01101100	00000000 00000000 01111110 00100111
+
+縧 = 绦 tao1 = 用丝线编织成的花边或扁平的带子
+
+
+
+
+if there's a discrepancy between the length of a byte and a character.
+
+11100110 10111100 10100010
+漢                         		
+11100101 10101101 10010111
+字
+
+Using $string[0] on the above string will, again, give us the first byte, 
+which is 11100110. In other words, a third of the three-byte character "漢". 
+11100110 is, by itself, an invalid UTF-8 sequence, so the string is now broken.
+
+
+strings are byte sequences

@@ -1,0 +1,23 @@
+if nesting data format
+choose xml and json
+
+unstructured data:
+ex: text that transcribe speech
+
+fixed schema:
+csv
+
+json allows loose schema
+
+dot functions 
+only for sqlite
+.mode
+
+joins
+inner: referential integrity
+outer (left): returns all records
+from the left table, 
+and the matched 
+records from the right table
+
+typically skip 2nd normal

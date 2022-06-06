@@ -1,0 +1,175 @@
+string slicing
+
++ operator concat
+
+
+list + ["lil baby"] //new list
+
+strings and tuple are immutable
+
+check for membership
+
+x in set
+
+list * numbers
+
+tuple: immutable list
+just commas, optional ()
+t = 1, 2, 3
+
+print((1, 2, 3)) //tuple
+print(1, 2, 3) //spaces between them
+
+f'the s variable is: {s}'
+
+unpack elements of tuple
+
+tuple = (1, 2, 3)
+x, y, z = tuple
+
+x, y, z = list //also fine
+
+
+dir(s) //string
+
+
+result = li.append("another item")
+print(result) //none, no return val
+
+
+dir(t) //tuple
+
+
+avoid loop in numpy 
+
+
+list(enumerate(breakfast))
+
+
+for i, v in enumeration(breakfast):
+	print(i, v)
+
+[f'{i} {food'} for i, food in enumerate(breakfast)]
+
+name_parts = "xi,liu".split(',')
+"*".join(name_parts)
+
+["whatever", *name_parts]
+
+
+d = {"first": "xi", "last": "liu"}
+
+
+d.get("key", "default val") //if key not exist, default
+
+for dict in d
+	print(dict)
+//only keys printed
+
+for k, v in d.items()
+	print(k, v)
+
+
+list = [...] 
+counts = {}
+for f in food:
+	if f in counts: //try
+		counts[f] += 1
+	else: //except KeyError
+		counts[f] = 1
+
+from collections import Counter
+c = Counter(food) //Counter object
+
+
+s1 = {1, 2, 3} //set
+mystery = {} //empty dict
+empty_s = set() //empty set
+
+set(list_name) //remove duplicates
+
+set is not ordered, so not subscriptable
+
+s1 | [3, 4, 5]
+s1.union([3, 4, 5])
+
+def f(s):
+	return s[1]
+sorted(food, key = f)
+//f returns the value that is going to be sorted by
+
+sorted(nums, key = abs)
+
+
+def f(*args):	//arbitrary args
+	print(args)
+
+def add(a, b, *args)
+	print(type(args)) 	//tuple
+	return a + b + sum(args)
+
+def add(a, b = 0) 	//default val
+	return a + b
+
+
+def g(**kwargs):
+	print(kwargs)
+
+
+**kwargs stands for keyword arguments. 
+The only difference from args is that it 
+uses keywords and returns the values 
+in the form of a dictionary
+
+def f(a, li = [])
+	li.append(a)
+	return li
+
+only scope is functions
+
+for i in range(5)
+	pass
+//i is 4 now
+//local var leak out of for loop
+
+def f(g):
+	g()
+	g()
+
+
+def make_adder(n):
+	def adder(m):
+		return n + m
+	return adder
+//return val is function adder
+
+
+sorted(nums, key = lambda x : x ** 2)
+
+
+
+class fraction:
+	def __init__(self, num, den): 
+		self.num = num
+		self.den = den //denominator
+		#constructor, self is this in java
+		#instance.f() self is instance that the method is called on
+	def __getitem__(self, k):
+		if k == 0:
+			return self.num
+		elif k == 1
+			
+	def multiply(self, other):
+		new_num = self.num * other.num
+		new_den = self.den * other.den
+		return fraction(new_num, new_den)
+
+	def __str__(self): #tostring
+		return f'{self.num} / {self.den}'
+	
+	def __repr__(self)
+		return self.__str__()
+
+
+
+//if prefix with underscore, then private

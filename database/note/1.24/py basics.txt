@@ -1,0 +1,9 @@
+doctest
+
+
+
+#basic lambda function
+f = lambda x: x+1
+f(2)
+f = lambda x,y : x+y
+f(5,2)

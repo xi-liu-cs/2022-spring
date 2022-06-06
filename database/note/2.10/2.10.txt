@@ -1,0 +1,41 @@
+excel
+each row and col have unique id
+indices are attached to spreadsheet, not data
+
+gs files are composed of scripts
+created by Google Apps Script 
+
+excel
+visual basic
+preference, developer menu
+
+google sheet
+javascript
+
+apple numbers
+applescript
+
+fixed schema
+
+1 cell contain 1 data
+
+fips
+Federal Information Processing Standards
+
+with large data sets
+spreadsheets often work slowly or don't work
+
+write formula in excel: use = sign
+= AVERAGE(...)
+
+death counts are cumulative
+from beginning of pandemic to that day
+
+col_name : col_name
+   SUMIFS(sum_range, criteria_range1, criteria1)
+= SUMIFS(col, field, name)
+
+double click to look at formula
+
+people may not get tested
+exist many people with covid but not tested 

@@ -1,0 +1,56 @@
+separate table for each entity
+
+entities have data that 
+describe them
+their attributes
+
+entity - relationship model
+实体关系模型
+entity 实体 用矩形 ex: student, course
+relationship 关系 rhombus (diamond) 菱形
+attribute 属性 ellipses or ovals 椭圆 are attributes of an entity 
+
+underline primary key attribute (unique identifier)
+
+social security number
+is unique id for person 
+in government database
+
+read from left to right generally
+
+is the email address interesting 
+to me indepedent of student?
+no
+
+so email is an attribute
+student is an entity
+
+does this thing have subproperties?
+
+could there be multiple instances
+in a record? (can have multiple emails to a student,
+multiple performers in a concert)
+
+
+entity1 ---M---- has ----1---- entity2
+for each entity 2, it can be had by more than 1 entity1
+
+
+painter ---1--- paints ----M---- painting
+each painter can paint more than 1 painting
+but each painting is painted by only 1 painter
+
+
+
+M or N both means multiple is allowed
+
+entity1 --M-- relationship --N-- entity2
+usually keep letters different
+
+database indices
+
+draw diagrams:
+draw.io
+ 
+on vscode
+draw.io integration
